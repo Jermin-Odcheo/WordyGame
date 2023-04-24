@@ -1,1 +1,6 @@
-
+module CORBA_IDL {
+    interface wordy{
+        boolean login(String username, String password);
+        boolean register(String username, String password);
+    }
+}
