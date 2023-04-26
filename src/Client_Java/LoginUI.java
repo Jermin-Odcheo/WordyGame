@@ -1,6 +1,9 @@
 package Client_Java;
 
 import javax.swing.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 public class LoginUI extends JFrame {
 
@@ -135,8 +138,35 @@ public class LoginUI extends JFrame {
         pack();
     }
     private void loginButtonActionPerformed(java.awt.event.ActionEvent evt) {
-
+        String user = userName.getText();
+        String pass = String.valueOf(password.getPassword());
+        if (user.isEmpty()){
+            JOptionPane.showMessageDialog(null,"Username is empty");
+        } else  if (pass.isEmpty()){
+            JOptionPane.showMessageDialog(null,"Password is empty");
+        }
+        /*
+        Testing of JDBC
+        JDBC should be server-sided
+         */
+        PreparedStatement preparedStatement;
+        ResultSet resultSet;
+        try {
+            preparedStatement = myConnection.getConnection().prepareStatement("SELECT * FROM `users` WHERE user_username =? AND user_password =?");
+            preparedStatement.setString(1,user);
+            preparedStatement.setString(2,pass);
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()){
+                System.out.println("Successfully Logged-In!");
+            } else {
+                System.out.println("Fail");
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+        }
     }
+
     public static void startLogin() {
         try {
             for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
