@@ -2,6 +2,7 @@ package Server_Java;
 
 public class Server {
     public static void main(String args[]) {
+        ServerLoginUI.runServer();
         //Testing
 //        try{
 //            // create and initialize the ORB
