@@ -13,8 +13,9 @@ import java.util.Properties;
 
 public class Server {
     public static void main(String[] args) {
-        try {
 
+        try {
+            ServerLoginUI.runServer();
             ORB orb = ORB.init(args,null);
             POA rootpoa = POAHelper.narrow(orb.resolve_initial_references("RootPOA"));
             rootpoa.the_POAManager().activate();

@@ -11,6 +11,7 @@ public class Client {
     static wordy wordyImpl;
     public static void main(String[] args) {
         try {
+            ClientLoginUI.startLogin();
             // create and initialize the ORB
             ORB orb = ORB.init(args, null);
 
