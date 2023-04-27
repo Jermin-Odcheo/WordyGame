@@ -30,3 +30,15 @@ public class Server {
 //        }
     }
 }
+/**
+ * login;
+ * start join game;
+ * obtain 17 characters random
+ * sendwords; with player (kung sino nag send)
+ * endGame;
+ * endRound;
+ * wonRoundOrNot;
+ * gameEnded;
+ * longestWord;
+ * topPlayers;(ranking)
+ */
