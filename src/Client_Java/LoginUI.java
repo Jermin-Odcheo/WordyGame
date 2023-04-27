@@ -1,9 +1,8 @@
 package Client_Java;
 
 import javax.swing.*;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+
+import static Client_Java.Client.wordyImpl;
 
 public class LoginUI extends JFrame {
 
@@ -144,28 +143,16 @@ public class LoginUI extends JFrame {
             JOptionPane.showMessageDialog(null,"Username is empty");
         } else  if (pass.isEmpty()){
             JOptionPane.showMessageDialog(null,"Password is empty");
+//        } else if (wordyImpl.login(user,pass) == null){
+//            JOptionPane.showMessageDialog(null,"Account Does Not Exist");
+//        } else if (wordyImpl.login(user,pass).equals(false)){
+//            JOptionPane.showMessageDialog(null,"Invalid Credentials");
+        } else {
+            JOptionPane.showMessageDialog(null,"Successfully Logged In");
         }
-        /*
-        Testing of JDBC
-        JDBC should be server-sided
-         */
-        PreparedStatement preparedStatement;
-        ResultSet resultSet;
-        try {
-            preparedStatement = myConnection.getConnection().prepareStatement("SELECT * FROM `users` WHERE user_username =? AND user_password =?");
-            preparedStatement.setString(1,user);
-            preparedStatement.setString(2,pass);
-            resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()){
-                System.out.println("Successfully Logged-In!");
-            } else {
-                System.out.println("Fail");
-            }
-        } catch (Exception e){
-            e.printStackTrace();
-            System.out.println(e.getMessage());
-        }
+
     }
+
 
     public static void startLogin() {
         try {
