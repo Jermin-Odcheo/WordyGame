@@ -1,36 +1,39 @@
 package Server_Java;
 
+import Server_Java.CORBA_IDL.wordy;
+import Server_Java.CORBA_IDL.wordyHelper;
+import org.omg.CORBA.ORB;
+import org.omg.CosNaming.NameComponent;
+import org.omg.CosNaming.NamingContextExt;
+import org.omg.CosNaming.NamingContextExtHelper;
+import org.omg.PortableServer.POA;
+import org.omg.PortableServer.POAHelper;
+
+import java.util.Properties;
+
 public class Server {
-    public static void main(String args[]) {
-        ServerLoginUI.runServer();
-        //Testing
-//        try{
-//            // create and initialize the ORB
-//            ORB orb = ORB.init(args, null);
-//
-//            // get reference to root POA and activate the POAManager
-//            POA rootPOA = POAHelper.narrow(orb.resolve_initial_references("RootPOA"));
-//            rootPOA.the_POAManager().activate();
-//
-//            // create servant and register it with the ORB
-//            HelloPOA helloPOA = new HelloPOA();
-//            org.omg.CORBA.Object ref = rootPOA.servant_to_reference(helloPOA);
-//            Hello href = HelloApp.HelloHelper.narrow(ref);
-//
-//            // bind the object reference to the naming service
-//            org.omg.CORBA.Object objRef = orb.resolve_initial_references("NameService");
-//            NamingContextExt ncRef = NamingContextExtHelper.narrow(objRef);
-//            NameComponent path[] = ncRef.to_name("Hello");
-//            ncRef.rebind(path, href);
-//
-//            // wait for incoming requests
-//            orb.run();
-//        }
-//        catch(Exception e) {
-//            e.printStackTrace();
-//        }
+    public static void main(String[] args) {
+        try {
+
+            ORB orb = ORB.init(args,null);
+            POA rootpoa = POAHelper.narrow(orb.resolve_initial_references("RootPOA"));
+            rootpoa.the_POAManager().activate();
+            WordyServer wordyServer = new WordyServer();
+            org.omg.CORBA.Object ref = rootpoa.servant_to_reference(wordyServer);
+            wordy href = wordyHelper.narrow(ref);
+            org.omg.CORBA.Object objRef = orb.resolve_initial_references("NameService");
+            NamingContextExt ncRef = NamingContextExtHelper.narrow(objRef);
+            String name = "Hello";
+            NameComponent[] path = ncRef.to_name(name);
+            ncRef.rebind(path,href);
+            System.out.println("Server is ready");
+            orb.run();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
+
 /**
  * login;
  * start join game;
