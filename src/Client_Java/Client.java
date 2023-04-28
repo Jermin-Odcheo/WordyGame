@@ -11,7 +11,7 @@ public class Client {
     static wordy wordyImpl;
     public static void main(String[] args) {
         try {
-            ClientLoginUI.startLogin();
+
             // create and initialize the ORB
             ORB orb = ORB.init(args, null);
 
@@ -24,9 +24,9 @@ public class Client {
             // resolve the Object Reference in Naming
             String name = "Hello";
             wordyImpl = wordyHelper.narrow(ncRef.resolve_str(name));
-
             System.out.println("Obtained a handle on server object: " + wordyImpl);
-            LoginUI.startLogin();
+
+            ClientLoginUI.startLogin();
         } catch (Exception e){
             System.out.println("ERROR: Client error" + e.getMessage());
         }

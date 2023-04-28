@@ -1,6 +1,10 @@
 package Client_Java;
 
 
+import javax.swing.*;
+
+import static Client_Java.Client.wordyImpl;
+
 public class ClientLoginUI extends javax.swing.JFrame {
 
     public ClientLoginUI() {
@@ -11,12 +15,12 @@ public class ClientLoginUI extends javax.swing.JFrame {
 
         jPanel1 = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
-        jTextField2 = new javax.swing.JTextField();
+        userName = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
         loginButton = new javax.swing.JButton();
-        jPasswordField1 = new javax.swing.JPasswordField();
+        password = new javax.swing.JPasswordField();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
@@ -30,9 +34,9 @@ public class ClientLoginUI extends javax.swing.JFrame {
 
         jPanel2.setBackground(new java.awt.Color(255, 255, 255));
 
-        jTextField2.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jTextField2.setBorder(javax.swing.BorderFactory.createMatteBorder(0, 0, 3, 0, new java.awt.Color(5, 191, 219)));
-        jTextField2.addActionListener(new java.awt.event.ActionListener() {
+        userName.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        userName.setBorder(javax.swing.BorderFactory.createMatteBorder(0, 0, 3, 0, new java.awt.Color(5, 191, 219)));
+        userName.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jTextField2ActionPerformed(evt);
             }
@@ -59,8 +63,8 @@ public class ClientLoginUI extends javax.swing.JFrame {
             }
         });
 
-        jPasswordField1.setFont(new java.awt.Font("sansserif", 1, 14)); // NOI18N
-        jPasswordField1.setBorder(javax.swing.BorderFactory.createMatteBorder(0, 0, 3, 0, new java.awt.Color(5, 191, 219)));
+        password.setFont(new java.awt.Font("sansserif", 1, 14)); // NOI18N
+        password.setBorder(javax.swing.BorderFactory.createMatteBorder(0, 0, 3, 0, new java.awt.Color(5, 191, 219)));
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -73,8 +77,8 @@ public class ClientLoginUI extends javax.swing.JFrame {
                                                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                                         .addComponent(jLabel4)
                                                         .addComponent(jLabel3)
-                                                        .addComponent(jTextField2)
-                                                        .addComponent(jPasswordField1, javax.swing.GroupLayout.DEFAULT_SIZE, 264, Short.MAX_VALUE))
+                                                        .addComponent(userName)
+                                                        .addComponent(password, javax.swing.GroupLayout.DEFAULT_SIZE, 264, Short.MAX_VALUE))
                                                 .addGap(28, 28, 28))
                                         .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                                                 .addComponent(loginButton, javax.swing.GroupLayout.PREFERRED_SIZE, 153, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -91,11 +95,11 @@ public class ClientLoginUI extends javax.swing.JFrame {
                                 .addGap(36, 36, 36)
                                 .addComponent(jLabel3)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(userName, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(32, 32, 32)
                                 .addComponent(jLabel4)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jPasswordField1, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(password, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(77, 77, 77)
                                 .addComponent(loginButton, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addContainerGap(89, Short.MAX_VALUE))
@@ -190,7 +194,25 @@ public class ClientLoginUI extends javax.swing.JFrame {
     }
 
     private void loginButtonActionPerformed(java.awt.event.ActionEvent evt) {
-        // TODO add your handling code here:
+        try {
+            String user = userName.getText();
+            String pass = String.valueOf(password.getPassword());
+            if (user.equals("")) {
+                JOptionPane.showMessageDialog(null, "Username is empty");
+            } else if (pass.equals("")) {
+                JOptionPane.showMessageDialog(null, "Password is empty");
+            } else if (wordyImpl.login(user,pass).equals("NotFound")){
+                JOptionPane.showMessageDialog(null, "Username Does Not Exist");
+            } else if (wordyImpl.login(user,pass).equals("Invalid")){
+                JOptionPane.showMessageDialog(null, "Invalid Credentials");
+            } else if (wordyImpl.login(user,pass).equals("Error")) {
+                JOptionPane.showMessageDialog(null, "Failed to Log In: Server Error");
+            } else{
+                JOptionPane.showMessageDialog(null, "Successfully Logged In!");
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     public static void startLogin() {
@@ -233,7 +255,7 @@ public class ClientLoginUI extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
-    private javax.swing.JPasswordField jPasswordField1;
-    private javax.swing.JTextField jTextField2;
+    private javax.swing.JPasswordField password;
+    private javax.swing.JTextField userName;
 
 }

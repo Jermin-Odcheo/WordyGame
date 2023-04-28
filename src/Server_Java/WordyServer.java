@@ -8,38 +8,56 @@ import java.sql.ResultSet;
 
 public class WordyServer extends wordyPOA {
     @Override
-    public Object login(String username, String password) {
-            PreparedStatement preparedStatement;
-            ResultSet resultSet;
-            try {
-                preparedStatement = myConnection.getConnection().prepareStatement("SELECT * FROM `users` WHERE user_username =? AND user_password =?");
+    public String login(String username, String password) {
+        try {
+            boolean check = verifyUsername(username);
+            if (!check) {
+                System.out.println(username + " : " + "Account not found");
+                return "NotFound";
+            } else {
+                PreparedStatement preparedStatement;
+                ResultSet resultSet;
+                preparedStatement = myConnection.getConnection().prepareStatement("SELECT * FROM `users` WHERE user_username = ? AND user_password = ?");
                 preparedStatement.setString(1, username);
                 preparedStatement.setString(2, password);
                 resultSet = preparedStatement.executeQuery();
                 if (resultSet.next()) {
-                    return true;
+                        System.out.println(username + " : " + "Successfully Logged In");
+                        return "Found";
                 } else {
-                    return false;
+                    return "Invalid";
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
-                System.out.println(e.getMessage());
             }
-            return false;
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return "Error";
         }
-    public boolean verifyUsername(String username){
+    }
+
+    public boolean verifyUsername(String username) {
         ResultSet resultSet;
         try {
-            resultSet = myConnection.getConnection().createStatement().executeQuery("SELECT * FROM `users`");
-         while (resultSet.next()){
-             if (username.equals(resultSet.getString("user_username"))){
-                 return true;
-             }
-         }
-        } catch (Exception e){
+            PreparedStatement preparedStatement;
+            preparedStatement = myConnection.getConnection().prepareStatement("SELECT * FROM `users` WHERE user_username =?");
+            preparedStatement.setString(1, username);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                String user = resultSet.getString("user_username");
+                if (username.equals(user)) {
+                    System.out.println(user + " : " + "Successfully Logged In -Verify");
+                    return true;
+                }
+            }
+        } catch (Exception e) {
             e.printStackTrace();
             System.out.println(e.getMessage());
         }
         return false;
     }
+
+    public static void main(String[] args) {
+
+    }
 }
+
+
