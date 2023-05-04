@@ -194,6 +194,7 @@ public class ClientLoginUI extends javax.swing.JFrame {
     }
 
     private void loginButtonActionPerformed(java.awt.event.ActionEvent evt) {
+
         try {
             String user = userName.getText();
             String pass = String.valueOf(password.getPassword());
@@ -207,16 +208,19 @@ public class ClientLoginUI extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(null, "Invalid Credentials");
             } else if (wordyImpl.login(user,pass).equals("Error")) {
                 JOptionPane.showMessageDialog(null, "Failed to Log In: Server Error");
-            } else{
+            } else if ((wordyImpl.login(user,pass).equals("LoggedIn"))){
+                JOptionPane.showMessageDialog(null, user + " Already Logged In!");
+            } else {
                 JOptionPane.showMessageDialog(null, "Successfully Logged In!");
+                GameUI.startGameUI(user);
             }
+
         }catch (Exception e){
             e.printStackTrace();
         }
     }
 
     public static void startLogin() {
-
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {

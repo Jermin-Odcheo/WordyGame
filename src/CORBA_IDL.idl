@@ -1,5 +1,0 @@
-module CORBA_IDL {
-    interface wordy{
-        string login(in string username , in string password );
-    };
-};
