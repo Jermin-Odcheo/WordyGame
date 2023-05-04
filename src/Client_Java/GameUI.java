@@ -1,8 +1,9 @@
 package Client_Java;
 
 public class GameUI extends javax.swing.JFrame {
-
-    public GameUI() {
+    String username;
+    public GameUI(String username) {
+        this.username = username;
         initComponents();
     }
 
@@ -120,8 +121,7 @@ public class GameUI extends javax.swing.JFrame {
     private void sendButtonActionPerformed(java.awt.event.ActionEvent evt) {
         // TODO add your handling code here:
     }
-    public static void main(String args[]) {
-
+    public static void startGameUI(String username) {
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
@@ -140,7 +140,7 @@ public class GameUI extends javax.swing.JFrame {
         }
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new GameUI().setVisible(true);
+                new GameUI(username).setVisible(true);
             }
         });
     }
