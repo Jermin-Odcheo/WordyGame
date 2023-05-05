@@ -6,6 +6,7 @@ module corba {
         string login(in string username , in string password );
         boolean joinGame(in string playerName) raises (GameException);
         void playWord(in string playerName, in string word) raises (GameException);
+        boolean status(in string playerName);
     };
 
 };

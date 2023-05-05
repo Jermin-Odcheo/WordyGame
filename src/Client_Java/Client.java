@@ -1,7 +1,8 @@
 package Client_Java;
 
-import Client_Java.corba.wordy;
+
 import Client_Java.corba.wordyHelper;
+import corba.wordy;
 import org.omg.CORBA.ORB;
 import org.omg.CosNaming.NamingContextExt;
 import org.omg.CosNaming.NamingContextExtHelper;
