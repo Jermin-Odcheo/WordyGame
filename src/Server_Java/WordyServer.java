@@ -12,7 +12,7 @@ import java.sql.ResultSet;
 import java.util.*;
 
 
-public class WordyServer extends wordyPOA  {
+public class WordyServer extends wordyPOA {
     private final List<Player> players = new ArrayList<>();
     private int currentPlayer = 0;
     private final List<String> rounds = new ArrayList<>();
@@ -49,11 +49,11 @@ public class WordyServer extends wordyPOA  {
     public boolean status(String username){
         for (Player player : players) {
             if (player.getName().equals(username)) {
-                return true;
+                System.out.println("Logged In");
             }
         }
         players.add(new Player(username));
-        return false;
+        return true;
     }
     public boolean verifyUsername(String username) {
         ResultSet resultSet;
@@ -108,9 +108,6 @@ public class WordyServer extends wordyPOA  {
         if (!isValidWord(word)) {
             throw new GameException("Invalid word.");
         }
-        if (!isPlayerTurn(playerName)) {
-            throw new GameException("Not your turn.");
-        }
         if (!isWordValidForRound(word)) {
             throw new GameException("Word is not valid for this round.");
         }
@@ -157,7 +154,13 @@ public class WordyServer extends wordyPOA  {
         for (char c : letters) {
             sb.append(c);
         }
+        generateLetters(sb.toString());
         return sb.toString();
+    }
+
+    @Override
+    public String generateLetters(String word) {
+        return word;
     }
 
     private char getRandomVowel() {

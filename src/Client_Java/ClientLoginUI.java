@@ -198,24 +198,26 @@ public class ClientLoginUI extends javax.swing.JFrame {
         try {
             String user = userName.getText();
             String pass = String.valueOf(password.getPassword());
-            if (user.equals("")) {
-                JOptionPane.showMessageDialog(null, "Username is empty");
-            } else if (pass.equals("")) {
-                JOptionPane.showMessageDialog(null, "Password is empty");
-            } else if (wordyImpl.login(user,pass).equals("NotFound")){
-                JOptionPane.showMessageDialog(null, "Username Does Not Exist");
-            } else if (wordyImpl.login(user,pass).equals("Invalid")){
-                JOptionPane.showMessageDialog(null, "Invalid Credentials");
-            } else if (wordyImpl.login(user,pass).equals("Error")) {
-                JOptionPane.showMessageDialog(null, "Failed to Log In: Server Error");
-            } else if ((wordyImpl.login(user,pass).equals("LoggedIn"))){
-                JOptionPane.showMessageDialog(null, user + " Already Logged In!");
-            } else {
-                JOptionPane.showMessageDialog(null, "Successfully Logged In!");
-                GameUI.startGameUI(user);
-                this.dispose();
-            }
 
+             if (!wordyImpl.status(user)){
+                 JOptionPane.showMessageDialog(null, user + " Already Logged In!");
+             } else {
+                 if (user.equals("")) {
+                     JOptionPane.showMessageDialog(null, "Username is empty");
+                 } else if (pass.equals("")) {
+                     JOptionPane.showMessageDialog(null, "Password is empty");
+                 } else if (wordyImpl.login(user, pass).equals("NotFound")) {
+                     JOptionPane.showMessageDialog(null, "Username Does Not Exist");
+                 } else if (wordyImpl.login(user, pass).equals("Invalid")) {
+                     JOptionPane.showMessageDialog(null, "Invalid Credentials");
+                 } else if (wordyImpl.login(user, pass).equals("Error")) {
+                     JOptionPane.showMessageDialog(null, "Failed to Log In: Server Error");
+                 } else {
+                     JOptionPane.showMessageDialog(null, "Successfully Logged In!");
+                     GameUI.startGameUI(user);
+                     this.dispose();
+                 }
+             }
         }catch (Exception e){
             e.printStackTrace();
         }
