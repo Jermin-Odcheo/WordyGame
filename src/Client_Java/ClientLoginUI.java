@@ -27,7 +27,7 @@ public class ClientLoginUI extends javax.swing.JFrame {
         jLabel8 = new javax.swing.JLabel();
         jLabel9 = new javax.swing.JLabel();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
         jPanel1.setBackground(new java.awt.Color(10, 77, 104));
         jPanel1.setForeground(new java.awt.Color(10, 77, 104));
@@ -213,6 +213,7 @@ public class ClientLoginUI extends javax.swing.JFrame {
             } else {
                 JOptionPane.showMessageDialog(null, "Successfully Logged In!");
                 GameUI.startGameUI(user);
+                this.dispose();
             }
 
         }catch (Exception e){

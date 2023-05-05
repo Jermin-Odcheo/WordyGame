@@ -65,7 +65,6 @@ public class WordyServer extends wordyPOA  {
             while (resultSet.next()) {
                 String user = resultSet.getString("user_username");
                 if (username.equals(user)) {
-                    System.out.println(user + " : " + "Successfully Logged In -Verify");
                     return true;
                 }
             }
