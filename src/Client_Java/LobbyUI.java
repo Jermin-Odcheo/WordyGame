@@ -1,5 +1,7 @@
 package Client_Java;
 
+import java.awt.*;
+
 public class LobbyUI extends javax.swing.JFrame {
 
     public LobbyUI() {
@@ -15,10 +17,10 @@ public class LobbyUI extends javax.swing.JFrame {
         logo = new javax.swing.JLabel();
         waitingTextField = new javax.swing.JLabel();
         matchCountdownText = new javax.swing.JLabel();
-        countdownTextField = new javax.swing.JLabel();
+        countdownTextField = new javax.swing.JTextField();
         exitLobbyButton = new javax.swing.JButton();
-        playerInLobbyTextField = new javax.swing.JLabel();
-        playerCountTextField = new javax.swing.JLabel();
+        playerInLobbyText = new javax.swing.JLabel();
+        playerCountTextField = new javax.swing.JTextField();
         instructionTextField = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -58,6 +60,13 @@ public class LobbyUI extends javax.swing.JFrame {
         countdownTextField.setFont(new java.awt.Font("Arial Rounded MT Bold", 1, 18)); // NOI18N
         countdownTextField.setForeground(new java.awt.Color(255, 255, 255));
         countdownTextField.setText("10");
+        countdownTextField.setBackground(new Color(0,0,0,1));
+        countdownTextField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                countdownTextFieldActionPerformed(evt);
+            }
+        });
+
 
         exitLobbyButton.setBackground(new java.awt.Color(255, 102, 153));
         exitLobbyButton.setFont(new java.awt.Font("Arial Rounded MT Bold", 1, 12)); // NOI18N
@@ -69,14 +78,20 @@ public class LobbyUI extends javax.swing.JFrame {
             }
         });
 
-        playerInLobbyTextField.setFont(new java.awt.Font("Arial Rounded MT Bold", 1, 14)); // NOI18N
-        playerInLobbyTextField.setForeground(new java.awt.Color(253, 244, 245));
-        playerInLobbyTextField.setText("PLAYERS IN LOBBY :");
-        playerInLobbyTextField.setToolTipText("");
+        playerInLobbyText.setFont(new java.awt.Font("Arial Rounded MT Bold", 1, 14)); // NOI18N
+        playerInLobbyText.setForeground(new java.awt.Color(253, 244, 245));
+        playerInLobbyText.setText("PLAYERS IN LOBBY :");
+        playerInLobbyText.setToolTipText("");
 
         playerCountTextField.setFont(new java.awt.Font("Arial Rounded MT Bold", 1, 14)); // NOI18N
         playerCountTextField.setForeground(new java.awt.Color(255, 255, 255));
         playerCountTextField.setText("10");
+        playerCountTextField.setBackground(new Color(0,0,0,1));
+        playerCountTextField.addActionListener(new java.awt.event.ActionListener(){
+            public void actionPerformed(java.awt.event.ActionEvent evt){
+                playerCountTextFieldActionPerformed(evt);
+            }
+        });
 
         instructionTextField.setFont(new java.awt.Font("Arial Rounded MT Bold", 1, 14)); // NOI18N
         instructionTextField.setForeground(new java.awt.Color(253, 244, 245));
@@ -87,7 +102,7 @@ public class LobbyUI extends javax.swing.JFrame {
         jLayeredPane2.setLayer(matchCountdownText, javax.swing.JLayeredPane.DEFAULT_LAYER);
         jLayeredPane2.setLayer(countdownTextField, javax.swing.JLayeredPane.DEFAULT_LAYER);
         jLayeredPane2.setLayer(exitLobbyButton, javax.swing.JLayeredPane.DEFAULT_LAYER);
-        jLayeredPane2.setLayer(playerInLobbyTextField, javax.swing.JLayeredPane.DEFAULT_LAYER);
+        jLayeredPane2.setLayer(playerInLobbyText, javax.swing.JLayeredPane.DEFAULT_LAYER);
         jLayeredPane2.setLayer(playerCountTextField, javax.swing.JLayeredPane.DEFAULT_LAYER);
         jLayeredPane2.setLayer(instructionTextField, javax.swing.JLayeredPane.DEFAULT_LAYER);
 
@@ -102,7 +117,7 @@ public class LobbyUI extends javax.swing.JFrame {
                                                 .addComponent(matchCountdownText, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE))
                                         .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jLayeredPane2Layout.createSequentialGroup()
                                                 .addGap(404, 404, 404)
-                                                .addComponent(playerInLobbyTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 156, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                                .addComponent(playerInLobbyText, javax.swing.GroupLayout.PREFERRED_SIZE, 156, javax.swing.GroupLayout.PREFERRED_SIZE)))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(jLayeredPane2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                         .addComponent(countdownTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -135,7 +150,7 @@ public class LobbyUI extends javax.swing.JFrame {
                                         .addComponent(countdownTextField))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(jLayeredPane2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                        .addComponent(playerInLobbyTextField)
+                                        .addComponent(playerInLobbyText)
                                         .addComponent(playerCountTextField))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(logo, javax.swing.GroupLayout.PREFERRED_SIZE, 351, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -170,6 +185,14 @@ public class LobbyUI extends javax.swing.JFrame {
         // TODO add your handling code here:
     }
 
+    private void countdownTextFieldActionPerformed(java.awt.event.ActionEvent evt){
+
+    }
+
+    private void playerCountTextFieldActionPerformed(java.awt.event.ActionEvent evt){
+
+    }
+
     public static void main(String args[]) {
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
@@ -187,9 +210,6 @@ public class LobbyUI extends javax.swing.JFrame {
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
             java.util.logging.Logger.getLogger(LobbyUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
-        //</editor-fold>
-
-        /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 new LobbyUI().setVisible(true);
@@ -197,8 +217,7 @@ public class LobbyUI extends javax.swing.JFrame {
         });
     }
 
-    // Variables declaration - do not modify
-    private javax.swing.JLabel countdownTextField;
+    private javax.swing.JTextField countdownTextField;
     private javax.swing.JButton exitLobbyButton;
     private javax.swing.JLabel instructionTextField;
     private javax.swing.JLabel jLabel3;
@@ -206,8 +225,8 @@ public class LobbyUI extends javax.swing.JFrame {
     private javax.swing.JLayeredPane jLayeredPane2;
     private javax.swing.JLabel logo;
     private javax.swing.JLabel matchCountdownText;
-    private javax.swing.JLabel playerCountTextField;
-    private javax.swing.JLabel playerInLobbyTextField;
+    private javax.swing.JTextField playerCountTextField;
+    private javax.swing.JLabel playerInLobbyText;
     private javax.swing.JLabel waitingTextField;
     // End of variables declaration
 }
