@@ -7,7 +7,6 @@ public class LobbyUI extends javax.swing.JFrame {
     }
 
     @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">
     private void initComponents() {
 
         jLayeredPane1 = new javax.swing.JLayeredPane();
@@ -24,7 +23,7 @@ public class LobbyUI extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jLabel3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/clientui/finalclientui/background.jpg"))); // NOI18N
+        jLabel3.setIcon(new javax.swing.ImageIcon(getClass().getResource("src/Client_Java/17250835.png"))); // NOI18N
 
         jLayeredPane1.setLayer(jLabel3, javax.swing.JLayeredPane.DEFAULT_LAYER);
 
@@ -45,7 +44,7 @@ public class LobbyUI extends javax.swing.JFrame {
                                 .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, 563, Short.MAX_VALUE))
         );
 
-        logo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/clientui/finalclientui/logo.png"))); // NOI18N
+        logo.setIcon(new javax.swing.ImageIcon(getClass().getResource("src/Server_Java/WORD.png"))); // NOI18N
         logo.setToolTipText("");
 
         waitingTextField.setFont(new java.awt.Font("Arial Rounded MT Bold", 1, 36)); // NOI18N
