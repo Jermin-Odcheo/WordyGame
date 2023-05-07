@@ -154,13 +154,12 @@ public class WordyServer extends wordyPOA {
         for (char c : letters) {
             sb.append(c);
         }
-        generateLetters(sb.toString());
         return sb.toString();
     }
 
-    @Override
-    public String generateLetters(String word) {
-        return word;
+
+    public String generateLetters() {
+        return generateRandomLetters();
     }
 
     private char getRandomVowel() {

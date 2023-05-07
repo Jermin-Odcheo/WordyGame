@@ -7,9 +7,8 @@ module corba {
         boolean joinGame(in string playerName) raises (GameException);
         void playWord(in string playerName, in string word) raises (GameException);
         boolean status(in string playerName);
-        string generateLetters(in string word);
+        string generateLetters();
     };
 
 };
-
 #pragma prefix "Client_Java"

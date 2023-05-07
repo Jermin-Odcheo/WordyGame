@@ -15,7 +15,8 @@ public class Client {
     public static void main(String[] args) {
         try {
             // create and initialize the ORB
-            ORB orb = ORB.init(new String[]{"-ORBInitialHost", "192.168.137.1", "-ORBInitialPort", "1050"}, null);
+            //Connect to the server using Server IP Address
+            ORB orb = ORB.init(new String[]{"-ORBInitialHost", "192.168.1.10", "-ORBInitialPort", "1050"}, null);
 
             // get the root naming context
             org.omg.CORBA.Object objRef = orb.resolve_initial_references("NameService");
@@ -41,7 +42,7 @@ public class Client {
                 System.out.print("Enter your word: ");
                 String word = scanner.nextLine();
                 try {
-                    System.out.println(wordyImpl.generateLetters(""));
+                    System.out.println(wordyImpl.generateLetters());
                     wordyImpl.playWord(playerName, word);
                 } catch (GameException e) {
                     System.out.println(e.message);
