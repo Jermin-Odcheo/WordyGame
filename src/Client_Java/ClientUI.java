@@ -1,7 +1,9 @@
 package Client_Java;
 
 public class ClientUI extends javax.swing.JFrame {
-    public ClientUI() {
+    static String username;
+    public ClientUI(String username) {
+        this.username = username;
         initComponents();
     }
 
@@ -156,13 +158,11 @@ public class ClientUI extends javax.swing.JFrame {
     }
 
     private void startGameButtonActionPerformed(java.awt.event.ActionEvent evt) {
-        // TODO add your handling code here:
+        GameUI.startGameUI(username);
     }
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
+
+    public static void startClientUI(String username) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
@@ -187,9 +187,10 @@ public class ClientUI extends javax.swing.JFrame {
         //</editor-fold>
 
         /* Create and display the form */
+        System.out.println("Check: " + username);
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new ClientUI().setVisible(true);
+                new ClientUI(username).setVisible(true);
             }
         });
     }

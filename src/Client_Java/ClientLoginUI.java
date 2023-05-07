@@ -214,7 +214,7 @@ public class ClientLoginUI extends javax.swing.JFrame {
                      JOptionPane.showMessageDialog(null, "Failed to Log In: Server Error");
                  } else {
                      JOptionPane.showMessageDialog(null, "Successfully Logged In!");
-                     GameUI.startGameUI(user);
+                     ClientUI.startClientUI(user);
                      this.dispose();
                  }
              }
