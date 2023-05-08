@@ -1,5 +1,9 @@
 package Client_Java;
 
+import javax.swing.*;
+
+import static Client_Java.Client.wordyImpl;
+
 public class ClientUI extends javax.swing.JFrame {
     static String username;
     public ClientUI(String username) {
@@ -158,7 +162,18 @@ public class ClientUI extends javax.swing.JFrame {
     }
 
     private void startGameButtonActionPerformed(java.awt.event.ActionEvent evt) {
-       LobbyUI.startLobby(username);
+        try {
+            boolean joined = wordyImpl.joinGame(username);
+            if (joined) {
+                System.out.println("Successfully joined the lobby!");
+                JOptionPane.showMessageDialog(null,"Successfully joined the lobby!");
+            } else {
+                JOptionPane.showMessageDialog(null,"Failed to join the lobby. Please try again later.");
+                dispose();
+            }
+        }catch (Exception e){
+            System.out.println(e.getMessage());
+        }
     }
 
 

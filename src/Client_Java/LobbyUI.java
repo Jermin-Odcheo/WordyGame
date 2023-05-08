@@ -3,6 +3,8 @@ package Client_Java;
 import javax.swing.*;
 import java.awt.*;
 
+import static Client_Java.Client.wordyImpl;
+
 public class LobbyUI extends javax.swing.JFrame{
 String username;
     public LobbyUI(String username) {
@@ -124,13 +126,36 @@ String username;
     public static void main(String[] args) {
 
     }
-    /*
-    Timer ends execute to start game or cancel game
+
+    //Timer ends execute to start game or cancel game
     private void timer()
     {
-
+        try {
+            int timeElapsed = 0;
+            while (timeElapsed < 10) {
+                System.out.println(timeElapsed);
+                boolean ready = wordyImpl.status(username);
+                if (ready) {
+                    System.out.println("Game starting...");
+                    GameUI.startGameUI(username);
+                    break;
+                } else {
+                    System.out.println("Waiting for other players to join...");
+                    Thread.sleep(1000); // Wait for 1 second
+                    timeElapsed++;
+                }
+            }
+            // If the game didn't start after 10 seconds, exit the lobby
+            if (timeElapsed == 10) {
+                System.out.println("No other players joined. Exiting lobby.");
+                wordyImpl.leaveGame(username);
+                dispose();
+            }
+        }catch (Exception e){
+            System.out.println(e.getMessage());
+        }
     }
-     */
+
     private void exitLobbyButtonActionPerformed(java.awt.event.ActionEvent evt) {
         // TODO add your handling code here:
     }

@@ -2,6 +2,7 @@ package Server_Java;
 
 import Client_Java.myConnection;
 import Server_Java.corba.GameException;
+import Server_Java.corba.WordyCallback;
 import Server_Java.corba.wordyPOA;
 
 import java.io.BufferedReader;
@@ -13,10 +14,14 @@ import java.util.*;
 
 
 public class WordyServer extends wordyPOA {
-    private static final List<Player> players = new ArrayList<>();
-    private int currentPlayer = 0;
+//    private static final List<Player> players = new ArrayList<>();
     private final List<String> rounds = new ArrayList<>();
-
+    private static final List<String> lobbyPlayers = new ArrayList<>();
+    private final ArrayList<String> playersInGame = new ArrayList<String>();
+    private int countdown = 10;
+    private boolean isGameStarted;
+    private String letters;
+    private WordyCallback callback;
     public String login(String username, String password) {
         try {
             boolean check = verifyUsername(username);
@@ -44,14 +49,8 @@ public class WordyServer extends wordyPOA {
 
     }
 
-    public boolean status(String username) throws GameException {
-        for (Player player : players) {
-            if (player.getName().equals(username)) {
-                throw new GameException("Already Logged In");
-            }
-        }
-        players.add(new Player(username));
-        return true;
+    public boolean status(String playerName) {
+        return playersInGame.contains(playerName);
     }
     public boolean verifyUsername(String username) {
         ResultSet resultSet;
@@ -82,37 +81,60 @@ public class WordyServer extends wordyPOA {
             return name;
         }
     }
-
+    private void notifyPlayersList() {
+        if (callback != null) {
+            callback.notifyPlayersList(lobbyPlayers);
+        }
+    }
+    //Player join the lobby
     public boolean joinGame(String playerName) throws GameException {
-        if (players.size() >= 4) {
-            throw new GameException("Game is full.");
+        if (lobbyPlayers.contains(playerName)) {
+            throw new GameException("Player " + playerName + " is already in the lobby.");
         }
-        for (Player player : players) {
-            if (player.getName().equals(playerName)) {
-                throw new GameException("Already Logged In");
-            }
+
+        if (lobbyPlayers.size() >= 5) {
+            throw new GameException("Lobby is full. Please try again later.");
         }
-        players.add(new Player(playerName));
-        System.out.println(playerName + " joined the game.");
-        if (players.size() == 4) {
-            startGame();
+
+        lobbyPlayers.add(playerName);
+        System.out.println("Player " + playerName + " joined the lobby.");
+        notifyPlayersList();
+        // Start countdown if there are at least 2 players
+        if (lobbyPlayers.size() >= 2) {
+            new Thread(() -> {
+                while (countdown > 0) {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    countdown--;
+                    System.out.println(countdown + " seconds left to join the game!");
+                }
+                startGame();
+            }).start();
         }
+
         return true;
     }
-    public synchronized void playWord(String playerName, String word) throws GameException {
 
-        if (!isValidWord(word)) {
-            throw new GameException("Invalid word.");
+    // Play Word method
+    public void playWord(String playerName, String word) throws GameException {
+        // check if game has started
+        if (!isGameStarted) {
+            throw new GameException("Game has not yet started.");
         }
-        if (!isWordValidForRound(word)) {
-            throw new GameException("Word is not valid for this round.");
+        // check if player is in game
+        if (!playersInGame.contains(playerName)) {
+            throw new GameException("Player is not in game.");
         }
-        System.out.println(playerName + " played the word \"" + word + "\".");
-        currentPlayer = (currentPlayer + 1) % players.size();
-        if (currentPlayer == 0) {
-            startNewRound();
+        // check if word can be formed from letters
+        for (char c : word.toCharArray()) {
+            if (letters.indexOf(c) == -1) {
+                throw new GameException("Word cannot be formed from letters.");
+            }
         }
-        notifyAll();
+        System.out.println(playerName + " played the word: " + word);
     }
 
     private boolean isWordValidForRound(String word) {
@@ -173,7 +195,7 @@ public class WordyServer extends wordyPOA {
     // implementation to check if word is valid using .txt file
     private boolean isValidWord(String word) {
         try {
-            words = new HashSet<String>();
+            words = new HashSet<>();
             BufferedReader reader = new BufferedReader(new FileReader("src/Server_Java/words.txt"));
             String line;
             while ((line = reader.readLine()) != null) {
@@ -188,16 +210,59 @@ public class WordyServer extends wordyPOA {
     }
 
     private void startGame() {
-        startNewRound();
-        System.out.println("Game started.");
+        if (lobbyPlayers.size() < 2) {
+            System.out.println("Cannot start game. Not enough players.");
+            lobbyPlayers.clear();
+            countdown = 10;
+            return;
+        }
+
+        System.out.println("Starting game with players: " + lobbyPlayers.toString());
+
+        // TODO: Generate 17 random letters with 5-7 vowels
+        String letters = generateLetters();
+
+        for (String player : lobbyPlayers) {
+
+            // TODO: Send generated letters to player
+        }
+
+        lobbyPlayers.clear();
+        countdown = 10;
+    }
+    public void leaveGame(String playerName) throws GameException {
+        if (playersInGame.contains(playerName)) {
+            playersInGame.remove(playerName);
+            if (playersInGame.size() == 0) {
+                isGameStarted = false;
+            }
+        } else {
+            throw new GameException("Player " + playerName + " is not in the game");
+        }
+        notifyPlayersList();
+    }
+
+    public void leaveLobby(String playerName) throws GameException {
+        if (lobbyPlayers.contains(playerName)) {
+            lobbyPlayers.remove(playerName);
+            System.out.println("Player " + playerName + " has left the lobby.");
+        } else {
+            throw new GameException("Player " + playerName + " is not in the lobby");
+        }
+        notifyPlayersList();
     }
     //METHOD TIMER TO START THE LOBBY
-    public static boolean timer(){
+    private static Timer timer;
+      public boolean timer(){
+        WordyCallbackImpl callback = new WordyCallbackImpl();
         int i = 10;
         while (i>=0){
             System.out.println("Remaining: "+i+" seconds");
             if ( i == 0){
-                if (players.size() < 2) {
+                timer.cancel();
+                callback.notifyCountdownStarted(i);
+                callback.notifyGameStarted();
+                if (lobbyPlayers.size() < 2) {
                     System.out.println("NOT ENOUGH PLAYERS");
                     return false;
                 } else {
@@ -207,7 +272,6 @@ public class WordyServer extends wordyPOA {
             try {
                 i--;
                 Thread.sleep(1000L);    // 1000L = 1000ms = 1 second
-
             }
             catch (InterruptedException e) {
                 e.printStackTrace();
@@ -215,7 +279,7 @@ public class WordyServer extends wordyPOA {
         }
         return false;
     }
-    public static void main(String[] args) {
-        timer();
-    }
+
+
+
 }

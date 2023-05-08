@@ -8,7 +8,14 @@ module corba {
         void playWord(in string playerName, in string word) raises (GameException);
         boolean status(in string playerName);
         string generateLetters();
+        boolean timer();
+        void leaveGame(in string playerName) raises (GameException);
     };
-
+    typedef sequence<string> Players;
+  interface WordyCallback {
+        void notifyCountdownStarted(in long count );
+        void notifyPlayersList(in Players players);
+        void notifyGameStarted();
+  };
 };
 #pragma prefix "Client_Java"
