@@ -79,7 +79,11 @@ public abstract class wordyPOA extends org.omg.PortableServer.Servant
        {
          String playerName = in.read_string ();
          boolean $result = false;
-         $result = this.status (playerName);
+         try {
+           $result = this.status (playerName);
+         } catch (GameException e) {
+           throw new RuntimeException(e);
+         }
          out = $rh.createReply();
          out.write_boolean ($result);
          break;
