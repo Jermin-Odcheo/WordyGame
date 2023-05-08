@@ -46,10 +46,10 @@ public class WordyServer extends wordyPOA {
         }
 
     }
-    public boolean status(String username){
+    public boolean status(String username) throws GameException {
         for (Player player : players) {
             if (player.getName().equals(username)) {
-                System.out.println("Logged In");
+                throw new GameException("Already Logged In");
             }
         }
         players.add(new Player(username));
@@ -159,7 +159,9 @@ public class WordyServer extends wordyPOA {
 
 
     public String generateLetters() {
-        return generateRandomLetters();
+        String letters = generateRandomLetters();
+        System.out.println("Starting new round with letters: " + letters);
+        return letters;
     }
 
     private char getRandomVowel() {
@@ -170,9 +172,6 @@ public class WordyServer extends wordyPOA {
     private char getRandomConsonant() {
         String consonants = "BCDFGHJKLMNPQRSTVWXYZ";
         return consonants.charAt(new Random().nextInt(consonants.length()));
-    }
-    private boolean isPlayerTurn(String playerName) {
-        return players.get(currentPlayer).getName().equals(playerName);
     }
     private Set<String> words;
     // implementation to check if word is valid using .txt file
