@@ -1,16 +1,23 @@
 package Client_Java;
 
+import Client_Java.corba.GameException;
+
 import javax.swing.*;
+
+import static Client_Java.Client.wordyImpl;
 
 public class GameUI extends javax.swing.JFrame {
 
-    String username;
+    static String username;
     public GameUI(String username) {
         this.username = username;
         initComponents();
+        jTextArea1.append(wordyImpl.generateLetters());
     }
 
+
     private void initComponents() {
+
 
         jScrollPane1 = new javax.swing.JScrollPane();
         playerListField = new javax.swing.JTextArea();
@@ -140,10 +147,15 @@ public class GameUI extends javax.swing.JFrame {
     }
 
     private void sendButtonActionPerformed(java.awt.event.ActionEvent evt) {
-        // TODO add your handling code here:
+        try {
+        wordyImpl.playWord(username,inputField.getText());}
+        catch (Exception e){
+            System.out.println(e.getMessage());
+        }
     }
 
     public static void startGameUI(String username) {
+
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
@@ -157,12 +169,13 @@ public class GameUI extends javax.swing.JFrame {
         }
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
+
                 new GameUI(username).setVisible(true);
             }
         });
     }
 
-    private javax.swing.JTextField inputField;
+    private static javax.swing.JTextField inputField;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -173,7 +186,7 @@ public class GameUI extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
-    private javax.swing.JTextArea jTextArea1;
+    private static javax.swing.JTextArea jTextArea1;
     private javax.swing.JTextArea playerListField;
     private javax.swing.JButton sendButton;
     private javax.swing.JLabel timerField;

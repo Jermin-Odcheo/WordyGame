@@ -13,6 +13,6 @@ public interface wordyOperations
   String login (String username, String password);
   boolean joinGame (String playerName) throws GameException;
   void playWord (String playerName, String word) throws GameException;
-  boolean status (String playerName);
+  boolean status (String playerName) throws GameException;
   String generateLetters ();
 } // interface wordyOperations
