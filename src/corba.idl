@@ -8,6 +8,7 @@ module corba {
         void playWord(in string playerName, in string word) raises (GameException);
         boolean status(in string playerName);
         string generateLetters();
+        boolean timer();
     };
 
 };

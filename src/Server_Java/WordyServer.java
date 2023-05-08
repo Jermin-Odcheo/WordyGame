@@ -13,7 +13,7 @@ import java.util.*;
 
 
 public class WordyServer extends wordyPOA {
-    private final List<Player> players = new ArrayList<>();
+    private static final List<Player> players = new ArrayList<>();
     private int currentPlayer = 0;
     private final List<String> rounds = new ArrayList<>();
 
@@ -31,9 +31,6 @@ public class WordyServer extends wordyPOA {
                 preparedStatement.setString(2, password);
                 resultSet = preparedStatement.executeQuery();
                 if (resultSet.next()) {
-                    if (!status(username)){
-                        return "LoggedIn";
-                    }
                     System.out.println(username + " : " + "Successfully Logged In");
                         return "Found";
                 } else {
@@ -46,6 +43,7 @@ public class WordyServer extends wordyPOA {
         }
 
     }
+
     public boolean status(String username) throws GameException {
         for (Player player : players) {
             if (player.getName().equals(username)) {
@@ -102,9 +100,7 @@ public class WordyServer extends wordyPOA {
         return true;
     }
     public synchronized void playWord(String playerName, String word) throws GameException {
-        if (players.size() < 2) {
-            throw new GameException("Not enough players to start the game.");
-        }
+
         if (!isValidWord(word)) {
             throw new GameException("Invalid word.");
         }
@@ -194,5 +190,32 @@ public class WordyServer extends wordyPOA {
     private void startGame() {
         startNewRound();
         System.out.println("Game started.");
+    }
+    //METHOD TIMER TO START THE LOBBY
+    public static boolean timer(){
+        int i = 10;
+        while (i>=0){
+            System.out.println("Remaining: "+i+" seconds");
+            if ( i == 0){
+                if (players.size() < 2) {
+                    System.out.println("NOT ENOUGH PLAYERS");
+                    return false;
+                } else {
+                    System.out.println("STARTING");
+                }
+            }
+            try {
+                i--;
+                Thread.sleep(1000L);    // 1000L = 1000ms = 1 second
+
+            }
+            catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        return false;
+    }
+    public static void main(String[] args) {
+        timer();
     }
 }

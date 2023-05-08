@@ -158,7 +158,7 @@ public class ClientUI extends javax.swing.JFrame {
     }
 
     private void startGameButtonActionPerformed(java.awt.event.ActionEvent evt) {
-        GameUI.startGameUI(username);
+       LobbyUI.startLobby(username);
     }
 
 

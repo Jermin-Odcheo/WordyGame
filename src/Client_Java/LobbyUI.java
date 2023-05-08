@@ -1,10 +1,12 @@
 package Client_Java;
 
+import javax.swing.*;
 import java.awt.*;
 
-public class LobbyUI extends javax.swing.JFrame {
-
-    public LobbyUI() {
+public class LobbyUI extends javax.swing.JFrame{
+String username;
+    public LobbyUI(String username) {
+        this.username = username;
         initComponents();
     }
 
@@ -23,7 +25,7 @@ public class LobbyUI extends javax.swing.JFrame {
         jLayeredPane1 = new javax.swing.JLayeredPane();
         jLabel7 = new javax.swing.JLabel();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(1270, 750));
         getContentPane().setLayout(null);
 
@@ -116,11 +118,24 @@ public class LobbyUI extends javax.swing.JFrame {
         pack();
     }
 
+
+
+
+    public static void main(String[] args) {
+
+    }
+    /*
+    Timer ends execute to start game or cancel game
+    private void timer()
+    {
+
+    }
+     */
     private void exitLobbyButtonActionPerformed(java.awt.event.ActionEvent evt) {
         // TODO add your handling code here:
     }
 
-    public static void main(String args[]) {
+    public static void startLobby(String username) {
 
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
@@ -141,7 +156,7 @@ public class LobbyUI extends javax.swing.JFrame {
 
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new LobbyUI().setVisible(true);
+                new LobbyUI(username).setVisible(true);
             }
         });
     }
