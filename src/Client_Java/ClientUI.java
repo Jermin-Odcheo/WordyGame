@@ -1,7 +1,11 @@
 package Client_Java;
 
+import Server_Java.WordyCallbackImpl;
+import Server_Java.corba.WordyCallbackHelper;
+
 import javax.swing.*;
 
+import static Client_Java.Client.wordyCallback;
 import static Client_Java.Client.wordyImpl;
 
 public class ClientUI extends javax.swing.JFrame {
@@ -154,7 +158,7 @@ public class ClientUI extends javax.swing.JFrame {
     }// </editor-fold>
 
     private void exitButtonActionPerformed(java.awt.event.ActionEvent evt) {
-        // TODO add your handling code here:
+        dispose();
     }
 
     private void settingsButtonActionPerformed(java.awt.event.ActionEvent evt) {
@@ -163,13 +167,19 @@ public class ClientUI extends javax.swing.JFrame {
 
     private void startGameButtonActionPerformed(java.awt.event.ActionEvent evt) {
         try {
+            dispose();
+            LobbyUI.startLobby(username);
             boolean joined = wordyImpl.joinGame(username);
             if (joined) {
                 System.out.println("Successfully joined the lobby!");
-                JOptionPane.showMessageDialog(null,"Successfully joined the lobby!");
+                wordyCallback.notifyGameStarted();
+                WordyCallbackImpl callback = new WordyCallbackImpl();
+//                wordyImpl.setCallback(callback);
             } else {
                 JOptionPane.showMessageDialog(null,"Failed to join the lobby. Please try again later.");
-                dispose();
+                System.out.println("No other players joined. Exiting lobby.");
+                wordyImpl.leaveGame(username);
+                startClientUI(username);
             }
         }catch (Exception e){
             System.out.println(e.getMessage());

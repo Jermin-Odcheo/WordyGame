@@ -6,7 +6,7 @@ import java.awt.*;
 import static Client_Java.Client.wordyImpl;
 
 public class LobbyUI extends javax.swing.JFrame{
-String username;
+static String username;
     public LobbyUI(String username) {
         this.username = username;
         initComponents();
@@ -123,12 +123,9 @@ String username;
 
 
 
-    public static void main(String[] args) {
-
-    }
 
     //Timer ends execute to start game or cancel game
-    private void timer()
+    void timer()
     {
         try {
             int timeElapsed = 0;

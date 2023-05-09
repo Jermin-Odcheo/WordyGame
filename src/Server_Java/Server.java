@@ -1,5 +1,6 @@
 package Server_Java;
 
+import Server_Java.corba.WordyCallback;
 import Server_Java.corba.wordy;
 import Server_Java.corba.wordyHelper;
 import org.omg.CORBA.ORB;

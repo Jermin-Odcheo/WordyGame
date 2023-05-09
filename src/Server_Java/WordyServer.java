@@ -81,7 +81,7 @@ public class WordyServer extends wordyPOA {
             return name;
         }
     }
-    private void notifyPlayersList() {
+    private void notifyPlayersList(String s) {
         if (callback != null) {
             callback.notifyPlayersList(lobbyPlayers);
         }
@@ -98,7 +98,7 @@ public class WordyServer extends wordyPOA {
 
         lobbyPlayers.add(playerName);
         System.out.println("Player " + playerName + " joined the lobby.");
-        notifyPlayersList();
+        notifyPlayersList("Player " + playerName + " joined the lobby.");
         // Start countdown if there are at least 2 players
         if (lobbyPlayers.size() >= 2) {
             new Thread(() -> {
@@ -239,7 +239,7 @@ public class WordyServer extends wordyPOA {
         } else {
             throw new GameException("Player " + playerName + " is not in the game");
         }
-        notifyPlayersList();
+        notifyPlayersList("Player " + playerName + " joined the lobby.");
     }
 
     public void leaveLobby(String playerName) throws GameException {
@@ -249,8 +249,9 @@ public class WordyServer extends wordyPOA {
         } else {
             throw new GameException("Player " + playerName + " is not in the lobby");
         }
-        notifyPlayersList();
+        notifyPlayersList("Player " + playerName + " joined the lobby.");
     }
+
     //METHOD TIMER TO START THE LOBBY
     private static Timer timer;
       public boolean timer(){
