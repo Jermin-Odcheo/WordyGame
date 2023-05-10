@@ -1,5 +1,7 @@
 package Client_Java;
 
+import Server_Java.WordyServer;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -57,6 +59,8 @@ static String username;
         jLabel5.setText("PLAYERS IN THE LOBBY :");
         getContentPane().add(jLabel5);
         jLabel5.setBounds(530, 120, 184, 17);
+
+
 
         matchTimerField.setFont(new java.awt.Font("Arial Rounded MT Bold", 1, 18)); // NOI18N
         matchTimerField.setForeground(new java.awt.Color(255, 236, 238));
@@ -123,42 +127,28 @@ static String username;
 
 
 
+    public void startTimer(){
+        if (wordyImpl.timer().equals("NotEnoughPlayer")){
+            jLabel5.setFont(new java.awt.Font("Arial Rounded MT Bold", 1, 25)); // NOI18N
+            jLabel5.setForeground(new java.awt.Color(255, 236, 238));
+            jLabel5.setText("NOT ENOUGH PLAYERS TO START!");
+            getContentPane().add(jLabel5);
+            jLabel5.setBounds(530, 120, 184, 17);
+            System.out.println("NOT ENOUGH PLAYERS TO START!");
 
-    //Timer ends execute to start game or cancel game
-    void timer()
-    {
-        try {
-            int timeElapsed = 0;
-            while (timeElapsed < 10) {
-                System.out.println(timeElapsed);
-                boolean ready = wordyImpl.status(username);
-                if (ready) {
-                    System.out.println("Game starting...");
-                    GameUI.startGameUI(username);
-                    break;
-                } else {
-                    System.out.println("Waiting for other players to join...");
-                    Thread.sleep(1000); // Wait for 1 second
-                    timeElapsed++;
-                }
-            }
-            // If the game didn't start after 10 seconds, exit the lobby
-            if (timeElapsed == 10) {
-                System.out.println("No other players joined. Exiting lobby.");
-                wordyImpl.leaveGame(username);
-                dispose();
-            }
-        }catch (Exception e){
-            System.out.println(e.getMessage());
+        } else {
+
         }
     }
 
+
     private void exitLobbyButtonActionPerformed(java.awt.event.ActionEvent evt) {
-        // TODO add your handling code here:
+        dispose();
     }
 
     public static void startLobby(String username) {
-
+        LobbyUI lobbyUI = new LobbyUI(username);
+        lobbyUI.startTimer();
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
