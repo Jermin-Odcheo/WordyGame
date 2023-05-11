@@ -14,16 +14,14 @@ import java.util.*;
 
 
 public class WordyServer extends wordyPOA {
+//    private static final List<Player> players = new ArrayList<>();
     private final List<String> rounds = new ArrayList<>();
-    private static final List<String> lobbyPlayers = new ArrayList<String>();
+    private static final List<String> lobbyPlayers = new ArrayList<>();
     private final ArrayList<String> playersInGame = new ArrayList<String>();
-    private List<WordyCallback> clients = new ArrayList<>();
     private int countdown = 10;
     private boolean isGameStarted;
     private String letters;
     private WordyCallback callback;
-    private WordyCallbackImpl callbackImpl;
-
 
 
     public String login(String username, String password) {
@@ -76,32 +74,47 @@ public class WordyServer extends wordyPOA {
         return false;
     }
 
+    public static class Player {
+        private final String name;
+        public Player(String name) {
+            this.name = name;
+        }
+        public String getName() {
+            return name;
+        }
+    }
+    private void notifyPlayersList(String s) {
+//        if (callback != null) {
+//            callback.notifyPlayersList(lobbyPlayers);
+//        }
+    }
     //Player join the lobby
     public boolean joinGame(String playerName) throws GameException {
         if (lobbyPlayers.contains(playerName)) {
             throw new GameException("Player " + playerName + " is already in the lobby.");
         }
+
         if (lobbyPlayers.size() >= 5) {
             throw new GameException("Lobby is full. Please try again later.");
         }
-        lobbyPlayers.add(playerName);
 
+        lobbyPlayers.add(playerName);
         System.out.println("Player " + playerName + " joined the lobby.");
-        // Start countdown if there are at least 2 players
-        if (lobbyPlayers.size() >= 2) {
-            new Thread(() -> {
-                while (countdown > 0) {
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    countdown--;
-                    System.out.println(countdown + " seconds left to join the game!");
-                }
-                startGame();
-            }).start();
-        }
+        notifyPlayersList("Player " + playerName + " joined the lobby.");
+//        // Start countdown if there are at least 2 players
+//        if (lobbyPlayers.size() >= 2) {
+//            new Thread(() -> {
+//                while (countdown > 0) {
+//                    try {
+//                        Thread.sleep(1000);
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
+//                    countdown--;
+//                }
+//                startGame();
+//            }).start();
+//        }
 
         return true;
     }
@@ -162,13 +175,12 @@ public class WordyServer extends wordyPOA {
         }
         return sb.toString();
     }
-    public void setCallback(WordyCallback cb) {
-        this.callback = cb;
-    }
+
 
     public String generateLetters() {
         String letters = generateRandomLetters();
         System.out.println("Starting new round with letters: " + letters);
+
         return letters;
     }
 
@@ -229,21 +241,8 @@ public class WordyServer extends wordyPOA {
         } else {
             throw new GameException("Player " + playerName + " is not in the game");
         }
+        notifyPlayersList("Player " + playerName + " joined the lobby.");
     }
-    private WordyServer wordyServer;
-    public void registerReceiver(WordyServer receiver) {
-        this.wordyServer = receiver;
-    }
-    public void sendMessage(String message){
-        if (wordyServer != null){
-            wordyServer.receiveMessage(message);
-        }
-    }
-    @Override
-    public void receiveMessage(String receiveMessage) {
-
-    }
-
 
     public void leaveLobby(String playerName) throws GameException {
         if (lobbyPlayers.contains(playerName)) {
@@ -252,27 +251,24 @@ public class WordyServer extends wordyPOA {
         } else {
             throw new GameException("Player " + playerName + " is not in the lobby");
         }
-
+        notifyPlayersList("Player " + playerName + " joined the lobby.");
     }
 
     //METHOD TIMER TO START THE LOBBY
-    private static Timer timer;
-      public String timer(){
-        WordyCallbackImpl callback = new WordyCallbackImpl();
+      public boolean timer(){
+//        WordyCallbackImpl callback = new WordyCallbackImpl();
         int i = 10;
-
         while (i>=0){
             System.out.println("Remaining: "+i+" seconds");
             if ( i == 0){
-                timer.cancel();
-                callback.notifyCountdownStarted(i);
-                callback.notifyGameStarted();
+//                timer.cancel();
+//                callback.notifyCountdownStarted(i);
+//                callback.notifyGameStarted();
                 if (lobbyPlayers.size() < 2) {
                     System.out.println("NOT ENOUGH PLAYERS");
-                    return "NotEnoughPlayer";
+                    return false;
                 } else {
                     System.out.println("STARTING");
-                    return "Start";
                 }
             }
             try {
@@ -283,8 +279,9 @@ public class WordyServer extends wordyPOA {
                 e.printStackTrace();
             }
         }
-       return null;
+        return false;
     }
+
 
 
 

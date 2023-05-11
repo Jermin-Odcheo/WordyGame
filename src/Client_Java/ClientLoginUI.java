@@ -194,7 +194,6 @@ public class ClientLoginUI extends javax.swing.JFrame {
     }
 
     private void loginButtonActionPerformed(java.awt.event.ActionEvent evt) {
-
         try {
             String user = userName.getText();
             String pass = String.valueOf(password.getPassword());

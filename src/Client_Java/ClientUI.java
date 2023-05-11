@@ -166,24 +166,8 @@ public class ClientUI extends javax.swing.JFrame {
     }
 
     private void startGameButtonActionPerformed(java.awt.event.ActionEvent evt) {
-        try {
-            dispose();
-            LobbyUI.startLobby(username);
-            boolean joined = wordyImpl.joinGame(username);
-            if (joined) {
-                System.out.println("Successfully joined the lobby!");
-                wordyCallback.notifyGameStarted();
-                WordyCallbackImpl callback = new WordyCallbackImpl();
-                //wordyImpl.notifyCountdownStarted(callback);
-            } else {
-                JOptionPane.showMessageDialog(null,"Failed to join the lobby. Please try again later.");
-                System.out.println("No other players joined. Exiting lobby.");
-                wordyImpl.leaveGame(username);
-                startClientUI(username);
-            }
-        }catch (Exception e){
-            System.out.println(e.getMessage());
-        }
+        LobbyUI.startLobby(username);
+        dispose();
     }
 
 
