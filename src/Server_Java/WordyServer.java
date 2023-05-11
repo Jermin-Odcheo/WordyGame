@@ -33,13 +33,18 @@ public class WordyServer extends wordyPOA {
             } else {
                 PreparedStatement preparedStatement;
                 ResultSet resultSet;
-                preparedStatement = myConnection.getConnection().prepareStatement("SELECT * FROM `users` WHERE user_username = ? AND user_password = ?");
+                preparedStatement = myConnection.getConnection().prepareStatement("SELECT * FROM users WHERE user_username = ? AND user_password = ?");
                 preparedStatement.setString(1, username);
                 preparedStatement.setString(2, password);
                 resultSet = preparedStatement.executeQuery();
                 if (resultSet.next()) {
-                    System.out.println(username + " : " + "Successfully Logged In");
+                    if(status(username)) {
+                        System.out.println(username + " : " + "Account already logged in");
+                        return "LoggedIn";
+                    } else {
+                        System.out.println(username + " : " + "Successfully Logged In");
                         return "Found";
+                    }
                 } else {
                     return "Invalid";
                 }
