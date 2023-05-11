@@ -8,7 +8,7 @@ module corba {
         void playWord(in string playerName, in string word) raises (GameException);
         boolean status(in string playerName);
         string generateLetters();
-        string timer();
+        boolean timer();
         void leaveGame(in string playerName) raises (GameException);
         void receiveMessage(in string receiveMessage);
     };
@@ -20,4 +20,4 @@ module corba {
         void sendMessage(in string sendMessage);
   };
 };
-#pragma prefix "Client_Java"
+#pragma prefix "Server_Java"

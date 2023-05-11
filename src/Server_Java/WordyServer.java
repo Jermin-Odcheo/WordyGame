@@ -244,6 +244,11 @@ public class WordyServer extends wordyPOA {
         notifyPlayersList("Player " + playerName + " joined the lobby.");
     }
 
+    @Override
+    public void receiveMessage(String receiveMessage) {
+
+    }
+
     public void leaveLobby(String playerName) throws GameException {
         if (lobbyPlayers.contains(playerName)) {
             lobbyPlayers.remove(playerName);
