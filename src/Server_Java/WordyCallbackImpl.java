@@ -22,24 +22,16 @@ public class WordyCallbackImpl extends WordyCallbackPOA {
             callback.notifyCountdownStarted(i);
         }
     }
-
     @Override
-    public void notifyPlayersList(String[] players) {
+    public void notifyPlayersList(List<String> players) {
 
     }
-
-
-
 
     @Override
     public void notifyGameStarted() {
         System.out.println("Game started!");
     }
 
-    @Override
-    public void sendMessage(String sendMessage) {
-
-    }
 
 
 }

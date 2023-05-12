@@ -116,65 +116,31 @@ static String username;
 
         getContentPane().add(jLayeredPane1);
         jLayeredPane1.setBounds(0, 0, 1260, 710);
-
+        inLobby();
         pack();
     }
 
 
 
 
-    void lobby(){
+
+
+    public static void inLobby(){
         try {
-            dispose();
             boolean joined = wordyImpl.joinGame(username);
-            System.out.println("Successfully joined the lobby!");
-            if (joined == !wordyImpl.timer()) {
-                GameUI.startGameUI(username);
-                dispose();
-//                wordyCallback.notifyGameStarted();
-//                WordyCallbackImpl callback = new WordyCallbackImpl();
-//                wordyImpl.setCallback(callback);
+            if (joined) {
+                System.out.println("Successfully joined the lobby!");
             } else {
                 JOptionPane.showMessageDialog(null,"Failed to join the lobby. Please try again later.");
                 System.out.println("No other players joined. Exiting lobby.");
                 wordyImpl.leaveGame(username);
                 ClientUI.startClientUI(username);
-                dispose();
             }
         }catch (Exception e){
             System.out.println(e.getMessage());
+            e.printStackTrace();
         }
     }
-    //Timer ends execute to start game or cancel game
-    void timer()
-    {
-        try {
-            int timeElapsed = 0;
-            while (timeElapsed < 10) {
-                System.out.println(timeElapsed);
-                boolean ready = wordyImpl.status(username);
-                if (ready) {
-                    System.out.println("Game starting...");
-                    jLabel3.setText("MATCH WILL START IN" + timeElapsed);
-                    GameUI.startGameUI(username);
-                    break;
-                } else {
-                    System.out.println("Waiting for other players to join...");
-                    Thread.sleep(1000); // Wait for 1 second
-                    timeElapsed++;
-                }
-            }
-            // If the game didn't start after 10 seconds, exit the lobby
-            if (timeElapsed == 10) {
-                System.out.println("No other players joined. Exiting lobby.");
-                wordyImpl.leaveGame(username);
-                dispose();
-            }
-        }catch (Exception e){
-            System.out.println(e.getMessage());
-        }
-    }
-
     private void exitLobbyButtonActionPerformed(java.awt.event.ActionEvent evt) {
        dispose();
     }
@@ -185,8 +151,7 @@ static String username;
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
                     javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    LobbyUI lobbyUI = new LobbyUI(username);
-                    lobbyUI.lobby();
+
                     break;
                 }
             }
@@ -203,6 +168,7 @@ static String username;
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 new LobbyUI(username).setVisible(true);
+
             }
         });
     }
