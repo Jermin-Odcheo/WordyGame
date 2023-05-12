@@ -1,7 +1,5 @@
 package Client_Java;
 
-import Client_Java.corba.GameException;
-
 import javax.swing.*;
 
 import static Client_Java.Client.wordyImpl;

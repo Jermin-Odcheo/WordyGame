@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class WordyServer extends wordyPOA {
@@ -262,9 +263,10 @@ public class WordyServer extends wordyPOA {
     }
     private Timer timer;
     //METHOD TIMER TO START THE LOBBY
+
       public double timer(){
           // Start countdown if there are at least 2 players
-          if (lobbyPlayers.size() >= 2) {
+          if (lobbyPlayers.size() >= 1) {
               new Thread(() -> {
                   while (countdown > 0) {
                       try {
@@ -274,40 +276,15 @@ public class WordyServer extends wordyPOA {
                       }
                       countdown--;
                       System.out.println(countdown);
-
+                      callback.notifyCountdownStarted(countdown);
                   }
 
                   startGame();
 
               }).start();
-              return countdown;
-          }
 
-////        WordyCallbackImpl callback = new WordyCallbackImpl();
-//        int i = 10;
-//        while (i>=0){
-//            System.out.println("Remaining: "+i+" seconds");
-//            if ( i == 0){
-//                timer.cancel();
-//                callback.notifyCountdownStarted(i);
-//                callback.notifyGameStarted();
-//                if (lobbyPlayers.size() < 2) {
-//                    System.out.println("NOT ENOUGH PLAYERS");
-//                    return false;
-//                } else {
-//                    System.out.println("STARTING");
-//                }
-//            }
-//            try {
-//                i--;
-//                Thread.sleep(1000L);    // 1000L = 1000ms = 1 second
-//            }
-//            catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//        return false;
-          return 0;
+          }
+          return countdown;
       }
 
 

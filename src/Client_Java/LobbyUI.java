@@ -130,6 +130,14 @@ static String username;
             boolean joined = wordyImpl.joinGame(username);
             if (joined) {
                 System.out.println("Successfully joined the lobby!");
+                int count = (int) wordyImpl.timer();
+                while (true) {
+                    System.out.println(count);
+                    if (count == 0) {
+                        System.out.println("Starting Game!");
+                        break;
+                    }
+                }
             } else {
                 JOptionPane.showMessageDialog(null,"Failed to join the lobby. Please try again later.");
                 System.out.println("No other players joined. Exiting lobby.");
