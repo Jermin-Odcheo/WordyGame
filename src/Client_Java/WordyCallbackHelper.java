@@ -13,9 +13,10 @@ public class WordyCallbackHelper extends WordyCallbackPOA {
     }
 
     @Override
-    public void notifyPlayersList(List<String> players) {
+    public void notifyPlayersList(String[] players) {
 
     }
+
 
     @Override
     public void notifyGameStarted() {

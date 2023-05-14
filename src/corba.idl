@@ -4,6 +4,7 @@ module corba {
       };
     interface wordy{
         string login(in string username , in string password );
+        void exit(in string username);
         boolean joinGame(in string playerName) raises (GameException);
         void playWord(in string playerName, in string word) raises (GameException);
         boolean status(in string playerName);
@@ -18,4 +19,4 @@ module corba {
         void notifyGameStarted();
   };
 };
-#pragma prefix "Client_Java"
+#pragma prefix "Server_Java"

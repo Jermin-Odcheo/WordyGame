@@ -198,7 +198,7 @@ public class ClientLoginUI extends javax.swing.JFrame {
             String user = userName.getText();
             String pass = String.valueOf(password.getPassword());
 
-             if (wordyImpl.status(user)){
+             if (wordyImpl.login(user, pass).equals("LoggedIn")){
                  JOptionPane.showMessageDialog(null, user + " Already Logged In!");
              } else {
                  if (user.equals("")) {

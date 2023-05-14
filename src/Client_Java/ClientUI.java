@@ -158,6 +158,7 @@ public class ClientUI extends javax.swing.JFrame {
     }// </editor-fold>
 
     private void exitButtonActionPerformed(java.awt.event.ActionEvent evt) {
+        wordyImpl.exit(username);
         dispose();
     }
 

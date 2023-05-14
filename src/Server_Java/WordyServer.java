@@ -11,14 +11,14 @@ import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class WordyServer extends wordyPOA {
-//    private static final List<Player> players = new ArrayList<>();
+    private static final List<String> players = new ArrayList<String>();
     private final List<String> rounds = new ArrayList<>();
     private static final List<String> lobbyPlayers = new ArrayList<>();
     private final ArrayList<String> playersInGame = new ArrayList<String>();
+//    private final ArrayList<String> playersOnline = new ArrayList<String>();
     Map<String, WordyCallback> playerCallbacks = new HashMap<>();
     private int countdown = 10;
     private boolean isGameStarted;
@@ -28,6 +28,10 @@ public class WordyServer extends wordyPOA {
 
 
     public String login(String username, String password) {
+        if (players.contains(username)){
+            System.out.println("Already Logged In!");
+            return "LoggedIn";
+        }
         try {
             boolean check = verifyUsername(username);
             if (!check) {
@@ -41,13 +45,9 @@ public class WordyServer extends wordyPOA {
                 preparedStatement.setString(2, password);
                 resultSet = preparedStatement.executeQuery();
                 if (resultSet.next()) {
-                    if(status(username)) {
-                        System.out.println(username + " : " + "Account already logged in");
-                        return "LoggedIn";
-                    } else {
+                        players.add(username);
                         System.out.println(username + " : " + "Successfully Logged In");
                         return "Found";
-                    }
                 } else {
                     return "Invalid";
                 }
@@ -57,6 +57,12 @@ public class WordyServer extends wordyPOA {
             return "Error";
         }
 
+    }
+
+    @Override
+    public void exit(String username) {
+        players.remove(username);
+        System.out.println(username + ": Logged Out!");
     }
 
     public boolean status(String playerName) {
@@ -92,9 +98,9 @@ public class WordyServer extends wordyPOA {
         }
     }
     private void notifyPlayersList(String s) {
-        if (callback != null) {
-            callback.notifyPlayersList(lobbyPlayers);
-        }
+//        if (callback != null) {
+//            callback.notifyPlayersList(lobbyPlayers);
+//        }
     }
     //Player join the lobby
     public boolean joinGame(String playerName) throws GameException {
@@ -276,7 +282,6 @@ public class WordyServer extends wordyPOA {
                       }
                       countdown--;
                       System.out.println(countdown);
-                      callback.notifyCountdownStarted(countdown);
                   }
 
                   startGame();
