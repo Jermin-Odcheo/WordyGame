@@ -10,6 +10,7 @@ static String username;
     public LobbyUI(String username) {
         this.username = username;
         initComponents();
+        inLobby();
     }
 
     private void initComponents() {
@@ -116,8 +117,9 @@ static String username;
 
         getContentPane().add(jLayeredPane1);
         jLayeredPane1.setBounds(0, 0, 1260, 710);
-        inLobby();
+
         pack();
+
     }
 
 
@@ -130,14 +132,7 @@ static String username;
             boolean joined = wordyImpl.joinGame(username);
             if (joined) {
                 System.out.println("Successfully joined the lobby!");
-                int count = (int) wordyImpl.timer();
-                while (true) {
-                    System.out.println(count);
-                    if (count == 0) {
-                        System.out.println("Starting Game!");
-                        break;
-                    }
-                }
+                wordyImpl.timer();
             } else {
                 JOptionPane.showMessageDialog(null,"Failed to join the lobby. Please try again later.");
                 System.out.println("No other players joined. Exiting lobby.");
