@@ -2,6 +2,14 @@ module corba {
    exception GameException {
         string message;
       };
+      interface lobby{
+      void time(in double countdown);
+      void playerList(in string message);
+      };
+      interface sendLobby{
+      string sendTimer(in lobby objref,in string message);
+      string sendPlayerList(in lobby objref,in string message);
+      };
     interface wordy{
         string login(in string username , in string password );
         void exit(in string username);
@@ -18,5 +26,6 @@ module corba {
         void notifyPlayersList(in Players players);
         void notifyGameStarted();
   };
+
 };
-#pragma prefix "Server_Java"
+#pragma prefix "Client_Java"

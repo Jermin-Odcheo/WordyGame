@@ -32,6 +32,8 @@ public class Server {
             POA rootpoa = POAHelper.narrow(orb.resolve_initial_references("RootPOA"));
             rootpoa.the_POAManager().activate();
 
+            WordyServer.WordyServant servant = new WordyServer.WordyServant();
+            servant.setORB(orb);
             // Create the Wordy servant and register it with the Naming Service
             WordyServer wordyServant = new WordyServer();
             org.omg.CORBA.Object ref = rootpoa.servant_to_reference(wordyServant);

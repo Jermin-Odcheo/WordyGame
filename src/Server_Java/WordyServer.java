@@ -1,9 +1,8 @@
 package Server_Java;
 
 import Client_Java.myConnection;
-import Server_Java.corba.GameException;
-import Server_Java.corba.WordyCallback;
-import Server_Java.corba.wordyPOA;
+import Server_Java.corba.*;
+import org.omg.CORBA.ORB;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -291,7 +290,26 @@ public class WordyServer extends wordyPOA {
           }
           return countdown;
       }
+    static class WordyServant extends sendLobbyPOA
+    {
+        private ORB orb;
 
+        public void setORB(ORB orb_val) {
+            orb = orb_val;
+        }
+
+        @Override
+        public String sendTimer(lobby objref, String message) {
+            objref.time(Double.parseDouble(message));
+            return "10";
+        }
+
+        @Override
+        public String sendPlayerList(lobby objref, String message) {
+            objref.playerList(message);
+            return "SEND PLAYER LIST";
+        }
+    }
 
 
 
