@@ -24,7 +24,7 @@ public class ClientUI extends javax.swing.JFrame {
         logo = new javax.swing.JLabel();
         jLayeredPane2 = new javax.swing.JLayeredPane();
         backgroundPane = new javax.swing.JLabel();
-        settingsButton = new javax.swing.JButton();
+        leaderboardButton = new javax.swing.JButton();
         exitButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -71,18 +71,18 @@ public class ClientUI extends javax.swing.JFrame {
                                 .addGap(0, 0, Short.MAX_VALUE))
         );
 
-        settingsButton.setFont(new java.awt.Font("Arial Rounded MT Bold", 1, 24)); // NOI18N
-        settingsButton.setForeground(new java.awt.Color(238, 241, 255));
-        settingsButton.setText("SETTINGS");
-        settingsButton.setBorder(null);
-        settingsButton.setContentAreaFilled(false);
-        settingsButton.addActionListener(new java.awt.event.ActionListener() {
+        leaderboardButton.setFont(new java.awt.Font("Arial Rounded MT Bold", 1, 18)); // NOI18N
+        leaderboardButton.setForeground(new java.awt.Color(238, 241, 255));
+        leaderboardButton.setText("LEADERBOARD");
+        leaderboardButton.setBorder(null);
+        leaderboardButton.setContentAreaFilled(false);
+        leaderboardButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                settingsButtonActionPerformed(evt);
+                leaderboardButtonActionPerformed(evt);
             }
         });
 
-        exitButton.setFont(new java.awt.Font("Arial Rounded MT Bold", 1, 24)); // NOI18N
+        exitButton.setFont(new java.awt.Font("Arial Rounded MT Bold", 1, 18)); // NOI18N
         exitButton.setForeground(new java.awt.Color(238, 241, 255));
         exitButton.setText("EXIT");
         exitButton.setBorder(null);
@@ -108,7 +108,7 @@ public class ClientUI extends javax.swing.JFrame {
                                                 .addGroup(backgroundPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                                         .addGroup(backgroundPanelLayout.createSequentialGroup()
                                                                 .addGap(135, 135, 135)
-                                                                .addComponent(settingsButton, javax.swing.GroupLayout.PREFERRED_SIZE, 151, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                                                .addComponent(leaderboardButton, javax.swing.GroupLayout.PREFERRED_SIZE, 151, javax.swing.GroupLayout.PREFERRED_SIZE))
                                                         .addGroup(backgroundPanelLayout.createSequentialGroup()
                                                                 .addGap(87, 87, 87)
                                                                 .addComponent(startGameButton, javax.swing.GroupLayout.PREFERRED_SIZE, 263, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -131,7 +131,7 @@ public class ClientUI extends javax.swing.JFrame {
                                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                                 .addComponent(startGameButton, javax.swing.GroupLayout.PREFERRED_SIZE, 69, javax.swing.GroupLayout.PREFERRED_SIZE)
                                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(settingsButton)
+                                                .addComponent(leaderboardButton)
                                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                                 .addComponent(exitButton)
                                                 .addGap(161, 161, 161))
@@ -155,15 +155,15 @@ public class ClientUI extends javax.swing.JFrame {
         );
 
         pack();
-    }// </editor-fold>
+    }
 
     private void exitButtonActionPerformed(java.awt.event.ActionEvent evt) {
         wordyImpl.exit(username);
         dispose();
     }
 
-    private void settingsButtonActionPerformed(java.awt.event.ActionEvent evt) {
-        // TODO add your handling code here:
+    private void leaderboardButtonActionPerformed(java.awt.event.ActionEvent evt) {
+
     }
 
     private void startGameButtonActionPerformed(java.awt.event.ActionEvent evt) {
@@ -173,30 +173,6 @@ public class ClientUI extends javax.swing.JFrame {
 
 
     public static void startClientUI(String username) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(ClientUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(ClientUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(ClientUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(ClientUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the form */
         System.out.println("StartClientUI: " + username);
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
@@ -205,15 +181,14 @@ public class ClientUI extends javax.swing.JFrame {
         });
     }
 
-    // Variables declaration - do not modify
     private javax.swing.JLabel backgroundPane;
     private javax.swing.JPanel backgroundPanel;
     private javax.swing.JButton exitButton;
     private javax.swing.JLayeredPane jLayeredPane2;
     private javax.swing.JLabel logo;
-    private javax.swing.JButton settingsButton;
+    private javax.swing.JButton leaderboardButton;
     private javax.swing.JButton startGameButton;
     private javax.swing.JLabel welcomeMessage;
-    // End of variables declaration
+
 }
 
