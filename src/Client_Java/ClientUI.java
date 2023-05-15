@@ -163,7 +163,7 @@ public class ClientUI extends javax.swing.JFrame {
     }
 
     private void leaderboardButtonActionPerformed(java.awt.event.ActionEvent evt) {
-
+        LeaderboardUI.startLeaderboardUI(username);
     }
 
     private void startGameButtonActionPerformed(java.awt.event.ActionEvent evt) {
