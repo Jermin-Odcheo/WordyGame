@@ -145,7 +145,8 @@ static String username;
         }
     }
     private void exitLobbyButtonActionPerformed(java.awt.event.ActionEvent evt) {
-       dispose();
+        dispose();
+        ClientUI.startClientUI(username);
     }
 
     public static void startLobby(String username) {
