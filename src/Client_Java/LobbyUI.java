@@ -45,7 +45,7 @@ static String username;
 
         jLabel3.setFont(new java.awt.Font("Arial Rounded MT Bold", 1, 18)); // NOI18N
         jLabel3.setForeground(new java.awt.Color(255, 236, 238));
-        jLabel3.setText("MATCH WILL START IN");
+        jLabel3.setText("WORDY LOBBY #2");
         getContentPane().add(jLabel3);
         jLabel3.setBounds(520, 90, 215, 21);
 
