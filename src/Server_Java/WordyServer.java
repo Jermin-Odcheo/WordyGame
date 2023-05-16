@@ -103,11 +103,6 @@ public class WordyServer extends wordyPOA {
     }
     //Player join the lobby
     public boolean joinGame(String playerName) throws GameException {
-
-        if (lobbyPlayers.contains(playerName)) {
-            throw new GameException("Player " + playerName + " is already in the lobby.");
-        }
-
         if (lobbyPlayers.size() >= 5) {
             throw new GameException("Lobby is full. Please try again later.");
         }
@@ -213,6 +208,7 @@ public class WordyServer extends wordyPOA {
     }
 
     private void startGame() {
+
         if (lobbyPlayers.size() < 2) {
             System.out.println("Cannot start game. Not enough players.");
             lobbyPlayers.clear();
@@ -271,7 +267,7 @@ public class WordyServer extends wordyPOA {
 
       public double timer(){
           // Start countdown if there are at least 2 players
-          if (lobbyPlayers.size() >= 1) {
+          if (lobbyPlayers.size() >= 2) {
               new Thread(() -> {
                   while (countdown > 0) {
                       try {

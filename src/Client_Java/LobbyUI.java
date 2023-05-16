@@ -133,6 +133,7 @@ static String username;
             if (joined) {
                 System.out.println("Successfully joined the lobby!");
                 wordyImpl.timer();
+                GameUI.startGameUI(username);
             } else {
                 JOptionPane.showMessageDialog(null,"Failed to join the lobby. Please try again later.");
                 System.out.println("No other players joined. Exiting lobby.");
