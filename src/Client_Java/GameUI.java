@@ -12,6 +12,7 @@ public class GameUI extends javax.swing.JFrame {
         initComponents();
         String letters = wordyImpl.generateLetters();
         jTextArea1.append(letters);
+        playerListField.setText(username);
     }
 
 
