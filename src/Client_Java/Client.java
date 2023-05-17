@@ -1,13 +1,8 @@
 package Client_Java;
 
 
-import Client_Java.corba.lobby;
-import Client_Java.corba.lobbyHelper;
-import Client_Java.corba.sendLobby;
-import Server_Java.corba.lobbyPOA;
-import Server_Java.corba.wordy;
-import Server_Java.corba.wordyHelper;
-import Server_Java.WordyCallbackImpl;
+
+import Server_Java.corba.*;
 import org.omg.CORBA.ORB;
 import org.omg.CosNaming.NamingContextExt;
 import org.omg.CosNaming.NamingContextExtHelper;
@@ -16,14 +11,12 @@ import org.omg.PortableServer.POAHelper;
 
 public class Client {
     static wordy wordyImpl;
-    static WordyCallbackImpl wordyCallback;
-    static sendLobby lobbyImpl;
+    static Client_Java.corba.WordyCallback wordyCallback;
     public static void main(String[] args) {
         try {
             // create and initialize the ORB
             //Connect to the server using Server IP Address
-            ORB orb = ORB.init(new String[]{"-ORBInitialHost", "192.168.1.22", "-ORBInitialPort", "1050"}, null);
-
+            ORB orb = ORB.init(new String[]{"-ORBInitialHost", "192.168.1.8", "-ORBInitialPort", "1050"}, null);
             // get the root naming context
             org.omg.CORBA.Object objRef = orb.resolve_initial_references("NameService");
             NamingContextExt ncRef = NamingContextExtHelper.narrow(objRef);
@@ -32,21 +25,33 @@ public class Client {
             // Resolve the object reference using a corbaloc URL
             String name = "Wordy";
             wordyImpl = wordyHelper.narrow(ncRef.resolve_str(name));
-
-
-
-
-            lobbyServant servant = new lobbyServant();
-            servant.setORB(orb);
-            org.omg.CORBA.Object ref = rootpoa.servant_to_reference(servant);
-            lobby cref = lobbyHelper.narrow(ref);
-
-
-
-
+            String name1 = "WordyCallback";
+            wordyCallback = Client_Java.corba.WordyCallbackHelper.narrow(ncRef.resolve_str(name1));
             ClientLoginUI.startLogin();
-            String say1 = lobbyImpl.sendPlayerList(cref,"Hello");
-            System.out.println(say1);
+        } catch (Exception e) {
+            System.out.println("Exception in main: " + e);
+            e.printStackTrace();
+        }
+    }
+
+
+    public static class WordyCallback extends WordyCallbackPOA {
+        private ORB orb;
+
+        public void setORB(ORB orb_val) {
+            orb = orb_val;
+        }
+
+        @Override
+        public String sendGeneratedLetter(String letters) {
+            System.out.println("FROM SERVER:" + letters);
+            return letters;
+
+        }
+    }
+}
+
+
 ////            // join the game
 //            Scanner scanner = new Scanner(System.in);
 //            System.out.print("Enter your name: ");
@@ -67,28 +72,3 @@ public class Client {
 //                    System.out.println(e.message);
 //                }
 //            }
-
-        } catch (Exception e) {
-            System.out.println("Exception in main: " + e);
-            e.printStackTrace();
-        }
-    }
-    static class lobbyServant extends lobbyPOA
-    {
-        private ORB orb;
-
-        public void setORB(ORB orb_val) {
-            orb = orb_val;
-        }
-
-        @Override
-        public void time(double countdown) {
-            System.out.println(countdown);
-        }
-
-        @Override
-        public void playerList(String message) {
-            System.out.println(message);
-        }
-    }
-}

@@ -1,14 +1,14 @@
 package Server_Java;
 
-import Server_Java.corba.WordyCallback;
-import Server_Java.corba.wordy;
-import Server_Java.corba.wordyHelper;
+import Client_Java.Client;
+import Server_Java.corba.*;
 import org.omg.CORBA.ORB;
 import org.omg.CosNaming.NameComponent;
 import org.omg.CosNaming.NamingContextExt;
 import org.omg.CosNaming.NamingContextExtHelper;
 import org.omg.PortableServer.POA;
 import org.omg.PortableServer.POAHelper;
+
 
 import java.net.InetAddress;
 
@@ -32,16 +32,29 @@ public class Server {
             POA rootpoa = POAHelper.narrow(orb.resolve_initial_references("RootPOA"));
             rootpoa.the_POAManager().activate();
 
-            WordyServer.WordyServant servant = new WordyServer.WordyServant();
-            servant.setORB(orb);
             // Create the Wordy servant and register it with the Naming Service
             WordyServer wordyServant = new WordyServer();
-            org.omg.CORBA.Object ref = rootpoa.servant_to_reference(wordyServant);
+            //WordytCallbackImpl
+            WordyServer.WordyCallback wordyCallback = new WordyServer.WordyCallback();
+            wordyCallback.setORB(orb);
+
+            //Narrow the object references to their respective interfaces
+            org.omg.CORBA.Object ref = rootpoa.servant_to_reference(wordyServant);;
+            org.omg.CORBA.Object refWordyServantImpl = rootpoa.servant_to_reference(wordyCallback);
+
+            // Narrow the object references to their respective interfaces
             wordy href = wordyHelper.narrow(ref);
+            WordyCallback wordycallbackimpl = WordyCallbackHelper.narrow(refWordyServantImpl);
+
+
             org.omg.CORBA.Object objRef = orb.resolve_initial_references("NameService");
             NamingContextExt ncRef = NamingContextExtHelper.narrow(objRef);
-            NameComponent[] path = ncRef.to_name("Wordy");
-            ncRef.rebind(path, href);
+
+
+            NameComponent[] wordyPath = ncRef.to_name("Wordy");
+            ncRef.rebind(wordyPath, href);
+            NameComponent[] wordyCallBack = ncRef.to_name("WordyCallback");
+            ncRef.rebind(wordyCallBack, wordycallbackimpl);
 
             // Print server ready message
             System.out.println("Server is ready...");

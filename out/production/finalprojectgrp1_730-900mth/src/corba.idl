@@ -2,29 +2,24 @@ module corba {
    exception GameException {
         string message;
       };
-      interface lobby{
-      void time(in double countdown);
-      void playerList(in string message);
-      };
-      interface sendLobby{
-      string sendTimer(in lobby objref,in string message);
-      string sendPlayerList(in lobby objref,in string message);
-      };
     interface wordy{
         string login(in string username , in string password );
         void exit(in string username);
-        boolean joinGame(in string playerName) raises (GameException);
+        boolean joinLobby(in string playerName) raises (GameException);
+        void timerServer();
+        double gettimer();
+        string generateLetters();
+        string playerInGameList();
+
         void playWord(in string playerName, in string word) raises (GameException);
         boolean status(in string playerName);
-        string generateLetters();
-        double timer();
+
+        double lobbyPlayerCount();
         void leaveGame(in string playerName) raises (GameException);
     };
-    typedef sequence<string> Players;
+
   interface WordyCallback {
-        void notifyCountdownStarted(in long count );
-        void notifyPlayersList(in Players players);
-        void notifyGameStarted();
+       string sendGeneratedLetter(in string letters);
   };
 
 };

@@ -1,8 +1,11 @@
 package Client_Java;
 
 import javax.swing.*;
-import java.awt.*;
 
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
+
+import static Client_Java.Client.wordyCallback;
 import static Client_Java.Client.wordyImpl;
 
 public class LobbyUI extends javax.swing.JFrame{
@@ -10,7 +13,7 @@ static String username;
     public LobbyUI(String username) {
         this.username = username;
         initComponents();
-        inLobby();
+        addListeners();
     }
 
     private void initComponents() {
@@ -55,7 +58,7 @@ static String username;
 
         jLabel5.setFont(new java.awt.Font("Arial Rounded MT Bold", 1, 14)); // NOI18N
         jLabel5.setForeground(new java.awt.Color(255, 236, 238));
-        jLabel5.setText("PLAYERS IN THE LOBBY :");
+        //jLabel5.setText("PLAYERS IN THE LOBBY :");
         getContentPane().add(jLabel5);
         jLabel5.setBounds(530, 120, 184, 17);
 
@@ -122,32 +125,123 @@ static String username;
 
     }
 
-
-
-
-
-
-    public static void inLobby(){
-        try {
-            boolean joined = wordyImpl.joinGame(username);
-            if (joined) {
-                System.out.println("Successfully joined the lobby!");
-                wordyImpl.timer();
-                GameUI.startGameUI(username);
-            } else {
-                JOptionPane.showMessageDialog(null,"Failed to join the lobby. Please try again later.");
-                System.out.println("No other players joined. Exiting lobby.");
-                wordyImpl.leaveGame(username);
-                ClientUI.startClientUI(username);
+    private void addListeners()
+    {
+        // Add your listeners here as usual
+        this.addWindowListener(new WindowListener()
+        {
+            @Override
+            public void windowOpened(WindowEvent e)
+            {
+                inLobby();
+                /* ... */
             }
-        }catch (Exception e){
-            System.out.println(e.getMessage());
-            e.printStackTrace();
+
+            @Override
+            public void windowClosing(WindowEvent e) {
+
+            }
+
+            @Override
+            public void windowClosed(WindowEvent e) {
+
+            }
+
+            @Override
+            public void windowIconified(WindowEvent e) {
+
+            }
+
+            @Override
+            public void windowDeiconified(WindowEvent e) {
+
+            }
+
+            @Override
+            public void windowActivated(WindowEvent e) {
+
+            }
+
+            @Override
+            public void windowDeactivated(WindowEvent e) {
+
+            }
+
+            /* Other methods of WindowListener ... */
+        });
+    }
+
+    /* ... */
+
+
+
+    public void inLobby() {
+        try {
+            double lobbyCount = 0;
+            double time = 0;
+            if (wordyImpl != null) {
+                boolean joined = wordyImpl.joinLobby(username);
+                if (joined) {
+                    int countdown = 5;
+                    System.out.println(username + "Joined");
+                    while (countdown > 0) {
+                        countdown--;
+                        System.out.println(countdown);
+                        Thread.sleep(1000);
+                        lobbyCount = wordyImpl.lobbyPlayerCount();
+                        time = wordyImpl.gettimer();
+                    }
+                }
+            }
+                    System.out.println("Players "+lobbyCount);
+                     while (time > 0) {
+                         lobbyCount = wordyImpl.lobbyPlayerCount();
+                        time--;
+                        if (lobbyCount >= 2) {
+                            System.out.println("Count Down " +time);
+                            jLabel3.setText("Starting Game: " + time);
+                            Thread.sleep(1000);
+                        }else {
+                            JOptionPane.showMessageDialog(null,"Not Enough Player!");
+                        }
+                    }
+                if (time == 0){
+                gameStartNotification();
+                }
+                } catch(Exception e){
+                    System.err.println("Error joining the lobby: " + e);
+                    e.printStackTrace(System.out);
+                }
+
         }
+
+
+
+
+    public void startGameUI(String username) {
+        SwingUtilities.invokeLater(() -> {
+            // Code to initialize and show the game UI
+            GameUI.startGameUI(username);
+            System.out.println("Game UI initialized for player: " + username);
+        });
+        dispose();
+    }
+
+    public void gameStartNotification() {
+        SwingUtilities.invokeLater(() -> {
+            // Update the UI to reflect the game start
+            startGameUI(username);
+
+        });
     }
     private void exitLobbyButtonActionPerformed(java.awt.event.ActionEvent evt) {
-        dispose();
-        ClientUI.startClientUI(username);
+        try {
+            wordyImpl.leaveGame(username);
+        }catch (Exception e){
+            System.out.println(e.getMessage());
+        }
+
+       dispose();
     }
 
     public static void startLobby(String username) {
@@ -176,6 +270,7 @@ static String username;
 
             }
         });
+
     }
 
     private javax.swing.JButton exitLobbyButton;
@@ -183,7 +278,7 @@ static String username;
     private javax.swing.JLabel jLabel2;
     private static javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
+    private static javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;

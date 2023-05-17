@@ -17,7 +17,7 @@ public class WordyServer extends wordyPOA {
     private final List<String> rounds = new ArrayList<>();
     private static final List<String> lobbyPlayers = new ArrayList<>();
     private final ArrayList<String> playersInGame = new ArrayList<String>();
-//    private final ArrayList<String> playersOnline = new ArrayList<String>();
+    private static final Map<String, String> playerLettersMap = new HashMap<>();
     Map<String, WordyCallback> playerCallbacks = new HashMap<>();
     private int countdown = 10;
     private boolean isGameStarted;
@@ -57,13 +57,12 @@ public class WordyServer extends wordyPOA {
         }
 
     }
-
     @Override
     public void exit(String username) {
         players.remove(username);
+        playersInGame.remove(username);
         System.out.println(username + ": Logged Out!");
     }
-
     public boolean status(String playerName) {
         return playersInGame.contains(playerName);
     }
@@ -86,33 +85,70 @@ public class WordyServer extends wordyPOA {
         }
         return false;
     }
-
-    public static class Player {
-        private final String name;
-        public Player(String name) {
-            this.name = name;
-        }
-        public String getName() {
-            return name;
-        }
-    }
-    private void notifyPlayersList(String s) {
-//        if (callback != null) {
-//            callback.notifyPlayersList(lobbyPlayers);
-//        }
-    }
     //Player join the lobby
-    public boolean joinGame(String playerName) throws GameException {
+    private boolean countdownStarted;
+    public boolean joinLobby(String playerName) throws GameException {
         if (lobbyPlayers.size() >= 5) {
-            throw new GameException("Lobby is full. Please try again later.");
+            System.out.println("Lobby is Full");
+            return false;
         }
         lobbyPlayers.add(playerName);
         System.out.println("Player " + playerName + " joined the lobby.");
-        notifyPlayersList("Player " + playerName + " joined the lobby.");
-
-
-
+        if (lobbyPlayers.size() >=2 && !countdownStarted) {
+            timerServer();
+            countdownStarted = true;
+        }
         return true;
+    }
+    public void timerServer(){
+        new Thread(() -> {
+            while (countdown > 0) {
+                System.out.println("Countdown: " + countdown);
+                countdown--;
+                try {
+                    Thread.sleep(1000); // Sleep for 1 second
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (lobbyPlayers.size() >= 2) {
+                startGame();
+            } else {
+                countdownStarted = false;
+            }
+
+        }).start();
+    }
+    public double gettimer() {
+
+        return countdown;
+    }
+
+    public String generateLetters(String letters) {
+        return null;
+    }
+
+    @Override
+    public String playerInGameList() {
+        return lobbyPlayers.toString();
+    }
+
+    private void startGame() {
+        if (lobbyPlayers.size() < 2) {
+            System.out.println("Cannot start game. Not enough players.");
+            lobbyPlayers.clear();
+            countdown = 10;
+            return;
+        }
+        System.out.println("Starting game with players: " + lobbyPlayers.toString());
+        // TODO: Generate 17 random letters with 5-7 vowels
+        String letters = generateLetters();
+        for (String player : lobbyPlayers) {
+            WordyCallback wordyCallback = playerCallbacks.get(lobbyPlayers);
+            // TODO: Send generated letters to player
+        }
+        lobbyPlayers.clear();
+        countdown = 10;
     }
 
     // Play Word method
@@ -175,10 +211,14 @@ public class WordyServer extends wordyPOA {
 
     public String generateLetters() {
         String letters = generateRandomLetters();
+        for (String p: lobbyPlayers){
+            playerLettersMap.put(p,letters);
+        }
         System.out.println("Starting new round with letters: " + letters);
-
+        //callback.sendGeneratedLetter(letters);
         return letters;
     }
+
 
     private char getRandomVowel() {
         String vowels = "AEIOU";
@@ -191,6 +231,12 @@ public class WordyServer extends wordyPOA {
     }
     private Set<String> words;
     // implementation to check if word is valid using .txt file
+
+
+
+
+
+
     private boolean isValidWord(String word) {
         try {
             words = new HashSet<>();
@@ -207,49 +253,19 @@ public class WordyServer extends wordyPOA {
         return words.contains(word.toUpperCase());
     }
 
-    private void startGame() {
-
-        if (lobbyPlayers.size() < 2) {
-            System.out.println("Cannot start game. Not enough players.");
-            lobbyPlayers.clear();
-            countdown = 10;
-            return;
-        }
-        System.out.println("Starting game with players: " + lobbyPlayers.toString());
-
-        // TODO: Generate 17 random letters with 5-7 vowels
-        String letters = generateLetters();
-
-        for (String player : lobbyPlayers) {
-            WordyCallback wordyCallback = playerCallbacks.get(lobbyPlayers);
-            if (callback != null){
-                callback.notifyGameStarted();
-//                callback.notifyPlayersList(getPlayersList());
-//                callback.notifyGeneratedLetters(letters);
-            }
-            // TODO: Send generated letters to player
-        }
-
-        lobbyPlayers.clear();
-        countdown = 10;
-    }
-    public void registerCallback(String playerName, WordyCallback callback) {
-        playerCallbacks.put(playerName, callback);
-    }
-
     public void unregisterCallback(String playerName) {
         playerCallbacks.remove(playerName);
     }
     public void leaveGame(String playerName) throws GameException {
-        if (playersInGame.contains(playerName)) {
+        if (playersInGame.contains(playerName) || lobbyPlayers.contains(playerName)) {
             playersInGame.remove(playerName);
-            if (playersInGame.size() == 0) {
+            lobbyPlayers.remove(playerName);
+            if (playersInGame.size() == 0 || lobbyPlayers.size() == 0) {
                 isGameStarted = false;
             }
         } else {
             throw new GameException("Player " + playerName + " is not in the game");
-        }
-        notifyPlayersList("Player " + playerName + " joined the lobby.");
+        };
     }
 
 
@@ -260,53 +276,29 @@ public class WordyServer extends wordyPOA {
         } else {
             throw new GameException("Player " + playerName + " is not in the lobby");
         }
-        notifyPlayersList("Player " + playerName + " joined the lobby.");
     }
     private Timer timer;
     //METHOD TIMER TO START THE LOBBY
 
-      public double timer(){
-          // Start countdown if there are at least 2 players
-          if (lobbyPlayers.size() >= 2) {
-              new Thread(() -> {
-                  while (countdown > 0) {
-                      try {
-                          Thread.sleep(1000);
-                      } catch (InterruptedException e) {
-                          e.printStackTrace();
-                      }
-                      countdown--;
-                      System.out.println(countdown);
-                  }
 
-                  startGame();
 
-              }).start();
-
-          }
-          return countdown;
-      }
-    static class WordyServant extends sendLobbyPOA
-    {
-        private ORB orb;
-
-        public void setORB(ORB orb_val) {
-            orb = orb_val;
-        }
-
-        @Override
-        public String sendTimer(lobby objref, String message) {
-            objref.time(Double.parseDouble(message));
-            return "10";
-        }
-
-        @Override
-        public String sendPlayerList(lobby objref, String message) {
-            objref.playerList(message);
-            return "SEND PLAYER LIST";
-        }
+    @Override
+    public double lobbyPlayerCount() {
+        return lobbyPlayers.size();
     }
+        public static class WordyCallback extends WordyCallbackPOA {
+            private final List<WordyCallback> callbacks = new ArrayList<>();
+            private ORB orb;
 
+            public void setORB(ORB orb_val) {
+                orb = orb_val;
+            }
+
+            @Override
+            public String sendGeneratedLetter(String letters) {
+                return letters;
+            }
+        }
 
 
 }

@@ -5,14 +5,13 @@ import javax.swing.*;
 import static Client_Java.Client.wordyImpl;
 
 public class GameUI extends javax.swing.JFrame {
-
     static String username;
     public GameUI(String username) {
         this.username = username;
         initComponents();
-        String letters = wordyImpl.generateLetters();
-        jTextArea1.append(letters);
-        playerListField.setText(username);
+
+        playerListField.append(wordyImpl.playerInGameList().replace(",", "\n").substring(1, wordyImpl.playerInGameList().length() - 1));
+        jTextArea1.append(wordyImpl.generateLetters());
     }
 
 

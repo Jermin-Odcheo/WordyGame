@@ -1,11 +1,5 @@
 package Client_Java;
 
-import Server_Java.WordyCallbackImpl;
-import Server_Java.corba.WordyCallbackHelper;
-
-import javax.swing.*;
-
-import static Client_Java.Client.wordyCallback;
 import static Client_Java.Client.wordyImpl;
 
 public class ClientUI extends javax.swing.JFrame {
