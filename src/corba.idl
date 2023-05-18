@@ -1,0 +1,27 @@
+module corba {
+   exception GameException {
+        string message;
+      };
+        interface WordyCallback {
+             void sendGeneratedLetter(in string letters);
+        };
+    interface wordy{
+        string login(in string username , in string password );
+        void exit(in string username);
+        boolean joinLobby(in string playerName) raises (GameException);
+        void timerServer();
+        double gettimer();
+        string getGeneratedLetter();
+        string playerInGameList();
+
+        void generateLetters();
+        void playWord(in string playerName, in string word) raises (GameException);
+        boolean status(in string playerName);
+        double lobbyPlayerCount();
+        void leaveGame(in string playerName) raises (GameException);
+    };
+
+
+
+};
+#pragma prefix "Client_Java"
