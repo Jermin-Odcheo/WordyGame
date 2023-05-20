@@ -3,6 +3,14 @@ package Client_Java;
 import static Client_Java.Client.wordyImpl;
 
 public class ClientUI extends javax.swing.JFrame {
+    private javax.swing.JLabel backgroundPane;
+    private javax.swing.JPanel backgroundPanel;
+    private javax.swing.JButton exitButton;
+    private javax.swing.JLayeredPane jLayeredPane2;
+    private javax.swing.JLabel logo;
+    private javax.swing.JButton leaderboardButton;
+    private javax.swing.JButton startGameButton;
+    private javax.swing.JLabel welcomeMessage;
     static String username;
     public ClientUI(String username) {
         this.username = username;
@@ -67,7 +75,7 @@ public class ClientUI extends javax.swing.JFrame {
 
         leaderboardButton.setFont(new java.awt.Font("Arial Rounded MT Bold", 1, 18)); // NOI18N
         leaderboardButton.setForeground(new java.awt.Color(238, 241, 255));
-        leaderboardButton.setText("LEADERBOARD");
+        leaderboardButton.setText("ACHIEVEMENTS");
         leaderboardButton.setBorder(null);
         leaderboardButton.setContentAreaFilled(false);
         leaderboardButton.addActionListener(new java.awt.event.ActionListener() {
@@ -175,14 +183,6 @@ public class ClientUI extends javax.swing.JFrame {
         });
     }
 
-    private javax.swing.JLabel backgroundPane;
-    private javax.swing.JPanel backgroundPanel;
-    private javax.swing.JButton exitButton;
-    private javax.swing.JLayeredPane jLayeredPane2;
-    private javax.swing.JLabel logo;
-    private javax.swing.JButton leaderboardButton;
-    private javax.swing.JButton startGameButton;
-    private javax.swing.JLabel welcomeMessage;
 
 }
 
