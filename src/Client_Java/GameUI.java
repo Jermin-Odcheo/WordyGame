@@ -12,6 +12,22 @@ import static Client_Java.Client.wordyCallback;
 import static Client_Java.Client.wordyImpl;
 
 public class GameUI extends javax.swing.JFrame {
+    private static javax.swing.JTextField inputField;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
+    private static javax.swing.JTextArea jTextArea1;
+    private javax.swing.JTextArea playerListField;
+    private javax.swing.JButton sendButton;
+    private javax.swing.JLabel timerField;
+    private javax.swing.JTextArea wordBoxField;
     static String username;
     public GameUI(String username) {
         this.username = username;
@@ -228,21 +244,5 @@ public class GameUI extends javax.swing.JFrame {
         });
     }
 
-    private static javax.swing.JTextField inputField;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
-    private javax.swing.JLabel jLabel7;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JScrollPane jScrollPane3;
-    private static javax.swing.JTextArea jTextArea1;
-    private javax.swing.JTextArea playerListField;
-    private javax.swing.JButton sendButton;
-    private javax.swing.JLabel timerField;
-    private javax.swing.JTextArea wordBoxField;
 }
 

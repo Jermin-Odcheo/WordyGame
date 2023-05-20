@@ -6,7 +6,19 @@ import javax.swing.*;
 import static Client_Java.Client.wordyImpl;
 
 public class ClientLoginUI extends javax.swing.JFrame {
-
+    private javax.swing.JButton loginButton;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JPasswordField password;
+    private javax.swing.JTextField userName;
     public ClientLoginUI() {
         initComponents();
     }
@@ -250,18 +262,5 @@ public class ClientLoginUI extends javax.swing.JFrame {
     }
 
 
-    private javax.swing.JButton loginButton;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel7;
-    private javax.swing.JLabel jLabel8;
-    private javax.swing.JLabel jLabel9;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel jPanel2;
-    private javax.swing.JPasswordField password;
-    private javax.swing.JTextField userName;
 
 }
