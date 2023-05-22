@@ -195,7 +195,7 @@ static String username;
                 boolean joined = wordyImpl.joinLobby(username);
                 if (joined) {
                     int countdown = 5;
-                    System.out.println(username + "Joined");
+                    System.out.println(username + " Joined");
                     while (countdown > 0) {
                         countdown--;
                         System.out.println(countdown);
@@ -205,27 +205,33 @@ static String username;
                     }
                 }
             }
-                    System.out.println("Players "+lobbyCount);
-                     while (time > 0) {
-                         lobbyCount = wordyImpl.lobbyPlayerCount();
-                        time--;
-                        if (lobbyCount >= 2) {
-                            System.out.println("Count Down " +time);
-                            jLabel3.setText("Starting Game: " + time);
-                            Thread.sleep(1000);
-                        }else {
-                            JOptionPane.showMessageDialog(null,"Not Enough Player!");
-                        }
-                    }
-                if (time == 0){
-                gameStartNotification();
-                }
-                } catch(Exception e){
-                    System.err.println("Error joining the lobby: " + e);
-                    e.printStackTrace(System.out);
-                }
 
+            System.out.println("Players " + lobbyCount);
+            while (time > 0) {
+                lobbyCount = wordyImpl.lobbyPlayerCount();
+                time--;
+                if (lobbyCount >= 2) {
+                    System.out.println("Count Down " + time);
+                    jLabel3.setText("Starting Game: " + time);
+                    Thread.sleep(1000);
+                } else {
+                    int result = JOptionPane.showConfirmDialog(null, "Not Enough Players!\nGo back to ClientUI?", "Error", JOptionPane.OK_CANCEL_OPTION);
+                    if (result == JOptionPane.OK_OPTION) {
+                        dispose();
+                        ClientUI.startClientUI(username);
+                    }
+                    break;
+                }
+            }
+
+            if (time == 0) {
+                gameStartNotification();
+            }
+        } catch (Exception e) {
+            System.err.println("Error joining the lobby: " + e);
+            e.printStackTrace(System.out);
         }
+    }
 
 
 
