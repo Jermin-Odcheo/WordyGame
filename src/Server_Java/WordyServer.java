@@ -18,6 +18,7 @@ public class WordyServer extends wordyPOA {
     private static final List<String> lobbyPlayers = new ArrayList<>();
     private final ArrayList<String> playersInGame = new ArrayList<>();
     private final Map<String, String> clientWords = new HashMap<>();
+    private final Map<String, Integer> clientWinCount = new HashMap<>();
     private int countdown = 10;
     private boolean isGameStarted;
     private String letters;
@@ -89,8 +90,10 @@ public class WordyServer extends wordyPOA {
             System.out.println("Lobby is Full");
             return false;
         }
-        lobbyPlayers.add(playerName);
-        System.out.println("Player " + playerName + " joined the lobby.");
+        if (!lobbyPlayers.contains(playerName)) {
+            lobbyPlayers.add(playerName);
+            System.out.println("Player " + playerName + " joined the lobby.");
+        }
         if (lobbyPlayers.size() >=2 && !countdownStarted) {
             timerServer();
             countdownStarted = true;
@@ -135,7 +138,6 @@ public class WordyServer extends wordyPOA {
 
     }
 
-    private Server_Java.WordyServer.WordyCallback[] clients;
 
 
     private void startGame() {
@@ -230,7 +232,7 @@ public class WordyServer extends wordyPOA {
         }
     }
 
-    private void startNewRound() {
+    public void startNewRound() {
         letters = generateRandomLetters();
         rounds.add(letters);
         System.out.println("Starting new round with letters: " + letters);

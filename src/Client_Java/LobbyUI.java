@@ -17,7 +17,7 @@ static String username;
     }
 
     private void initComponents() {
-        jPanel1 = new javax.swing.JPanel();
+
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
@@ -34,9 +34,7 @@ static String username;
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(1270, 750));
         getContentPane().setLayout(null);
-        jLayeredPane1.setBackground(new java.awt.Color(204, 153, 255));
-        jLayeredPane1.setMinimumSize(new java.awt.Dimension(1125, 800));
-        jLayeredPane1.setPreferredSize(new java.awt.Dimension(1125, 800));
+
         jLabel1.setForeground(new java.awt.Color(255, 236, 238));
         jLabel1.setIcon(new javax.swing.ImageIcon("src/Server_Java/WORD.png")); // NOI18N
         getContentPane().add(jLabel1);
@@ -44,13 +42,13 @@ static String username;
 
         jLabel2.setFont(new java.awt.Font("Arial Rounded MT Bold", 1, 36)); // NOI18N
         jLabel2.setForeground(new java.awt.Color(255, 236, 238));
-        jLabel2.setText("WAITING FOR PLAYERS");
+        jLabel2.setText("WAITING FOR PLAYERS TO JOIN");
         getContentPane().add(jLabel2);
         jLabel2.setBounds(342, 30, 609, 43);
 
         jLabel3.setFont(new java.awt.Font("Arial Rounded MT Bold", 1, 18)); // NOI18N
         jLabel3.setForeground(new java.awt.Color(255, 236, 238));
-        jLabel3.setText("WORDY GAME LOBBY");
+        jLabel3.setText("WORDY LOBBY #2");
         getContentPane().add(jLabel3);
         jLabel3.setBounds(520, 90, 215, 21);
 
@@ -98,6 +96,8 @@ static String username;
         });
         getContentPane().add(exitLobbyButton);
         exitLobbyButton.setBounds(560, 630, 160, 50);
+
+        jLabel7.setIcon(new javax.swing.ImageIcon("src/Client_Java/17250835.png")); // NOI18N
 
         jLayeredPane1.setLayer(jLabel7, javax.swing.JLayeredPane.DEFAULT_LAYER);
 
@@ -272,7 +272,7 @@ static String username;
         });
 
     }
-    private javax.swing.JPanel jPanel1;
+
     private javax.swing.JButton exitLobbyButton;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;

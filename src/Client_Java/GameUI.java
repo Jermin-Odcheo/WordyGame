@@ -1,5 +1,6 @@
 package Client_Java;
 
+import Server_Java.corba.GameException;
 import Server_Java.corba.InvalidWord;
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
@@ -75,7 +76,7 @@ public class GameUI extends javax.swing.JFrame{
 
     private void initComponents() {
 
-        jPanel1 = new javax.swing.JPanel();
+
         jScrollPane1 = new javax.swing.JScrollPane();
         playerListField = new javax.swing.JTextArea();
         jScrollPane2 = new javax.swing.JScrollPane();
@@ -91,15 +92,11 @@ public class GameUI extends javax.swing.JFrame{
         jLabel6 = new javax.swing.JLabel();
         timerField = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
+        jLabel7 = new javax.swing.JLabel();
         jLabelcheck = new JLabel();
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setMinimumSize(new java.awt.Dimension(1125, 800));
-        setPreferredSize(new java.awt.Dimension(1125, 800));
-        getContentPane().setLayout(null);
 
-        jPanel1.setBackground(new java.awt.Color(204, 153, 255));
-        jPanel1.setMinimumSize(new java.awt.Dimension(1125, 800));
-        jPanel1.setPreferredSize(new java.awt.Dimension(1125, 800));
+        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        getContentPane().setLayout(null);
 
         playerListField.setBackground(new java.awt.Color(212, 250, 252));
         playerListField.setColumns(20);
@@ -109,6 +106,9 @@ public class GameUI extends javax.swing.JFrame{
         playerListField.setBorder(javax.swing.BorderFactory.createMatteBorder(2, 2, 2, 2, new java.awt.Color(0, 153, 255)));
         jScrollPane1.setViewportView(playerListField);
 
+        getContentPane().add(jScrollPane1);
+        jScrollPane1.setBounds(790, 130, 266, 300);
+
         wordBoxField.setBackground(new java.awt.Color(227, 223, 253));
         wordBoxField.setColumns(20);
         wordBoxField.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
@@ -116,6 +116,9 @@ public class GameUI extends javax.swing.JFrame{
         wordBoxField.setRows(5);
         wordBoxField.setBorder(javax.swing.BorderFactory.createMatteBorder(2, 2, 2, 2, new java.awt.Color(255, 102, 255)));
         jScrollPane2.setViewportView(wordBoxField);
+
+        getContentPane().add(jScrollPane2);
+        jScrollPane2.setBounds(22, 130, 716, 310);
 
         jTextArea1.setBackground(new java.awt.Color(255, 204, 255));
         jTextArea1.setColumns(20);
@@ -126,9 +129,14 @@ public class GameUI extends javax.swing.JFrame{
         jTextArea1.setBorder(javax.swing.BorderFactory.createMatteBorder(3, 3, 3, 3, new java.awt.Color(255, 51, 255)));
         jScrollPane3.setViewportView(jTextArea1);
 
+        getContentPane().add(jScrollPane3);
+        jScrollPane3.setBounds(790, 480, 270, 240);
+
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 36)); // NOI18N
         jLabel1.setForeground(new java.awt.Color(255, 255, 255));
         jLabel1.setText("WordyGame Beta v3.32.12");
+        getContentPane().add(jLabel1);
+        jLabel1.setBounds(22, 15, 490, 48);
 
         inputField.setBackground(new java.awt.Color(204, 204, 255));
         inputField.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
@@ -139,10 +147,14 @@ public class GameUI extends javax.swing.JFrame{
                 inputFieldActionPerformed(evt);
             }
         });
+        getContentPane().add(inputField);
+        inputField.setBounds(30, 510, 530, 50);
 
         jLabel2.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         jLabel2.setForeground(new java.awt.Color(255, 255, 255));
         jLabel2.setText("Word Box");
+        getContentPane().add(jLabel2);
+        jLabel2.setBounds(20, 100, 117, 25);
 
         sendButton.setBackground(new java.awt.Color(255, 51, 255));
         sendButton.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
@@ -154,16 +166,31 @@ public class GameUI extends javax.swing.JFrame{
                 sendButtonActionPerformed(evt);
             }
         });
+        getContentPane().add(sendButton);
+        sendButton.setBounds(220, 590, 160, 50);
+
+        jLabelcheck.setFont(new java.awt.Font("Segoe UI", Font.BOLD, 18)); // NOI18N
+        jLabelcheck.setForeground(new java.awt.Color(255, 255, 255));
+        jLabelcheck.setText(" ");
+        getContentPane().add(jLabelcheck);
+        jLabelcheck.setBounds(190, 630, 250, 100);
+
 
         jLabel4.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         jLabel4.setForeground(new java.awt.Color(255, 255, 255));
         jLabel4.setText("Your Letters");
+        getContentPane().add(jLabel4);
+        jLabel4.setBounds(790, 450, 117, 25);
 
         jLabel5.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         jLabel5.setForeground(new java.awt.Color(255, 255, 255));
         jLabel5.setText("Player List");
+        getContentPane().add(jLabel5);
+        jLabel5.setBounds(790, 100, 117, 25);
 
         jLabel6.setIcon(new javax.swing.ImageIcon("src/Server_Java/WORD.png")); // NOI18N
+        getContentPane().add(jLabel6);
+        jLabel6.setBounds(400, 440, 410, 310);
 
         timerField.setFont(new java.awt.Font("Segoe UI", 1, 36)); // NOI18N
         timerField.setForeground(new java.awt.Color(255, 255, 255));
@@ -171,98 +198,18 @@ public class GameUI extends javax.swing.JFrame{
         getContentPane().add(timerField);
         timerField.setBounds(900, 30, 70, 50);
 
-
         jLabel3.setIcon(new javax.swing.ImageIcon("src/Client_Java/WORD (5).png")); // NOI18N
+        getContentPane().add(jLabel3);
+        jLabel3.setBounds(710, -20, 380, 150);
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-                jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGap(0, 1125, Short.MAX_VALUE)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addGroup(jPanel1Layout.createSequentialGroup()
-                                        .addGap(0, 0, Short.MAX_VALUE)
-                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                                .addGroup(jPanel1Layout.createSequentialGroup()
-                                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                                                .addGroup(jPanel1Layout.createSequentialGroup()
-                                                                        .addGap(2, 2, 2)
-                                                                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 490, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                                                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                                        .addGap(198, 198, 198)
-                                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                                                .addGroup(jPanel1Layout.createSequentialGroup()
-                                                                        .addGap(290, 290, 290)
-                                                                        .addComponent(timerField, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                                                .addGroup(jPanel1Layout.createSequentialGroup()
-                                                                        .addGap(80, 80, 80)
-                                                                        .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                                                .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 380, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                                .addGroup(jPanel1Layout.createSequentialGroup()
-                                                        .addGap(2, 2, 2)
-                                                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 716, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                        .addGap(52, 52, 52)
-                                                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                                .addGroup(jPanel1Layout.createSequentialGroup()
-                                                        .addGap(10, 10, 10)
-                                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                                                .addGroup(jPanel1Layout.createSequentialGroup()
-                                                                        .addGap(190, 190, 190)
-                                                                        .addComponent(sendButton, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                                        .addGap(20, 20, 20)
-                                                                        .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 410, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                                                .addGroup(jPanel1Layout.createSequentialGroup()
-                                                                        .addGap(760, 760, 760)
-                                                                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 270, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                                                .addGroup(jPanel1Layout.createSequentialGroup()
-                                                                        .addGap(760, 760, 760)
-                                                                        .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                                                .addComponent(inputField, javax.swing.GroupLayout.PREFERRED_SIZE, 530, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                                        .addGap(0, 0, Short.MAX_VALUE)))
-        );
-        jPanel1Layout.setVerticalGroup(
-                jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGap(0, 800, Short.MAX_VALUE)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addGroup(jPanel1Layout.createSequentialGroup()
-                                        .addGap(0, 0, Short.MAX_VALUE)
-                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                                .addGroup(jPanel1Layout.createSequentialGroup()
-                                                        .addGap(35, 35, 35)
-                                                        .addComponent(jLabel1)
-                                                        .addGap(37, 37, 37)
-                                                        .addComponent(jLabel2))
-                                                .addGroup(jPanel1Layout.createSequentialGroup()
-                                                        .addGap(50, 50, 50)
-                                                        .addComponent(timerField, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                        .addGap(20, 20, 20)
-                                                        .addComponent(jLabel5))
-                                                .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 310, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                                .addGroup(jPanel1Layout.createSequentialGroup()
-                                                        .addGap(150, 150, 150)
-                                                        .addComponent(sendButton, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                                .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 310, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                .addGroup(jPanel1Layout.createSequentialGroup()
-                                                        .addGap(40, 40, 40)
-                                                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 240, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                                .addGroup(jPanel1Layout.createSequentialGroup()
-                                                        .addGap(10, 10, 10)
-                                                        .addComponent(jLabel4))
-                                                .addGroup(jPanel1Layout.createSequentialGroup()
-                                                        .addGap(70, 70, 70)
-                                                        .addComponent(inputField, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                        .addGap(0, 0, Short.MAX_VALUE)))
-        );
+        jLabel7.setIcon(new javax.swing.ImageIcon("src/Client_Java/17250835.png")); // NOI18N
+        getContentPane().add(jLabel7);
+        jLabel7.setBounds(0, 0, 1110, 770);
 
-        getContentPane().add(jPanel1);
-        jPanel1.setBounds(0, 0, 1110, 776);
+        setBounds(0, 0, 1125, 776);
 
-        setBounds(0, 0, 1125, 810);
     }
+
     private void inputFieldActionPerformed(java.awt.event.ActionEvent evt) {
         // TODO add your handling code here:
     }
@@ -340,7 +287,6 @@ public class GameUI extends javax.swing.JFrame{
     private javax.swing.JTextArea playerListField;
     private javax.swing.JButton sendButton;
     private javax.swing.JTextArea wordBoxField;
-    private javax.swing.JPanel jPanel1;
     private void startCountdownTimer() {
         Timer timer = new Timer(1000, new ActionListener() {
             int remainingSeconds = countdownSeconds;
@@ -351,9 +297,25 @@ public class GameUI extends javax.swing.JFrame{
                 System.out.println(remainingSeconds);
                 if (remainingSeconds == 0) {
                     // Timer has reached 0, perform any necessary actions here
+
                     JOptionPane.showMessageDialog(null,wordyImpl.getWinner());
+                    try {
+                        Thread.sleep(5000);
+                    } catch (InterruptedException ex) {
+                        throw new RuntimeException(ex);
+                    }
                     // Stop the timer
                     ((Timer) e.getSource()).stop();
+
+                    try {
+                        wordyImpl.joinLobby(username);
+                    } catch (GameException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                    jTextArea1.setText(wordyImpl.getGeneratedLetter());
+                    System.out.println(wordyImpl.getGeneratedLetter());
+                    wordBoxField.setText(" ");
+                    startCountdownTimer();
                 }
 
                 remainingSeconds--;

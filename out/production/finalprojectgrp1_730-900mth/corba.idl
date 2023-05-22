@@ -20,7 +20,7 @@ module corba {
         string getValidWordFromClients();
         string getWinner();
         void generateLetters();
-
+        void startNewRound();
 
         boolean status(in string playerName);
         double lobbyPlayerCount();
