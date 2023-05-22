@@ -23,7 +23,7 @@ public class ClientUI extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        backgroundPanel.setBackground(new java.awt.Color(33, 42, 62));
+        backgroundPanel.setBackground(new java.awt.Color(204, 153, 255));
 
         startGameButton.setFont(new java.awt.Font("Arial Rounded MT Bold", 1, 36)); // NOI18N
         startGameButton.setForeground(new java.awt.Color(238, 241, 255));

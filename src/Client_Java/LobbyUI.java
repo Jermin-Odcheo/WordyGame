@@ -96,10 +96,8 @@ static String username;
         });
         getContentPane().add(exitLobbyButton);
         exitLobbyButton.setBounds(560, 630, 160, 50);
+        jLayeredPane1.setBackground(new java.awt.Color(204, 153, 255));;
 
-        jLabel7.setIcon(new javax.swing.ImageIcon("src/Client_Java/17250835.png")); // NOI18N
-
-        jLayeredPane1.setLayer(jLabel7, javax.swing.JLayeredPane.DEFAULT_LAYER);
 
         javax.swing.GroupLayout jLayeredPane1Layout = new javax.swing.GroupLayout(jLayeredPane1);
         jLayeredPane1.setLayout(jLayeredPane1Layout);
