@@ -12,12 +12,15 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import static Client_Java.Client.wordyImpl;
 
-public class GameUI extends javax.swing.JFrame implements Runnable{
+public class GameUI extends javax.swing.JFrame{
     static String username;
+    static JLabel timerField;
+    static int countdownSeconds = 30;
     public GameUI(String username) {
         this.username = username;
         initComponents();
         addListeners();
+        startCountdownTimer();
     }
 
     public void addListeners()
@@ -32,6 +35,8 @@ public class GameUI extends javax.swing.JFrame implements Runnable{
                 playerListField.append(wordyImpl.playerInGameList().replace(",", "\n").substring(1, wordyImpl.playerInGameList().length() - 1));
                 jTextArea1.append(wordyImpl.getGeneratedLetter());
                 System.out.println(wordyImpl.getGeneratedLetter());
+
+
             }
 
             @Override
@@ -41,7 +46,7 @@ public class GameUI extends javax.swing.JFrame implements Runnable{
 
             @Override
             public void windowClosed(WindowEvent e) {
-                LobbyUI.startLobby(username);
+
             }
 
             @Override
@@ -188,7 +193,7 @@ public class GameUI extends javax.swing.JFrame implements Runnable{
 
         timerField.setFont(new java.awt.Font("Segoe UI", 1, 36)); // NOI18N
         timerField.setForeground(new java.awt.Color(255, 255, 255));
-
+        timerField.setText("");
         getContentPane().add(timerField);
         timerField.setBounds(900, 30, 70, 50);
 
@@ -280,23 +285,18 @@ public class GameUI extends javax.swing.JFrame implements Runnable{
     private static javax.swing.JTextArea jTextArea1;
     private javax.swing.JTextArea playerListField;
     private javax.swing.JButton sendButton;
-    private javax.swing.JLabel timerField;
     private javax.swing.JTextArea wordBoxField;
-
-    @Override
-    public void run() {
-        int countdownSeconds = 30;
-
+    private void startCountdownTimer() {
         Timer timer = new Timer(1000, new ActionListener() {
             int remainingSeconds = countdownSeconds;
 
             @Override
             public void actionPerformed(ActionEvent e) {
                 timerField.setText(String.valueOf(remainingSeconds));
-
+                System.out.println(remainingSeconds);
                 if (remainingSeconds == 0) {
                     // Timer has reached 0, perform any necessary actions here
-
+                    JOptionPane.showMessageDialog(null,wordyImpl.getWinner());
                     // Stop the timer
                     ((Timer) e.getSource()).stop();
                 }

@@ -17,6 +17,7 @@ public class WordyServer extends wordyPOA {
     private final List<String> rounds = new ArrayList<>();
     private static final List<String> lobbyPlayers = new ArrayList<>();
     private final ArrayList<String> playersInGame = new ArrayList<>();
+    private final Map<String, String> clientWords = new HashMap<>();
     private int countdown = 10;
     private boolean isGameStarted;
     private String letters;
@@ -157,7 +158,7 @@ public class WordyServer extends wordyPOA {
         }
         lobbyPlayers.clear();
     }
-    private final Map<String, String> clientWords = new HashMap<>();
+
     // Play Word method
     public void playWord(String playerName, String word) throws InvalidWord {
 
@@ -170,7 +171,7 @@ public class WordyServer extends wordyPOA {
                 throw new InvalidWord("Word Not Valid");
         }
         words.add(word);
-        clientWords.put(word,playerName);
+        clientWords.put(playerName,word);
         System.out.println("Client " + playerName + " submitted word: " + word);
     }
 
@@ -192,7 +193,7 @@ public class WordyServer extends wordyPOA {
                 break;
             }
         }
-        return winner;
+        return winner + " won with word: " + longestWord;
     }
     @Override
     public String getValidWordFromClients() {
