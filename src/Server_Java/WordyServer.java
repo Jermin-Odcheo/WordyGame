@@ -189,14 +189,29 @@ public class WordyServer extends wordyPOA {
     public String getWinner() {
         String longestWord = findLongestWord();
         String winner = "";
+        int winCount = 0;
+        for (Map.Entry<String, Integer> entry : clientWinCount.entrySet()) {
+            String playerName = entry.getKey();
+            winCount = entry.getValue();
+            int maxWinCount = 3;
+            if (winCount > maxWinCount) {
+                winner = playerName;
+                return winner + " WON THE GAME!";
+            }
+        }
         for (Map.Entry<String, String> entry : clientWords.entrySet()) {
             if (entry.getValue().equals(longestWord)) {
                 winner = entry.getKey();
-                break;
+                clientWinCount.put(winner, clientWinCount.getOrDefault(winner, 0) + 1);
+                return winner + " won with word: " + longestWord;
             }
         }
-        return winner + " won with word: " + longestWord;
+
+
+
+        return winner + "WON!";
     }
+
     @Override
     public String getValidWordFromClients() {
         return String.valueOf(clientWords);
@@ -233,7 +248,16 @@ public class WordyServer extends wordyPOA {
     }
 
     public void startNewRound() {
-        letters = generateRandomLetters();
+        if (lobbyPlayers.size() < 2) {
+            System.out.println("Cannot start game. Not enough players.");
+            lobbyPlayers.clear();
+            return;
+        }
+        System.out.println("Starting game with players: " + lobbyPlayers.toString());
+        //Generate 17 random letters with 5-7 vowels
+        generateRandomLetters();
+        System.out.println("GAME STARTING WITH: " + letters);
+        lobbyPlayers.clear();
         rounds.add(letters);
         System.out.println("Starting new round with letters: " + letters);
     }

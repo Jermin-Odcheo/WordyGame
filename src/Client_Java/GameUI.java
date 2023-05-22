@@ -292,6 +292,9 @@ public class GameUI extends javax.swing.JFrame{
 
         getContentPane().add(jPanel1);
         jPanel1.setBounds(0, 0, 1110, 770);
+        jLabel7.setIcon(new javax.swing.ImageIcon("src/Client_Java/17250835.png")); // NOI18N
+        getContentPane().add(jLabel7);
+        jLabel7.setBounds(0, 0, 1110, 770);
 
         setBounds(0, 0, 1125, 776);
     }
@@ -385,7 +388,11 @@ public class GameUI extends javax.swing.JFrame{
                 System.out.println(remainingSeconds);
                 if (remainingSeconds == 0) {
                     // Timer has reached 0, perform any necessary actions here
-
+                    try {
+                        wordyImpl.joinLobby(username);
+                    } catch (GameException ex) {
+                        throw new RuntimeException(ex);
+                    }
                     JOptionPane.showMessageDialog(null,wordyImpl.getWinner());
                     try {
                         Thread.sleep(5000);
@@ -395,11 +402,7 @@ public class GameUI extends javax.swing.JFrame{
                     // Stop the timer
                     ((Timer) e.getSource()).stop();
 
-                    try {
-                        wordyImpl.joinLobby(username);
-                    } catch (GameException ex) {
-                        throw new RuntimeException(ex);
-                    }
+                    wordyImpl.startNewRound();
                     jTextArea1.setText(wordyImpl.getGeneratedLetter());
                     System.out.println(wordyImpl.getGeneratedLetter());
                     wordBoxField.setText(" ");
