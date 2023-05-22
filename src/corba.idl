@@ -2,6 +2,9 @@ module corba {
    exception GameException {
         string message;
       };
+      exception InvalidWord {
+        string message;
+      };
         interface WordyCallback {
              void sendGeneratedLetter(in string letters);
         };
@@ -13,9 +16,12 @@ module corba {
         double gettimer();
         string getGeneratedLetter();
         string playerInGameList();
-
+        void playWord(in string playerName, in string word) raises (InvalidWord);
+        string getValidWordFromClients();
+        string getWinner();
         void generateLetters();
-        void playWord(in string playerName, in string word) raises (GameException);
+
+
         boolean status(in string playerName);
         double lobbyPlayerCount();
         void leaveGame(in string playerName) raises (GameException);

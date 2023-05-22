@@ -1,43 +1,23 @@
 package Client_Java;
 
-import Server_Java.WordyServer;
-import Server_Java.corba.WordyCallback;
-
+import Server_Java.corba.InvalidWord;
 import javax.swing.*;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
 
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-
-import static Client_Java.Client.wordyCallback;
 import static Client_Java.Client.wordyImpl;
 
-public class GameUI extends javax.swing.JFrame {
-    private static javax.swing.JTextField inputField;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
-    private javax.swing.JLabel jLabel7;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JScrollPane jScrollPane3;
-    private static javax.swing.JTextArea jTextArea1;
-    private javax.swing.JTextArea playerListField;
-    private javax.swing.JButton sendButton;
-    private javax.swing.JLabel timerField;
-    private javax.swing.JTextArea wordBoxField;
+public class GameUI extends javax.swing.JFrame implements Runnable{
     static String username;
     public GameUI(String username) {
         this.username = username;
         initComponents();
-        System.out.println(wordyImpl.playerInGameList());
-        playerListField.append(wordyImpl.playerInGameList().replace(",", "\n").substring(1, wordyImpl.playerInGameList().length() - 1));
-        jTextArea1.append(wordyImpl.getGeneratedLetter());
-        System.out.println(wordyImpl.getGeneratedLetter());
-
-
+        addListeners();
     }
 
     public void addListeners()
@@ -48,8 +28,10 @@ public class GameUI extends javax.swing.JFrame {
             @Override
             public void windowOpened(WindowEvent e)
             {
-
-                /* ... */
+                System.out.println(wordyImpl.playerInGameList());
+                playerListField.append(wordyImpl.playerInGameList().replace(",", "\n").substring(1, wordyImpl.playerInGameList().length() - 1));
+                jTextArea1.append(wordyImpl.getGeneratedLetter());
+                System.out.println(wordyImpl.getGeneratedLetter());
             }
 
             @Override
@@ -85,6 +67,7 @@ public class GameUI extends javax.swing.JFrame {
             /* Other methods of WindowListener ... */
         });
     }
+
     private void initComponents() {
 
 
@@ -104,6 +87,7 @@ public class GameUI extends javax.swing.JFrame {
         timerField = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
+        jLabelcheck = new JLabel();
 
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         getContentPane().setLayout(null);
@@ -179,6 +163,13 @@ public class GameUI extends javax.swing.JFrame {
         getContentPane().add(sendButton);
         sendButton.setBounds(220, 590, 160, 50);
 
+        jLabelcheck.setFont(new java.awt.Font("Segoe UI", Font.BOLD, 18)); // NOI18N
+        jLabelcheck.setForeground(new java.awt.Color(255, 255, 255));
+        jLabelcheck.setText(" ");
+        getContentPane().add(jLabelcheck);
+        jLabelcheck.setBounds(190, 630, 250, 100);
+
+
         jLabel4.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         jLabel4.setForeground(new java.awt.Color(255, 255, 255));
         jLabel4.setText("Your Letters");
@@ -197,8 +188,9 @@ public class GameUI extends javax.swing.JFrame {
 
         timerField.setFont(new java.awt.Font("Segoe UI", 1, 36)); // NOI18N
         timerField.setForeground(new java.awt.Color(255, 255, 255));
+
         getContentPane().add(timerField);
-        timerField.setBounds(1000, 30, 70, 50);
+        timerField.setBounds(900, 30, 70, 50);
 
         jLabel3.setIcon(new javax.swing.ImageIcon("src/Client_Java/WORD (5).png")); // NOI18N
         getContentPane().add(jLabel3);
@@ -209,6 +201,7 @@ public class GameUI extends javax.swing.JFrame {
         jLabel7.setBounds(0, 0, 1110, 770);
 
         setBounds(0, 0, 1125, 776);
+
     }
 
     private void inputFieldActionPerformed(java.awt.event.ActionEvent evt) {
@@ -217,9 +210,37 @@ public class GameUI extends javax.swing.JFrame {
 
     private void sendButtonActionPerformed(java.awt.event.ActionEvent evt) {
         try {
-        wordyImpl.playWord(username,inputField.getText());}
-        catch (Exception e){
-            System.out.println(e.getMessage());
+            String word = inputField.getText();
+            if (word.length() < 5) {
+                jLabelcheck.setText("WORD IS TOO SHORT!");
+                Timer timer = new Timer(5000, new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        jLabelcheck.setText(" ");
+                    }
+                });
+                timer.start();
+            } else {
+                wordBoxField.append("You Played The Word: " + word + "\n");
+                wordyImpl.playWord(username, word);
+            }
+        } catch (InvalidWord e) {
+            try {
+            Document document = wordBoxField.getDocument();
+            int length = document.getLength();
+            int lastNewlineIndex = 0;
+
+                lastNewlineIndex = wordBoxField.getLineOfOffset(length - 1);
+
+            int startOffset = wordBoxField.getLineStartOffset(lastNewlineIndex);
+            int endOffset = wordBoxField.getLineEndOffset(lastNewlineIndex);
+
+            document.remove(startOffset, endOffset - startOffset);
+            jLabelcheck.setText("Invalid Word!");
+            System.out.println("Exception occurred on the server: " + e.getMessage());
+            } catch (BadLocationException ex) {
+                throw new RuntimeException(ex);
+            }
         }
     }
 
@@ -244,5 +265,47 @@ public class GameUI extends javax.swing.JFrame {
         });
     }
 
+    private static javax.swing.JTextField inputField;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabelcheck;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
+    private static javax.swing.JTextArea jTextArea1;
+    private javax.swing.JTextArea playerListField;
+    private javax.swing.JButton sendButton;
+    private javax.swing.JLabel timerField;
+    private javax.swing.JTextArea wordBoxField;
+
+    @Override
+    public void run() {
+        int countdownSeconds = 30;
+
+        Timer timer = new Timer(1000, new ActionListener() {
+            int remainingSeconds = countdownSeconds;
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                timerField.setText(String.valueOf(remainingSeconds));
+
+                if (remainingSeconds == 0) {
+                    // Timer has reached 0, perform any necessary actions here
+
+                    // Stop the timer
+                    ((Timer) e.getSource()).stop();
+                }
+
+                remainingSeconds--;
+            }
+        });
+
+        timer.start();
+    }
 }
 

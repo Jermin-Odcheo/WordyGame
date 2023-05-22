@@ -3,10 +3,7 @@ package Client_Java;
 import javax.swing.*;
 
 public class LeaderboardUI extends javax.swing.JFrame {
-    private javax.swing.JPanel backgroundPanel;
-    private javax.swing.JLabel leaderboardLogo;
-    private javax.swing.JButton longestWordsButton;
-    private javax.swing.JButton topWinsButton;
+
     public LeaderboardUI() {
         initComponents();
     }
@@ -30,6 +27,7 @@ public class LeaderboardUI extends javax.swing.JFrame {
         longestWordsButton.setFont(new java.awt.Font("Arial Rounded MT Bold", 1, 18)); // NOI18N
         longestWordsButton.setForeground(new java.awt.Color(241, 246, 249));
         longestWordsButton.setText("LONGEST WORDS");
+        //longestWordsButton.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, java.awt.Color.lightGray, null));
         longestWordsButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 longestWordsButtonActionPerformed(evt);
@@ -40,7 +38,7 @@ public class LeaderboardUI extends javax.swing.JFrame {
         topWinsButton.setFont(new java.awt.Font("Arial Rounded MT Bold", 1, 18)); // NOI18N
         topWinsButton.setForeground(new java.awt.Color(241, 246, 249));
         topWinsButton.setText("TOP WINS");
-
+        //topWinsButton.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, java.awt.Color.lightGray, null));
         topWinsButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 topWinsButtonActionPerformed(evt);
@@ -124,4 +122,8 @@ public class LeaderboardUI extends javax.swing.JFrame {
         });
     }
 
+    private javax.swing.JPanel backgroundPanel;
+    private javax.swing.JLabel leaderboardLogo;
+    private javax.swing.JButton longestWordsButton;
+    private javax.swing.JButton topWinsButton;
 }

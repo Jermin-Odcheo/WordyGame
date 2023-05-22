@@ -157,16 +157,62 @@ public class WordyServer extends wordyPOA {
         }
         lobbyPlayers.clear();
     }
-
+    private final Map<String, String> clientWords = new HashMap<>();
     // Play Word method
-    public void playWord(String playerName, String word) throws GameException {
-        // check if word can be formed from letters
-        for (char c : word.toCharArray()) {
-            if (letters.indexOf(c) == -1) {
-                throw new GameException("Word cannot be formed from letters.");
+    public void playWord(String playerName, String word) throws InvalidWord {
+
+        if (!canFormWord(word)) {
+            System.out.println("Cant be formed");
+                throw new InvalidWord("Word Cannot Be Formed!");
+        }
+        if (!isValidWord(word)) {
+            System.out.println("Not Valid");
+                throw new InvalidWord("Word Not Valid");
+        }
+        words.add(word);
+        clientWords.put(word,playerName);
+        System.out.println("Client " + playerName + " submitted word: " + word);
+    }
+
+    public String findLongestWord() {
+        String longestWord = "";
+        for (String word : clientWords.values()) {
+            if (word.length() > longestWord.length()) {
+                longestWord = word;
             }
         }
-        System.out.println(playerName + " played the word: " + word);
+        return longestWord;
+    }
+    public String getWinner() {
+        String longestWord = findLongestWord();
+        String winner = "";
+        for (Map.Entry<String, String> entry : clientWords.entrySet()) {
+            if (entry.getValue().equals(longestWord)) {
+                winner = entry.getKey();
+                break;
+            }
+        }
+        return winner;
+    }
+    @Override
+    public String getValidWordFromClients() {
+        return String.valueOf(clientWords);
+    }
+
+    private boolean canFormWord(String word){
+        word = word.toLowerCase();
+        letters = letters.toLowerCase();
+        Map<Character, Integer> letterCount = new HashMap<>();
+        for (char c : letters.toCharArray()) {
+            letterCount.put(c, letterCount.getOrDefault(c, 0) + 1);
+        }
+        for (char c : word.toCharArray()) {
+            if (!letterCount.containsKey(c) || letterCount.get(c) == 0) {
+                return false;
+            }
+            letterCount.put(c, letterCount.get(c) - 1);
+        }
+        return true;
     }
 
     private boolean isWordValidForRound(String word) {
@@ -230,7 +276,6 @@ public class WordyServer extends wordyPOA {
         } catch (IOException e) {
             System.err.println("Failed to load dictionary: " + e.getMessage());
         }
-
         return words.contains(word.toUpperCase());
     }
 
