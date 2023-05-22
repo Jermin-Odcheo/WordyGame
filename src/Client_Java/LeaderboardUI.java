@@ -24,7 +24,7 @@ public class LeaderboardUI extends javax.swing.JFrame {
 
         leaderboardLogo.setFont(new java.awt.Font("Arial Rounded MT Bold", 1, 24)); // NOI18N
         leaderboardLogo.setForeground(new java.awt.Color(255, 255, 255));
-        leaderboardLogo.setText("ACHIEVEMENTS");
+        leaderboardLogo.setText("LEADERBOARD");
 
         longestWordsButton.setBackground(new java.awt.Color(57, 72, 103));
         longestWordsButton.setFont(new java.awt.Font("Arial Rounded MT Bold", 1, 18)); // NOI18N

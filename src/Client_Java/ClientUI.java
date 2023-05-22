@@ -54,7 +54,7 @@ public class ClientUI extends javax.swing.JFrame {
         jLayeredPane2.setForeground(new java.awt.Color(238, 241, 255));
 
         backgroundPane.setIcon(new javax.swing.ImageIcon("src/Client_Java/17250835.png")); // NOI18N
-        backgroundPane.setText("jLabel2");
+        backgroundPane.setText("");
 
         jLayeredPane2.setLayer(backgroundPane, javax.swing.JLayeredPane.DEFAULT_LAYER);
 
@@ -75,7 +75,7 @@ public class ClientUI extends javax.swing.JFrame {
 
         leaderboardButton.setFont(new java.awt.Font("Arial Rounded MT Bold", 1, 18)); // NOI18N
         leaderboardButton.setForeground(new java.awt.Color(238, 241, 255));
-        leaderboardButton.setText("ACHIEVEMENTS");
+        leaderboardButton.setText("LEADERBOARD");
         leaderboardButton.setBorder(null);
         leaderboardButton.setContentAreaFilled(false);
         leaderboardButton.addActionListener(new java.awt.event.ActionListener() {
