@@ -41,7 +41,7 @@ public class GameUI extends javax.swing.JFrame implements Runnable{
 
             @Override
             public void windowClosed(WindowEvent e) {
-
+                LobbyUI.startLobby(username);
             }
 
             @Override
