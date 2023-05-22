@@ -59,9 +59,9 @@ public class ClientUI extends javax.swing.JFrame {
         welcomeMessage.setForeground(new java.awt.Color(255, 255, 255));
         welcomeMessage.setText("WORD GAME BETA v 3.32.71");
 
-        logo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/clientui/finalclientui/logo.png"))); // NOI18N
+        logo.setIcon(new javax.swing.ImageIcon(getClass().getResource("src/Server_Java/WORD.png"))); // NOI18N
 
-        backgroundImage.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/clientui/finalclientui/background.jpg"))); // NOI18N
+        backgroundImage.setIcon(new javax.swing.ImageIcon(getClass().getResource("src/Client_Java/17250835.png"))); // NOI18N
 
         jLayeredPane2.setLayer(backgroundImage, javax.swing.JLayeredPane.DEFAULT_LAYER);
 
