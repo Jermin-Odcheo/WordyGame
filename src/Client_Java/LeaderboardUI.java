@@ -17,7 +17,7 @@ public class LeaderboardUI extends javax.swing.JFrame {
 
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
-        backgroundPanel.setBackground(new java.awt.Color(204, 153, 255));
+        backgroundPanel.setBackground(new java.awt.Color(33, 42, 62));
 
         leaderboardLogo.setFont(new java.awt.Font("Arial Rounded MT Bold", 1, 24)); // NOI18N
         leaderboardLogo.setForeground(new java.awt.Color(255, 255, 255));
