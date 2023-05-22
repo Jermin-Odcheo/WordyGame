@@ -248,11 +248,12 @@ static String username;
     private void exitLobbyButtonActionPerformed(java.awt.event.ActionEvent evt) {
         try {
             wordyImpl.leaveGame(username);
-        }catch (Exception e){
+        } catch (Exception e) {
             System.out.println(e.getMessage());
         }
 
-       dispose();
+        dispose();
+        ClientUI.startClientUI(username);
     }
 
     public static void startLobby(String username) {
