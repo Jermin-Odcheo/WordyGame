@@ -16,7 +16,7 @@ public class Client {
         try {
             // create and initialize the ORB
             //Connect to the server using Server IP Address
-            ORB orb = ORB.init(new String[]{"-ORBInitialHost", "192.168.1.10", "-ORBInitialPort", "1050"}, null);
+            ORB orb = ORB.init(new String[]{"-ORBInitialHost", "10.10.107.155", "-ORBInitialPort", "1050"}, null);
             // get the root naming context
             org.omg.CORBA.Object objRef = orb.resolve_initial_references("NameService");
             NamingContextExt ncRef = NamingContextExtHelper.narrow(objRef);

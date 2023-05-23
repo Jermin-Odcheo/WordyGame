@@ -198,9 +198,7 @@ public class ClientLoginUI extends javax.swing.JFrame {
             String user = userName.getText();
             String pass = String.valueOf(password.getPassword());
 
-             if (wordyImpl.login(user, pass).equals("LoggedIn")){
-                 JOptionPane.showMessageDialog(null, user + " Already Logged In!");
-             } else {
+
                  if (user.equals("")) {
                      JOptionPane.showMessageDialog(null, "Username is empty");
                  } else if (pass.equals("")) {
@@ -211,16 +209,19 @@ public class ClientLoginUI extends javax.swing.JFrame {
                      JOptionPane.showMessageDialog(null, "Invalid Credentials");
                  } else if (wordyImpl.login(user, pass).equals("Error")) {
                      JOptionPane.showMessageDialog(null, "Failed to Log In: Server Error");
+                 }else if (wordyImpl.login(user, pass).equals("LoggedIn")){
+                         JOptionPane.showMessageDialog(null, user + " Already Logged In!");
                  } else {
                      JOptionPane.showMessageDialog(null, "Successfully Logged In!");
                      ClientUI.startClientUI(user);
                      this.dispose();
                  }
-             }
-        }catch (Exception e){
+             }catch (Exception e){
             e.printStackTrace();
         }
-    }
+        }
+
+
 
     public static void startLogin() {
         try {
