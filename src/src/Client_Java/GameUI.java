@@ -1,7 +1,9 @@
-package Client_Java;
+package src.Client_Java;
 
 import Server_Java.corba.GameException;
 import Server_Java.corba.InvalidWord;
+import src.Server_Java.corba.isSameLength;
+
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
@@ -14,23 +16,6 @@ import java.awt.event.WindowListener;
 import static Client_Java.Client.wordyImpl;
 
 public class GameUI extends javax.swing.JFrame{
-    private static javax.swing.JTextField inputField;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabelcheck;
-    private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
-    private javax.swing.JLabel jLabel7;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JScrollPane jScrollPane3;
-    private static javax.swing.JTextArea jTextArea1;
-    private javax.swing.JTextArea playerListField;
-    private javax.swing.JButton sendButton;
-    private javax.swing.JTextArea wordBoxField;
-    private javax.swing.JPanel jPanel1;
     static String username;
     static JLabel timerField;
     static int countdownSeconds = 30;
@@ -342,12 +327,9 @@ public class GameUI extends javax.swing.JFrame{
             Document document = wordBoxField.getDocument();
             int length = document.getLength();
             int lastNewlineIndex = 0;
-
-                lastNewlineIndex = wordBoxField.getLineOfOffset(length - 1);
-
+            lastNewlineIndex = wordBoxField.getLineOfOffset(length - 1);
             int startOffset = wordBoxField.getLineStartOffset(lastNewlineIndex);
             int endOffset = wordBoxField.getLineEndOffset(lastNewlineIndex);
-
             document.remove(startOffset, endOffset - startOffset);
             jLabelcheck.setText("Invalid Word!");
             System.out.println("Exception occurred on the server: " + e.getMessage());
@@ -378,6 +360,23 @@ public class GameUI extends javax.swing.JFrame{
         });
     }
 
+    private static javax.swing.JTextField inputField;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabelcheck;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
+    private static javax.swing.JTextArea jTextArea1;
+    private javax.swing.JTextArea playerListField;
+    private javax.swing.JButton sendButton;
+    private javax.swing.JTextArea wordBoxField;
+    private javax.swing.JPanel jPanel1;
     private void startCountdownTimer() {
         Timer timer = new Timer(1000, new ActionListener() {
             int remainingSeconds = countdownSeconds;
@@ -389,11 +388,28 @@ public class GameUI extends javax.swing.JFrame{
                 if (remainingSeconds == 0) {
                     // Timer has reached 0, perform any necessary actions here
                     try {
+                        JOptionPane.showMessageDialog(null, wordyImpl.getWinner());
+                        int delay = 15000; // 15 seconds in milliseconds
+                        Timer timer = new Timer(delay, ex -> {
+                            JOptionPane.getRootFrame().dispose(); // Close the dialog
+                        });
+                        timer.setRepeats(false); // Set the timer to execute only once
+                        timer.start();
+                    } catch (isSameLength ex) {
+                        JOptionPane.showMessageDialog(null, "TIE: Both clients sent words of the same length. Starting another round...");
+                        int delay = 15000; // 15 seconds in milliseconds
+                        Timer timer = new Timer(delay, exe -> {
+                            JOptionPane.getRootFrame().dispose(); // Close the dialog
+                        });
+                        timer.setRepeats(false); // Set the timer to execute only once
+                        timer.start();
+                        System.out.println(ex.message);
+                    }
+                    try {
                         wordyImpl.joinLobby(username);
                     } catch (GameException ex) {
                         throw new RuntimeException(ex);
                     }
-                    JOptionPane.showMessageDialog(null,wordyImpl.getWinner());
                     try {
                         Thread.sleep(5000);
                     } catch (InterruptedException ex) {

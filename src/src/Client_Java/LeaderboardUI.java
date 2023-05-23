@@ -1,13 +1,9 @@
-package Client_Java;
+package src.Client_Java;
 
 import javax.swing.*;
 
 public class LeaderboardUI extends javax.swing.JFrame {
 
-    private javax.swing.JPanel backgroundPanel;
-    private javax.swing.JLabel leaderboardLogo;
-    private javax.swing.JButton longestWordsButton;
-    private javax.swing.JButton topWinsButton;
     public LeaderboardUI() {
         initComponents();
     }
@@ -126,4 +122,8 @@ public class LeaderboardUI extends javax.swing.JFrame {
         });
     }
 
+    private javax.swing.JPanel backgroundPanel;
+    private javax.swing.JLabel leaderboardLogo;
+    private javax.swing.JButton longestWordsButton;
+    private javax.swing.JButton topWinsButton;
 }
