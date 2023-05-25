@@ -1,6 +1,10 @@
 
 package Client_Java;
 
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.sql.*;
+
 public class TopWinsUI extends javax.swing.JFrame {
 
     private String username;
@@ -8,8 +12,8 @@ public class TopWinsUI extends javax.swing.JFrame {
     public TopWinsUI(String username) {
         initComponents();
         this.username = username;
+        displayWinCount();
     }
-
 
     private void initComponents() {
 
@@ -18,7 +22,8 @@ public class TopWinsUI extends javax.swing.JFrame {
         jTable1 = new javax.swing.JTable();
         jLabel1 = new javax.swing.JLabel();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         setBackground(new java.awt.Color(255, 51, 255));
 
         jPanel1.setBackground(new java.awt.Color(204, 153, 255));
@@ -72,6 +77,29 @@ public class TopWinsUI extends javax.swing.JFrame {
         );
 
         pack();
+    }
+    private void displayWinCount() {
+        String url = "jdbc:mysql://localhost:3306/wordy_accounts";
+        String username = "root";
+        String password = "";
+
+        try (Connection conn = DriverManager.getConnection(url, username, password);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT username, wins FROM wincount")) {
+
+
+            DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+            model.setRowCount(0);
+
+
+            while (rs.next()) {
+                String player = rs.getString("username");
+                int wins = rs.getInt("wins");
+                model.addRow(new Object[]{player, wins});
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
     public static void startTopWinsUI(String username) {
         try {
