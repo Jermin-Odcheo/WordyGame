@@ -5,7 +5,6 @@ import javax.swing.*;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
-import static Client_Java.Client.wordyCallback;
 import static Client_Java.Client.wordyImpl;
 
 public class LobbyUI extends javax.swing.JFrame{

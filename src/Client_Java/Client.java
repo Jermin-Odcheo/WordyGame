@@ -2,7 +2,8 @@ package Client_Java;
 
 
 
-import Server_Java.corba.*;
+import Client_Java.corbaGame.wordy;
+import Client_Java.corbaGame.wordyHelper;
 import org.omg.CORBA.ORB;
 import org.omg.CosNaming.NamingContextExt;
 import org.omg.CosNaming.NamingContextExtHelper;
@@ -11,7 +12,6 @@ import org.omg.PortableServer.POAHelper;
 
 public class Client {
     static wordy wordyImpl;
-    static Server_Java.corba.WordyCallback wordyCallback;
     public static void main(String[] args) {
         try {
             // create and initialize the ORB
@@ -20,6 +20,7 @@ public class Client {
             // get the root naming context
             org.omg.CORBA.Object objRef = orb.resolve_initial_references("NameService");
             NamingContextExt ncRef = NamingContextExtHelper.narrow(objRef);
+
             POA rootpoa = POAHelper.narrow(orb.resolve_initial_references("RootPOA"));
             rootpoa.the_POAManager().activate();
             // Resolve the object reference using a corbaloc URL
@@ -34,18 +35,6 @@ public class Client {
     }
 
 
-    public static class WordyCallback extends WordyCallbackPOA {
-        private ORB orb;
-
-        public void setORB(ORB orb_val) {
-            orb = orb_val;
-        }
-
-        @Override
-        public void sendGeneratedLetter(String letters) {
-            System.out.println("FROM SERVER:" + letters);
-        }
-    }
 }
 
 

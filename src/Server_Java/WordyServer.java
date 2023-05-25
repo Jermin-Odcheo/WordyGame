@@ -1,7 +1,7 @@
 package Server_Java;
 
 import Client_Java.myConnection;
-import Server_Java.corba.*;
+import Server_Java.corbaGame.*;
 import org.omg.CORBA.ORB;
 
 import java.io.BufferedReader;
@@ -272,7 +272,6 @@ public class WordyServer extends wordyPOA {
                 break;
             }
         }
-
         if (isTie) {
             throw new isSameLength("TIE: Both clients sent words of the same length. Starting another round...");
         } else {
@@ -284,29 +283,22 @@ public class WordyServer extends wordyPOA {
                 if (winCount > maxWinCount) {
                     winner = playerName;
                     addOrUpdateUser(winner);
+                    System.out.println(winner + " WON");
                     throw new getWin(winner + " HAS WON THE GAME!!!");
-
                 }
             }
             for (Map.Entry<String, String> entry : clientWords.entrySet()) {
                 if (entry.getValue().equals(longestWord)) {
                     winner = entry.getKey();
                     clientWinCount.put(winner, clientWinCount.getOrDefault(winner, 0) + 1);
+                    System.out.println(winner + "won the round");
                     throw new getWin(winner + " won with a word: " + longestWord);
-
                 }
             }
         }
         throw new getRoundWin("No winner declared for this round. Starting another round...");
     }
 
-
-
-
-    private void resetRound() {
-        clientWords.clear();
-        // Reset any necessary variables or UI elements for a new round
-    }
 
     @Override
     public String getValidWordFromClients() {
@@ -404,17 +396,4 @@ public class WordyServer extends wordyPOA {
         return lobbyPlayers.size();
     }
 
-        public static class WordyCallback extends WordyCallbackPOA {
-            private final List<WordyCallback> callbacks = new ArrayList<>();
-            private ORB orb;
-
-            public void setORB(ORB orb_val) {
-                orb = orb_val;
-            }
-
-            @Override
-            public void sendGeneratedLetter(String letters) {
-                System.out.println("Received generated letters: " + letters);
-            }
-        }
 }

@@ -1,10 +1,10 @@
 package Client_Java;
 
 
-import Server_Java.corba.checkLogin;
-import Server_Java.corba.invalid;
-import Server_Java.corba.notFound;
-import Server_Java.corba.validatedLogin;
+import Client_Java.corbaGame.checkLogin;
+import Client_Java.corbaGame.invalid;
+import Client_Java.corbaGame.notFound;
+import Client_Java.corbaGame.validatedLogin;
 
 import javax.swing.*;
 

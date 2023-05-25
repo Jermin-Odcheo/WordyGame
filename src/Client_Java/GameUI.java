@@ -1,6 +1,7 @@
 package Client_Java;
 
-import Server_Java.corba.*;
+
+import Client_Java.corbaGame.*;
 
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
@@ -16,7 +17,7 @@ import static Client_Java.Client.wordyImpl;
 public class GameUI extends javax.swing.JFrame{
     static String username;
     static JLabel timerField;
-    static int countdownSeconds = 10;
+    static int countdownSeconds = 30;
     public GameUI(String username) {
         this.username = username;
         initComponents();
