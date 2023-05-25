@@ -95,7 +95,7 @@ public class LeaderboardUI extends javax.swing.JFrame {
     }
 
     private void longestWordsButtonActionPerformed(java.awt.event.ActionEvent evt) {
-        // TODO add your handling code here:
+        LongestWordsUI.startLongestWordsUI(username);
     }
 
     private void topWinsButtonActionPerformed(java.awt.event.ActionEvent evt) {
@@ -122,6 +122,7 @@ public class LeaderboardUI extends javax.swing.JFrame {
 
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
+
                 new LeaderboardUI(username).setVisible(true);
             }
         });
