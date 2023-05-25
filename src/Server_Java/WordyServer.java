@@ -9,6 +9,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 
 
@@ -24,37 +25,38 @@ public class WordyServer extends wordyPOA {
     private String letters;
 
 
-    public String login(String username, String password) {
-        if (players.contains(username)){
-            System.out.println("Already Logged In!");
-            return "LoggedIn";
-        }
-        try {
+    public void login(String username, String password) throws checkLogin,notFound,invalid,validatedLogin {
             boolean check = verifyUsername(username);
             if (!check) {
                 System.out.println(username + " : " + "Account not found");
-                return "NotFound";
+                throw new notFound(username + " : " + "Account not found" );
             } else {
-                PreparedStatement preparedStatement;
-                ResultSet resultSet;
-                preparedStatement = myConnection.getConnection().prepareStatement("SELECT * FROM users WHERE user_username = ? AND user_password = ?");
-                preparedStatement.setString(1, username);
-                preparedStatement.setString(2, password);
-                resultSet = preparedStatement.executeQuery();
-                if (resultSet.next()) {
-                        players.add(username);
-                        System.out.println(username + " : " + "Successfully Logged In");
-                        return "Found";
-                } else {
-                    return "Invalid";
+                try {
+                    PreparedStatement preparedStatement;
+                    ResultSet resultSet;
+                    preparedStatement = myConnection.getConnection().prepareStatement("SELECT * FROM users WHERE user_username = ? AND user_password = ?");
+                    preparedStatement.setString(1, username);
+                    preparedStatement.setString(2, password);
+                    resultSet = preparedStatement.executeQuery();
+                    if (resultSet.next()) {
+                        if (players.contains(username)){
+                            System.out.println("Already Logged In!");
+                            throw new checkLogin("Already Logged In!");
+                        } else {
+                            players.add(username);
+                            System.out.println(username + " : " + "Successfully Logged In");
+                            throw new validatedLogin(username + " : " + "Successfully Logged In");
+                        }
+                    } else {
+                        throw new invalid("Invalid Credentials!");
+                    }
+                } catch (SQLException e){
+                    System.out.println("Server Side Error");
                 }
             }
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            return "Error";
-        }
 
     }
+
     @Override
     public void exit(String username) {
         players.remove(username);
@@ -174,8 +176,78 @@ public class WordyServer extends wordyPOA {
         }
         words.add(word);
         clientWords.put(playerName,word);
+        storeClientWord(playerName,word);
         System.out.println("Client " + playerName + " submitted word: " + word);
     }
+    public static void addOrUpdateUser(String username) {
+
+        String selectSql = "SELECT * FROM wincount WHERE username = ?";
+        String insertSql = "INSERT INTO wincount (username, wins) VALUES (?, 1)";
+        String updateSql = "UPDATE wincount SET wins = wins + 1 WHERE username = ?";
+
+        try {
+
+            PreparedStatement selectStatement = myConnection.getConnection().prepareStatement(selectSql);
+            PreparedStatement insertStatement = myConnection.getConnection().prepareStatement(insertSql);
+            PreparedStatement updateStatement = myConnection.getConnection().prepareStatement(updateSql);
+
+            selectStatement.setString(1, username);
+            ResultSet resultSet = selectStatement.executeQuery();
+
+            if (resultSet.next()) {
+                // User exists, increment their win count
+                updateStatement.setString(1, username);
+                int rowsAffected = updateStatement.executeUpdate();
+                if (rowsAffected > 0) {
+                    System.out.println("Win count incremented for user: " + username);
+                } else {
+                    System.out.println("Failed to increment win count for user: " + username);
+                }
+            } else {
+                // User doesn't exist, add them to the table
+                insertStatement.setString(1, username);
+                int rowsAffected = insertStatement.executeUpdate();
+                if (rowsAffected > 0) {
+                    System.out.println("User added to wincount table: " + username);
+                } else {
+                    System.out.println("Failed to add user to wincount table: " + username);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    public static void storeClientWord(String username, String word) {
+        try {
+            // Retrieve the user ID based on the username
+            String userId = getUserIdByUsername(username);
+            // Insert the user ID and word into the wordlist table
+            String sql = "INSERT INTO wordlist (user_id, word) VALUES (?, ?)";
+            PreparedStatement statement;
+            statement = myConnection.getConnection().prepareStatement(sql);
+            statement.setString(1, userId);
+            statement.setString(2, word);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            // Handle any exceptions that occur during the database operation
+        }
+    }
+    private static String getUserIdByUsername(String username) throws SQLException {
+        String userId = null;
+        String sql = "SELECT user_id FROM users WHERE user_username = ?";
+        PreparedStatement statement;
+        statement = myConnection.getConnection().prepareStatement(sql);
+        statement.setString(1, username);
+        ResultSet resultSet = statement.executeQuery();
+        if (resultSet.next()) {
+            userId = resultSet.getString("user_id");
+        }
+        resultSet.close();
+        statement.close();
+        return userId;
+    }
+
 
     public String findLongestWord() {
         String longestWord = "";
@@ -186,30 +258,54 @@ public class WordyServer extends wordyPOA {
         }
         return longestWord;
     }
-    public String getWinner() {
+
+    public void getWinner() throws getWin,isSameLength,getRoundWin {
         String longestWord = findLongestWord();
         String winner = "";
         int winCount = 0;
-        for (Map.Entry<String, Integer> entry : clientWinCount.entrySet()) {
-            String playerName = entry.getKey();
-            winCount = entry.getValue();
-            int maxWinCount = 3;
-            if (winCount > maxWinCount) {
-                winner = playerName;
-                return winner + " WON THE GAME!";
-            }
-        }
+        boolean isTie = false;
+        // Check if both clients sent the same length of word
         for (Map.Entry<String, String> entry : clientWords.entrySet()) {
-            if (entry.getValue().equals(longestWord)) {
-                winner = entry.getKey();
-                clientWinCount.put(winner, clientWinCount.getOrDefault(winner, 0) + 1);
-                return winner + " won with word: " + longestWord;
+            String word = entry.getValue();
+            if (word.length() == longestWord.length() && !word.equals(longestWord)) {
+                isTie = true;
+                break;
             }
         }
 
+        if (isTie) {
+            throw new isSameLength("TIE: Both clients sent words of the same length. Starting another round...");
+        } else {
+
+            for (Map.Entry<String, Integer> entry : clientWinCount.entrySet()) {
+                String playerName = entry.getKey();
+                winCount = entry.getValue();
+                int maxWinCount = 3;
+                if (winCount > maxWinCount) {
+                    winner = playerName;
+                    addOrUpdateUser(winner);
+                    throw new getWin(winner + " HAS WON THE GAME!!!");
+
+                }
+            }
+            for (Map.Entry<String, String> entry : clientWords.entrySet()) {
+                if (entry.getValue().equals(longestWord)) {
+                    winner = entry.getKey();
+                    clientWinCount.put(winner, clientWinCount.getOrDefault(winner, 0) + 1);
+                    throw new getWin(winner + " won with a word: " + longestWord);
+
+                }
+            }
+        }
+        throw new getRoundWin("No winner declared for this round. Starting another round...");
+    }
 
 
-        return winner + "WON!";
+
+
+    private void resetRound() {
+        clientWords.clear();
+        // Reset any necessary variables or UI elements for a new round
     }
 
     @Override
@@ -233,23 +329,9 @@ public class WordyServer extends wordyPOA {
         return true;
     }
 
-    private boolean isWordValidForRound(String word) {
-        if (rounds.size() == 0) {
-            return true;
-        }
-        String lastWord = rounds.get(rounds.size()-1);
-        char lastChar = lastWord.charAt(lastWord.length() - 1);
-        char firstChar = word.charAt(0);
-        if (lastChar == firstChar) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
     public void startNewRound() {
         if (lobbyPlayers.size() < 2) {
-            System.out.println("Cannot start game. Not enough players.");
+            System.out.println("Cannot start game. Not enough players. SNR");
             lobbyPlayers.clear();
             return;
         }
@@ -277,14 +359,12 @@ public class WordyServer extends wordyPOA {
         for (char c : letter) {
             sb.append(c);
         }
-
-        return  letters = sb.toString();
+        return letters = sb.toString();
     }
     private char getRandomVowel() {
         String vowels = "AEIOU";
         return vowels.charAt(new Random().nextInt(vowels.length()));
     }
-
     private char getRandomConsonant() {
         String consonants = "BCDFGHJKLMNPQRSTVWXYZ";
         return consonants.charAt(new Random().nextInt(consonants.length()));

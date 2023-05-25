@@ -9,19 +9,7 @@ import static Client_Java.Client.wordyCallback;
 import static Client_Java.Client.wordyImpl;
 
 public class LobbyUI extends javax.swing.JFrame{
-    static String username;
-    private javax.swing.JButton exitLobbyButton;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private static javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
-    private static javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel7;
-    private javax.swing.JLabel jLabel8;
-    private javax.swing.JLabel jLabel9;
-    private javax.swing.JLayeredPane jLayeredPane1;
-    private javax.swing.JLabel matchTimerField;
-    private javax.swing.JLabel playerCountField;
+static String username;
     public LobbyUI(String username) {
         this.username = username;
         initComponents();
@@ -294,5 +282,18 @@ public class LobbyUI extends javax.swing.JFrame{
         });
 
     }
+
+    private javax.swing.JButton exitLobbyButton;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private static javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private static javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
+    private javax.swing.JLayeredPane jLayeredPane1;
+    private javax.swing.JLabel matchTimerField;
+    private javax.swing.JLabel playerCountField;
 
 }

@@ -1,6 +1,7 @@
 package Server_Java;
 
 import Client_Java.Client;
+import Client_Java.myConnection;
 import Server_Java.corba.*;
 import org.omg.CORBA.ORB;
 import org.omg.CosNaming.NameComponent;
@@ -11,6 +12,10 @@ import org.omg.PortableServer.POAHelper;
 
 
 import java.net.InetAddress;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Scanner;
 
 
 public class Server {
@@ -44,17 +49,18 @@ public class Server {
 
             NameComponent[] wordyPath = ncRef.to_name("Wordy");
             ncRef.rebind(wordyPath, href);
-
             // Print server ready message
             System.out.println("Server is ready...");
-
             // Start ORB event loop
             orb.run();
+
         } catch (Exception e) {
             System.err.println("Error: " + e);
             e.printStackTrace(System.out);
         }
     }
+
+
 }
 
 

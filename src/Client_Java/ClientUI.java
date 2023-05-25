@@ -4,14 +4,6 @@ import static Client_Java.Client.wordyImpl;
 
 public class ClientUI extends javax.swing.JFrame {
     static String username;
-    private javax.swing.JLabel backgroundPane;
-    private javax.swing.JPanel backgroundPanel;
-    private javax.swing.JButton exitButton;
-    private javax.swing.JLayeredPane jLayeredPane2;
-    private javax.swing.JLabel logo;
-    private javax.swing.JButton leaderboardButton;
-    private javax.swing.JButton startGameButton;
-    private javax.swing.JLabel welcomeMessage;
     public ClientUI(String username) {
         this.username = username;
         initComponents();
@@ -183,6 +175,14 @@ public class ClientUI extends javax.swing.JFrame {
         });
     }
 
+    private javax.swing.JLabel backgroundPane;
+    private javax.swing.JPanel backgroundPanel;
+    private javax.swing.JButton exitButton;
+    private javax.swing.JLayeredPane jLayeredPane2;
+    private javax.swing.JLabel logo;
+    private javax.swing.JButton leaderboardButton;
+    private javax.swing.JButton startGameButton;
+    private javax.swing.JLabel welcomeMessage;
 
 }
 

@@ -1,6 +1,11 @@
 package Client_Java;
 
 
+import Server_Java.corba.checkLogin;
+import Server_Java.corba.invalid;
+import Server_Java.corba.notFound;
+import Server_Java.corba.validatedLogin;
+
 import javax.swing.*;
 
 import static Client_Java.Client.wordyImpl;
@@ -194,31 +199,30 @@ public class ClientLoginUI extends javax.swing.JFrame {
     }
 
     private void loginButtonActionPerformed(java.awt.event.ActionEvent evt) {
-        try {
             String user = userName.getText();
             String pass = String.valueOf(password.getPassword());
-
-
                  if (user.equals("")) {
                      JOptionPane.showMessageDialog(null, "Username is empty");
                  } else if (pass.equals("")) {
                      JOptionPane.showMessageDialog(null, "Password is empty");
-                 } else if (wordyImpl.login(user, pass).equals("NotFound")) {
-                     JOptionPane.showMessageDialog(null, "Username Does Not Exist");
-                 } else if (wordyImpl.login(user, pass).equals("Invalid")) {
-                     JOptionPane.showMessageDialog(null, "Invalid Credentials");
-                 } else if (wordyImpl.login(user, pass).equals("Error")) {
-                     JOptionPane.showMessageDialog(null, "Failed to Log In: Server Error");
-                 }else if (wordyImpl.login(user, pass).equals("LoggedIn")){
-                         JOptionPane.showMessageDialog(null, user + " Already Logged In!");
                  } else {
-                     JOptionPane.showMessageDialog(null, "Successfully Logged In!");
-                     ClientUI.startClientUI(user);
-                     this.dispose();
+                     try {
+                         wordyImpl.login(user, pass);
+                     }catch (notFound e) {
+                         System.out.println(e.message);
+                         JOptionPane.showMessageDialog(null,e.message);
+                     } catch (invalid e) {
+                         System.out.println(e.message);
+                         JOptionPane.showMessageDialog(null,e.message);
+                     }   catch (validatedLogin e) {
+                         JOptionPane.showMessageDialog(null, "Successfully Logged In!");
+                         ClientUI.startClientUI(user);
+                         this.dispose();
+                     }catch (checkLogin e) {
+                         System.out.println(e.message);
+                         JOptionPane.showMessageDialog(null,e.message);
+                     }
                  }
-             }catch (Exception e){
-            e.printStackTrace();
-        }
         }
 
 
