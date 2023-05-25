@@ -83,7 +83,7 @@ public class LongestWordsUI extends javax.swing.JFrame {
 
         try (Connection conn = DriverManager.getConnection(url, username, password);
              Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery("SELECT user_id, word FROM wordlist ORDER BY LENGTH(word) DESC")) {
+             ResultSet rs = stmt.executeQuery("SELECT user_id, word FROM wordlist ORDER BY LENGTH(word) DESC LIMIT 5")) {
 
             DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
             model.setRowCount(0);
