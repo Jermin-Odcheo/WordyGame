@@ -3,12 +3,13 @@ package Client_Java;
 import javax.swing.*;
 
 public class LeaderboardUI extends javax.swing.JFrame {
-
+    static String username;
     private javax.swing.JPanel backgroundPanel;
     private javax.swing.JLabel leaderboardLogo;
     private javax.swing.JButton longestWordsButton;
     private javax.swing.JButton topWinsButton;
-    public LeaderboardUI() {
+    public LeaderboardUI(String username) {
+        this.username = username;
         initComponents();
     }
 
@@ -98,7 +99,7 @@ public class LeaderboardUI extends javax.swing.JFrame {
     }
 
     private void topWinsButtonActionPerformed(java.awt.event.ActionEvent evt) {
-        // TODO add your handling code here:
+        TopWinsUI.startTopWinsUI(username);
     }
 
     public static void startLeaderboardUI(String username) {
@@ -121,7 +122,7 @@ public class LeaderboardUI extends javax.swing.JFrame {
 
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new LeaderboardUI().setVisible(true);
+                new LeaderboardUI(username).setVisible(true);
             }
         });
     }
