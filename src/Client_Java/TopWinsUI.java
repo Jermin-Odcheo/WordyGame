@@ -33,7 +33,7 @@ public class TopWinsUI extends javax.swing.JFrame {
 
                 },
                 new String [] {
-                        "PLAYER", "WINS"
+                        "Top","PLAYER", "WINS"
                 }
         ));
         jScrollPane1.setViewportView(jTable1);
@@ -85,17 +85,18 @@ public class TopWinsUI extends javax.swing.JFrame {
 
         try (Connection conn = DriverManager.getConnection(url, username, password);
              Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery("SELECT username, wins FROM wincount")) {
-
+             ResultSet rs = stmt.executeQuery("SELECT username, wins FROM wincount ORDER BY wins DESC")) {
 
             DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
             model.setRowCount(0);
 
+            int top = 1;
 
             while (rs.next()) {
                 String player = rs.getString("username");
                 int wins = rs.getInt("wins");
-                model.addRow(new Object[]{player, wins});
+                model.addRow(new Object[]{top, player, wins});
+                top++;
             }
         } catch (SQLException e) {
             e.printStackTrace();
