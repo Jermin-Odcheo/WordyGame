@@ -2,14 +2,11 @@ package Server_Java;
 
 import Client_Java.myConnection;
 import Server_Java.corbaGame.*;
-import org.omg.CORBA.ORB;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.*;
 
 
@@ -23,7 +20,7 @@ public class WordyServer extends wordyPOA {
     private int countdown = 10;
     private boolean isGameStarted;
     private String letters;
-
+    WordyServer wordyServer;
 
     public void login(String username, String password) throws checkLogin,notFound,invalid,validatedLogin {
             boolean check = verifyUsername(username);
@@ -63,6 +60,7 @@ public class WordyServer extends wordyPOA {
         playersInGame.remove(username);
         System.out.println(username + ": Logged Out!");
     }
+
     public boolean status(String playerName) {
         return playersInGame.contains(playerName);
     }
@@ -247,6 +245,32 @@ public class WordyServer extends wordyPOA {
         statement.close();
         return userId;
     }
+    @Override
+    public String[] displayWordList() {
+        List<String> wordDataList = new ArrayList<>();
+
+        String sql = "SELECT w.user_id, w.word, u.user_username " +
+                "FROM wordlist w " +
+                "JOIN users u ON w.user_id = u.user_id " +
+                "ORDER BY LENGTH(w.word) DESC LIMIT 5";
+        try {
+            PreparedStatement statement = myConnection.getConnection().prepareStatement(sql);
+            ResultSet resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                String username = resultSet.getString("user_username");
+                String word = resultSet.getString("word");
+                String wordData = username + "," + word;
+                wordDataList.add(wordData);
+                System.out.println(username + word);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return wordDataList.toArray(new String[0]);
+    }
+
 
 
     public String findLongestWord() {
@@ -391,9 +415,11 @@ public class WordyServer extends wordyPOA {
     }
 
 
+
     @Override
     public double lobbyPlayerCount() {
         return lobbyPlayers.size();
     }
+
 
 }

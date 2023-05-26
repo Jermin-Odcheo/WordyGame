@@ -4,6 +4,7 @@ package Client_Java;
 
 import Client_Java.corbaGame.wordy;
 import Client_Java.corbaGame.wordyHelper;
+import Server_Java.corbaGame.*;
 import org.omg.CORBA.ORB;
 import org.omg.CosNaming.NamingContextExt;
 import org.omg.CosNaming.NamingContextExtHelper;
@@ -16,7 +17,7 @@ public class Client {
         try {
             // create and initialize the ORB
             //Connect to the server using Server IP Address
-            ORB orb = ORB.init(new String[]{"-ORBInitialHost", "192.168.1.10", "-ORBInitialPort", "1050"}, null);
+            ORB orb = ORB.init(new String[]{"-ORBInitialHost", "192.168.1.11", "-ORBInitialPort", "1050"}, null);
             // get the root naming context
             org.omg.CORBA.Object objRef = orb.resolve_initial_references("NameService");
             NamingContextExt ncRef = NamingContextExtHelper.narrow(objRef);
@@ -27,14 +28,13 @@ public class Client {
             String name = "Wordy";
             wordyImpl = wordyHelper.narrow(ncRef.resolve_str(name));
             //Start Login
+
             ClientLoginUI.startLogin();
         } catch (Exception e) {
             System.out.println("Exception in main: " + e);
             e.printStackTrace();
         }
     }
-
-
 }
 
 

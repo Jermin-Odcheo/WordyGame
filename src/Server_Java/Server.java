@@ -44,6 +44,9 @@ public class Server {
 
             NameComponent[] wordyPath = ncRef.to_name("Wordy");
             ncRef.rebind(wordyPath, href);
+
+            
+
             // Print server ready message
             System.out.println("Server is ready...");
             // Start ORB event loop

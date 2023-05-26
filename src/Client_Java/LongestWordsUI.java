@@ -2,9 +2,15 @@
 package Client_Java;
 
 
+import Server_Java.corbaGame.wordyPOA;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.sql.*;
+import java.util.Arrays;
+import java.util.List;
+
+import static Client_Java.Client.wordyImpl;
 
 public class LongestWordsUI extends javax.swing.JFrame {
 
@@ -76,27 +82,28 @@ public class LongestWordsUI extends javax.swing.JFrame {
 
         pack();
     }
+    public void sendWordData(String playerName, String word) {
+
+    }
     private void displayWordList() {
-        String url = "jdbc:mysql://localhost:3306/wordy_accounts";
-        String username = "root";
-        String password = "";
+        String[] wordDataList = wordyImpl.displayWordList();
 
-        try (Connection conn = DriverManager.getConnection(url, username, password);
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery("SELECT user_id, word FROM wordlist ORDER BY LENGTH(word) DESC LIMIT 5")) {
+        DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+        model.setRowCount(0); // Clear the table
 
-            DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
-            model.setRowCount(0);
+        for (String wordData : wordDataList) {
+            String[] data = wordData.split(",");
+            if (data.length >= 2) {
+                String user = data[0];
+                String word = data[1];
+                // Process username and word as needed
+                System.out.println("Username: " + user + ", Word: " + word);
 
-            while (rs.next()) {
-                int userId = rs.getInt("user_id");
-                String word = rs.getString("word");
-                model.addRow(new Object[]{userId, word});
+                model.addRow(new Object[]{user, word}); // Add a new row to the table
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
     }
+
 
     public static void startLongestWordsUI(String username) {
 
