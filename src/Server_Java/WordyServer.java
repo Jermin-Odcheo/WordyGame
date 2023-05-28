@@ -178,13 +178,11 @@ public class WordyServer extends wordyPOA {
         System.out.println("Client " + playerName + " submitted word: " + word);
     }
     public static void addOrUpdateUser(String username) {
-
         String selectSql = "SELECT * FROM wincount WHERE username = ?";
         String insertSql = "INSERT INTO wincount (username, wins) VALUES (?, 1)";
         String updateSql = "UPDATE wincount SET wins = wins + 1 WHERE username = ?";
 
         try {
-
             PreparedStatement selectStatement = myConnection.getConnection().prepareStatement(selectSql);
             PreparedStatement insertStatement = myConnection.getConnection().prepareStatement(insertSql);
             PreparedStatement updateStatement = myConnection.getConnection().prepareStatement(updateSql);
@@ -198,6 +196,7 @@ public class WordyServer extends wordyPOA {
                 int rowsAffected = updateStatement.executeUpdate();
                 if (rowsAffected > 0) {
                     System.out.println("Win count incremented for user: " + username);
+                    return;
                 } else {
                     System.out.println("Failed to increment win count for user: " + username);
                 }
@@ -207,6 +206,7 @@ public class WordyServer extends wordyPOA {
                 int rowsAffected = insertStatement.executeUpdate();
                 if (rowsAffected > 0) {
                     System.out.println("User added to wincount table: " + username);
+                    return;
                 } else {
                     System.out.println("Failed to add user to wincount table: " + username);
                 }
@@ -215,6 +215,8 @@ public class WordyServer extends wordyPOA {
             e.printStackTrace();
         }
     }
+
+
     public static void storeClientWord(String username, String word) {
         try {
             // Retrieve the user ID based on the username
@@ -270,6 +272,27 @@ public class WordyServer extends wordyPOA {
 
         return wordDataList.toArray(new String[0]);
     }
+    public String[] displayWinsList() {
+        List<String> winsDataList = new ArrayList<>();
+
+        String sql = "SELECT username, wins FROM wincount ORDER BY wins DESC LIMIT 5";
+        try {
+            PreparedStatement statement = myConnection.getConnection().prepareStatement(sql);
+            ResultSet resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                String username = resultSet.getString("username");
+                String wins = resultSet.getString("wins");
+                String wordData = username + "," + wins;
+                winsDataList.add(wordData);
+                System.out.println(username + wins);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return winsDataList.toArray(new String[0]);
+    }
 
 
 
@@ -283,23 +306,15 @@ public class WordyServer extends wordyPOA {
         return longestWord;
     }
 
-    public void getWinner() throws getWin,isSameLength,getRoundWin {
+    public void getWinner() throws getWin, isSameLength, getRoundWin {
         String longestWord = findLongestWord();
-        String winner = "";
         int winCount = 0;
-        boolean isTie = false;
-        // Check if both clients sent the same length of word
-        for (Map.Entry<String, String> entry : clientWords.entrySet()) {
-            String word = entry.getValue();
-            if (word.length() == longestWord.length() && !word.equals(longestWord)) {
-                isTie = true;
-                break;
-            }
-        }
-        if (isTie) {
+        String winner = "";
+        // Check if both clients sent words of the same length
+        if (isSameLengthWords(longestWord)) {
+
             throw new isSameLength("TIE: Both clients sent words of the same length. Starting another round...");
         } else {
-
             for (Map.Entry<String, Integer> entry : clientWinCount.entrySet()) {
                 String playerName = entry.getKey();
                 winCount = entry.getValue();
@@ -309,6 +324,7 @@ public class WordyServer extends wordyPOA {
                     addOrUpdateUser(winner);
                     System.out.println(winner + " WON");
                     throw new getWin(winner + " HAS WON THE GAME!!!");
+
                 }
             }
             for (Map.Entry<String, String> entry : clientWords.entrySet()) {
@@ -316,12 +332,24 @@ public class WordyServer extends wordyPOA {
                     winner = entry.getKey();
                     clientWinCount.put(winner, clientWinCount.getOrDefault(winner, 0) + 1);
                     System.out.println(winner + "won the round");
-                    throw new getWin(winner + " won with a word: " + longestWord);
+                    throw new getRoundWin(winner + " won with a word: " + longestWord);
                 }
             }
         }
-        throw new getRoundWin("No winner declared for this round. Starting another round...");
+
     }
+
+
+    private boolean isSameLengthWords(String longestWord) {
+        for (String word : clientWords.values()) {
+            if (word.length() == longestWord.length() && !word.equals(longestWord)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
 
 
     @Override
@@ -356,6 +384,7 @@ public class WordyServer extends wordyPOA {
         generateRandomLetters();
         System.out.println("GAME STARTING WITH: " + letters);
         lobbyPlayers.clear();
+        clientWords.clear();
         rounds.add(letters);
         System.out.println("Starting new round with letters: " + letters);
     }

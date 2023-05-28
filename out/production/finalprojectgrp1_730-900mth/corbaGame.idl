@@ -36,6 +36,7 @@ module corbaGame {
         string message;
    };
         typedef sequence<string> getTop;
+        typedef sequence<string> getWins;
     interface wordy{
         void login(in string username,in string password) raises (checkLogin,notFound,invalid,validatedLogin);
         void exit(in string username);
@@ -55,10 +56,10 @@ module corbaGame {
         void leaveGame(in string playerName) raises (GameException);
 
         getTop displayWordList();
-
+        getWins displayWinsList();
     };
 
 
 
 };
-#pragma prefix "Client_Java"
+#pragma prefix "Server_Java"

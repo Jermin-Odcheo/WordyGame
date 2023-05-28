@@ -82,9 +82,7 @@ public class LongestWordsUI extends javax.swing.JFrame {
 
         pack();
     }
-    public void sendWordData(String playerName, String word) {
 
-    }
     private void displayWordList() {
         String[] wordDataList = wordyImpl.displayWordList();
 
@@ -95,7 +93,7 @@ public class LongestWordsUI extends javax.swing.JFrame {
             String[] data = wordData.split(",");
             if (data.length >= 2) {
                 String user = data[0];
-                String word = data[1];
+                String word = data[1].toUpperCase();
                 // Process username and word as needed
                 System.out.println("Username: " + user + ", Word: " + word);
 

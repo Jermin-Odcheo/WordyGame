@@ -5,6 +5,8 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.sql.*;
 
+import static Client_Java.Client.wordyImpl;
+
 public class TopWinsUI extends javax.swing.JFrame {
 
     private String username;
@@ -79,27 +81,21 @@ public class TopWinsUI extends javax.swing.JFrame {
         pack();
     }
     private void displayWinCount() {
-        String url = "jdbc:mysql://localhost:3306/wordy_accounts";
-        String username = "root";
-        String password = "";
+        String[] wordDataList = wordyImpl.displayWinsList();
 
-        try (Connection conn = DriverManager.getConnection(url, username, password);
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery("SELECT username, wins FROM wincount ORDER BY wins DESC")) {
+        DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+        model.setRowCount(0); // Clear the table
 
-            DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
-            model.setRowCount(0);
+        for (String winData : wordDataList) {
+            String[] data = winData.split(",");
+            if (data.length >= 2) {
+                String user = data[0];
+                String wins = data[1].toUpperCase();
+                // Process username and word as needed
+                System.out.println("Username: " + user + ", Word: " + wins);
 
-            int top = 1;
-
-            while (rs.next()) {
-                String player = rs.getString("username");
-                int wins = rs.getInt("wins");
-                model.addRow(new Object[]{top, player, wins});
-                top++;
+                model.addRow(new Object[]{user, wins}); // Add a new row to the table
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
     }
     public static void startTopWinsUI(String username) {

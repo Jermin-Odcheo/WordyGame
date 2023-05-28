@@ -17,7 +17,7 @@ import static Client_Java.Client.wordyImpl;
 public class GameUI extends javax.swing.JFrame{
     static String username;
     static JLabel timerField;
-    static int countdownSeconds = 30;
+    static int countdownSeconds = 15;
     public GameUI(String username) {
         this.username = username;
         initComponents();
@@ -37,7 +37,6 @@ public class GameUI extends javax.swing.JFrame{
                 playerListField.append(wordyImpl.playerInGameList().replace(",", "\n").substring(1, wordyImpl.playerInGameList().length() - 1));
                 jTextArea1.append(wordyImpl.getGeneratedLetter());
                 System.out.println(wordyImpl.getGeneratedLetter());
-
 
             }
 
@@ -393,12 +392,12 @@ public class GameUI extends javax.swing.JFrame{
                     } catch (GameException ex) {
                         throw new RuntimeException(ex);
                     }
-//                    int delay = 15000; // 15 seconds in milliseconds
-//                    Timer timer = new Timer(delay, exe -> {
-//                        JOptionPane.getRootFrame().dispose(); // Close the dialog
-//                    });
-//                    timer.setRepeats(false); // Set the timer to execute only once
-//                    timer.start();
+                    int delay = 3000; // 15 seconds in milliseconds
+                    Timer timer = new Timer(delay, exe -> {
+                        JOptionPane.getRootFrame().dispose(); // Close the dialog
+                    });
+                    timer.setRepeats(false); // Set the timer to execute only once
+                    timer.start();
                     try {
                         wordyImpl.getWinner();
                     } catch (isSameLength ex) {
@@ -407,13 +406,16 @@ public class GameUI extends javax.swing.JFrame{
                     } catch (getWin ex) {
                         JOptionPane.showMessageDialog(null, ex.message);
                         System.out.println(ex.message);
+                        wordyImpl.exit(username);
+                        ClientUI.startClientUI(username);
+                        dispose();
+                        return;
                     } catch (getRoundWin ex) {
                         JOptionPane.showMessageDialog(null, ex.message);
                         System.out.println(ex.message);
                     }
-
                     try {
-                        Thread.sleep(5000);
+                        Thread.sleep(3000);
                     } catch (InterruptedException ex) {
                         throw new RuntimeException(ex);
                     }
