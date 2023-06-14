@@ -17,7 +17,7 @@ import static Client_Java.Client.wordyImpl;
 public class GameUI extends javax.swing.JFrame{
     static String username;
     static JLabel timerField;
-    static int countdownSeconds = 15;
+    static int countdownSeconds = 30;
     public GameUI(String username) {
         this.username = username;
         initComponents();
