@@ -94,7 +94,7 @@ public class WordyServer extends wordyPOA {
             lobbyPlayers.add(playerName);
             System.out.println("Player " + playerName + " joined the lobby.");
         }
-        if (lobbyPlayers.size() >=2 && !countdownStarted) {
+        if (lobbyPlayers.size() >=1 && !countdownStarted) {
             timerServer();
             countdownStarted = true;
         }
@@ -312,9 +312,12 @@ public class WordyServer extends wordyPOA {
         String winner = "";
         // Check if both clients sent words of the same length
         if (isSameLengthWords(longestWord)) {
-
             throw new isSameLength("TIE: Both clients sent words of the same length. Starting another round...");
-        } else {
+        } else if (clientWords.isEmpty()){
+            System.out.println("No word entered");
+            throw new isSameLength("TIE: NO WINNER. Starting another round...");
+        }
+        else {
             for (Map.Entry<String, Integer> entry : clientWinCount.entrySet()) {
                 String playerName = entry.getKey();
                 winCount = entry.getValue();
@@ -330,13 +333,14 @@ public class WordyServer extends wordyPOA {
             for (Map.Entry<String, String> entry : clientWords.entrySet()) {
                 if (entry.getValue().equals(longestWord)) {
                     winner = entry.getKey();
+
                     clientWinCount.put(winner, clientWinCount.getOrDefault(winner, 0) + 1);
                     System.out.println(winner + "won the round");
                     throw new getRoundWin(winner + " won with a word: " + longestWord);
                 }
             }
         }
-
+        clientWords.clear();
     }
 
 
@@ -348,7 +352,6 @@ public class WordyServer extends wordyPOA {
         }
         return false;
     }
-
 
 
 
