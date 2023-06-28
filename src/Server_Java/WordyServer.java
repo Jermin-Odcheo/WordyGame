@@ -15,7 +15,7 @@ public class WordyServer extends wordyPOA {
     private final List<String> rounds = new ArrayList<>();
     private static final List<String> lobbyPlayers = new ArrayList<>();
     private final ArrayList<String> playersInGame = new ArrayList<>();
-    private final Map<String, String> clientWords = new HashMap<>();
+
     private final Map<String, Integer> clientWinCount = new HashMap<>();
     private int countdown = 10;
     private boolean isGameStarted;
@@ -305,19 +305,21 @@ public class WordyServer extends wordyPOA {
         }
         return longestWord;
     }
+    private final Map<String, String> clientWords = new HashMap<>();
 
     public void getWinner() throws getWin, isSameLength, getRoundWin {
         String longestWord = findLongestWord();
         int winCount = 0;
         String winner = "";
+
         // Check if both clients sent words of the same length
-        if (isSameLengthWords(longestWord)) {
+        boolean sameLengthWords = isSameLengthWords(longestWord);
+
+        if (sameLengthWords) {
             throw new isSameLength("TIE: Both clients sent words of the same length. Starting another round...");
-        } else if (clientWords.isEmpty()){
-            System.out.println("No word entered");
+        } else if (clientWords.isEmpty()) {
             throw new isSameLength("TIE: NO WINNER. Starting another round...");
-        }
-        else {
+        } else {
             for (Map.Entry<String, Integer> entry : clientWinCount.entrySet()) {
                 String playerName = entry.getKey();
                 winCount = entry.getValue();
@@ -327,31 +329,41 @@ public class WordyServer extends wordyPOA {
                     addOrUpdateUser(winner);
                     System.out.println(winner + " WON");
                     throw new getWin(winner + " HAS WON THE GAME!!!");
-
                 }
             }
+
+            boolean hasWinner = false;
             for (Map.Entry<String, String> entry : clientWords.entrySet()) {
                 if (entry.getValue().equals(longestWord)) {
+                    if (hasWinner) {
+                        // We have multiple winners with the same longest word
+                        throw new getRoundWin("TIE: Multiple players won with the same word: " + longestWord);
+                    }
                     winner = entry.getKey();
-
                     clientWinCount.put(winner, clientWinCount.getOrDefault(winner, 0) + 1);
-                    System.out.println(winner + "won the round");
-                    throw new getRoundWin(winner + " won with a word: " + longestWord);
+                    System.out.println(winner + " won the round");
+                    hasWinner = true;
                 }
+            }
+            if (hasWinner) {
+                throw new getRoundWin(winner + " won with a word: " + longestWord);
             }
         }
         clientWords.clear();
     }
 
-
     private boolean isSameLengthWords(String longestWord) {
+        int wordLength = longestWord.length();
+        int count = 0;
         for (String word : clientWords.values()) {
-            if (word.length() == longestWord.length() && !word.equals(longestWord)) {
-                return true;
+            if (word.length() == wordLength) {
+                count++;
             }
         }
-        return false;
+        return count == 2; // Return true if there are exactly two words with the same length as the longest word
     }
+
+
 
 
 

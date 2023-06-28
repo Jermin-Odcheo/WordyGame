@@ -175,29 +175,26 @@ static String username;
     public void inLobby() {
         try {
             double lobbyCount = 0;
-            double time = 0;
+            double time = wordyImpl.gettimer() + 1;
             if (wordyImpl != null) {
                 boolean joined = wordyImpl.joinLobby(username);
                 if (joined) {
-                    int countdown = 5;
                     System.out.println(username + " Joined");
-                    while (countdown > 0) {
-                        countdown--;
-                        System.out.println(countdown);
+                    while (time > 0) {
+                        time -= 1;
+                        System.out.println(time);
                         Thread.sleep(1000);
                         lobbyCount = wordyImpl.lobbyPlayerCount();
-                        time = wordyImpl.gettimer() + 1;
                     }
                 }
             }
 
             System.out.println("Players " + lobbyCount);
-            while (time > 0) {
-                lobbyCount = wordyImpl.lobbyPlayerCount();
-                time--;
+            if (time == 0) {
                 if (lobbyCount >= 2) {
                     System.out.println("Count Down " + time);
                     jLabel3.setText("Starting Game: " + time);
+                    gameStartNotification();
                     Thread.sleep(1000);
                 } else {
                     int result = JOptionPane.showConfirmDialog(null, "Not Enough Players!\nGo back to ClientUI?", "Error", JOptionPane.OK_CANCEL_OPTION);
@@ -205,17 +202,14 @@ static String username;
                         dispose();
                         ClientUI.startClientUI(username);
                         try {
+                            System.out.println("Failed to Join: Not enough players");
                             wordyImpl.leaveGame(username);
                         } catch (Exception e) {
                             System.out.println(e.getMessage());
                         }
                     }
-                    break;
                 }
-            }
 
-            if (time == 0) {
-                gameStartNotification();
             }
         } catch (Exception e) {
             System.err.println("Error joining the lobby: " + e);
