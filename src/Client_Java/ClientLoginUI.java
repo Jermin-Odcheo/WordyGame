@@ -199,33 +199,117 @@ public class ClientLoginUI extends javax.swing.JFrame {
     }
 
     private void loginButtonActionPerformed(java.awt.event.ActionEvent evt) {
-            String user = userName.getText();
-            String pass = String.valueOf(password.getPassword());
-                 if (user.equals("")) {
-                     JOptionPane.showMessageDialog(null, "Username is empty");
-                 } else if (pass.equals("")) {
-                     JOptionPane.showMessageDialog(null, "Password is empty");
-                 } else {
-                     try {
-                         wordyImpl.login(user, pass);
-                     }catch (notFound e) {
-                         System.out.println(e.message);
-                         JOptionPane.showMessageDialog(null,e.message);
-                     } catch (invalid e) {
-                         System.out.println(e.message);
-                         JOptionPane.showMessageDialog(null,e.message);
-                     }   catch (validatedLogin e) {
-                         JOptionPane.showMessageDialog(null, "Successfully Logged In!");
-                         ClientUI.startClientUI(user);
-                         this.dispose();
-                     }catch (checkLogin e) {
-                         System.out.println(e.message);
-                         JOptionPane.showMessageDialog(null,e.message);
-                     }
-                 }
+        // Disable login button to prevent multiple clicks
+        loginButton.setEnabled(false);
+        loginButton.setText("Connecting...");
+
+        String usernameText = userName.getText().trim();
+        String passwordText = new String(password.getPassword()).trim();
+
+        // Validate input
+        if (usernameText.isEmpty() || passwordText.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter both username and password.", "Input Error", JOptionPane.WARNING_MESSAGE);
+            resetLoginButton();
+            return;
         }
 
+        // Run connection and login in background thread to avoid UI freezing
+        SwingWorker<Boolean, String> loginWorker = new SwingWorker<Boolean, String>() {
+            @Override
+            protected Boolean doInBackground() throws Exception {
+                // First, try to establish connection to server
+                publish("Connecting to server...");
 
+                if (!Client.connectToServer(5)) { // Try 5 times to connect
+                    return false;
+                }
+
+                publish("Authenticating...");
+
+                // Try to login
+                try {
+                    wordyImpl.login(usernameText, passwordText);
+                    return false; // This shouldn't happen if login is successful
+                } catch (validatedLogin vl) {
+                    // Success - this is actually the successful case
+                    publish("Login successful!");
+                    return true;
+                } catch (checkLogin cl) {
+                    publish("ERROR: User already logged in!");
+                    return false;
+                } catch (notFound nf) {
+                    publish("ERROR: Account not found!");
+                    return false;
+                } catch (invalid inv) {
+                    publish("ERROR: Invalid credentials!");
+                    return false;
+                } catch (Exception e) {
+                    publish("ERROR: Connection failed - " + e.getMessage());
+                    return false;
+                }
+            }
+
+            @Override
+            protected void process(java.util.List<String> chunks) {
+                // Update UI with progress messages
+                for (String message : chunks) {
+                    if (message.startsWith("ERROR:")) {
+                        // Show error in dialog and reset button
+                        SwingUtilities.invokeLater(() -> {
+                            JOptionPane.showMessageDialog(ClientLoginUI.this,
+                                    message.substring(6), // Remove "ERROR:" prefix
+                                    "Login Error",
+                                    JOptionPane.ERROR_MESSAGE);
+                        });
+                        loginButton.setText("Login Failed");
+                    } else {
+                        loginButton.setText(message);
+                    }
+                }
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    boolean success = get();
+                    if (success) {
+                        // Login successful - redirect to ClientUI first
+                        SwingUtilities.invokeLater(() -> {
+                            JOptionPane.showMessageDialog(ClientLoginUI.this,
+                                    "Welcome " + usernameText + "! Redirecting to main menu...",
+                                    "Login Successful",
+                                    JOptionPane.INFORMATION_MESSAGE);
+
+                            // Close login window and go to ClientUI
+                            dispose();
+                            ClientUI.startClientUI(usernameText);
+                        });
+
+                    } else {
+                        // Login failed - reset button after short delay
+                        Timer resetTimer = new Timer(2000, e -> resetLoginButton());
+                        resetTimer.setRepeats(false);
+                        resetTimer.start();
+                    }
+                } catch (Exception e) {
+                    SwingUtilities.invokeLater(() -> {
+                        JOptionPane.showMessageDialog(ClientLoginUI.this,
+                                "Unexpected error during login: " + e.getMessage(),
+                                "System Error",
+                                JOptionPane.ERROR_MESSAGE);
+                        resetLoginButton();
+                    });
+                }
+            }
+        };
+
+        loginWorker.execute();
+    }
+
+    private void resetLoginButton() {
+        loginButton.setEnabled(true);
+        loginButton.setText("Login");
+    }
 
     public static void startLogin() {
         try {

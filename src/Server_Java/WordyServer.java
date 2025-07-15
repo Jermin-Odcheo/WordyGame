@@ -15,55 +15,66 @@ public class WordyServer extends wordyPOA {
     private final List<String> rounds = new ArrayList<>();
     private static final List<String> lobbyPlayers = new ArrayList<>();
     private final ArrayList<String> playersInGame = new ArrayList<>();
+    private final ArrayList<String> playersWaitingForRestart = new ArrayList<>();
 
     private final Map<String, Integer> clientWinCount = new HashMap<>();
+    private final Map<String, String> clientWords = new HashMap<>();
+    private final List<String> words = new ArrayList<>();
     private int countdown = 10;
-    private boolean isGameStarted;
+    private int gameTimer = 30; // Game duration in seconds
+    private boolean isGameStarted = false;
+    private boolean isGameEnded = false;
     private String letters;
-    WordyServer wordyServer;
+    private String currentWinner = "";
+    private boolean countdownStarted = false;
+    private Timer gameTimerInstance;
 
-    public void login(String username, String password) throws checkLogin,notFound,invalid,validatedLogin {
-            boolean check = verifyUsername(username);
-            if (!check) {
-                System.out.println(username + " : " + "Account not found");
-                throw new notFound(username + " : " + "Account not found" );
-            } else {
-                try {
-                    PreparedStatement preparedStatement;
-                    ResultSet resultSet;
-                    preparedStatement = myConnection.getConnection().prepareStatement("SELECT * FROM users WHERE user_username = ? AND user_password = ?");
-                    preparedStatement.setString(1, username);
-                    preparedStatement.setString(2, password);
-                    resultSet = preparedStatement.executeQuery();
-                    if (resultSet.next()) {
-                        if (players.contains(username)){
-                            System.out.println("Already Logged In!");
-                            throw new checkLogin("Already Logged In!");
-                        } else {
-                            players.add(username);
-                            System.out.println(username + " : " + "Successfully Logged In");
-                            throw new validatedLogin(username + " : " + "Successfully Logged In");
-                        }
+    public void login(String username, String password) throws checkLogin, notFound, invalid, validatedLogin {
+        boolean check = verifyUsername(username);
+        if (!check) {
+            System.out.println(username + " : " + "Account not found");
+            throw new notFound(username + " : " + "Account not found");
+        } else {
+            try {
+                PreparedStatement preparedStatement;
+                ResultSet resultSet;
+                preparedStatement = myConnection.getConnection().prepareStatement("SELECT * FROM users WHERE user_username = ? AND user_password = ?");
+                preparedStatement.setString(1, username);
+                preparedStatement.setString(2, password);
+                resultSet = preparedStatement.executeQuery();
+                if (resultSet.next()) {
+                    if (players.contains(username)) {
+                        System.out.println("Already Logged In!");
+                        throw new checkLogin("Already Logged In!");
                     } else {
-                        throw new invalid("Invalid Credentials!");
+                        players.add(username);
+                        System.out.println(username + " : " + "Successfully Logged In");
+                        throw new validatedLogin(username + " : " + "Successfully Logged In");
                     }
-                } catch (SQLException e){
-                    System.out.println("Server Side Error");
+                } else {
+                    throw new invalid("Invalid Credentials!");
                 }
+            } catch (SQLException e) {
+                System.out.println("Server Side Error");
             }
+        }
 
     }
 
     @Override
     public void exit(String username) {
         players.remove(username);
+        lobbyPlayers.remove(username);
         playersInGame.remove(username);
+        playersWaitingForRestart.remove(username);
+        clientWords.remove(username);
         System.out.println(username + ": Logged Out!");
     }
 
     public boolean status(String playerName) {
         return playersInGame.contains(playerName);
     }
+
     public boolean verifyUsername(String username) {
         ResultSet resultSet;
         try {
@@ -83,9 +94,13 @@ public class WordyServer extends wordyPOA {
         }
         return false;
     }
+
     //Player join the lobby
-    private boolean countdownStarted;
     public boolean joinLobby(String playerName) {
+        if (isGameStarted) {
+            System.out.println("Cannot join - game in progress");
+            return false;
+        }
         if (lobbyPlayers.size() >= 5) {
             System.out.println("Lobby is Full");
             return false;
@@ -94,21 +109,20 @@ public class WordyServer extends wordyPOA {
             lobbyPlayers.add(playerName);
             System.out.println("Player " + playerName + " joined the lobby.");
         }
-        if (lobbyPlayers.size() >=1 && !countdownStarted) {
+        if (lobbyPlayers.size() >= 1 && !countdownStarted) {
             timerServer();
             countdownStarted = true;
         }
         return true;
     }
-    private Timer timer;
-    //METHOD TIMER TO START THE LOBBY
-    public void timerServer(){
+
+    public void timerServer() {
         new Thread(() -> {
-            while (countdown > 0) {
-                System.out.println("Countdown: " + countdown);
+            while (countdown > 0 && lobbyPlayers.size() >= 1) {
+                System.out.println("Lobby Countdown: " + countdown);
                 countdown--;
                 try {
-                    Thread.sleep(1000); // Sleep for 1 second
+                    Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -116,67 +130,227 @@ public class WordyServer extends wordyPOA {
             if (lobbyPlayers.size() >= 2) {
                 startGame();
             } else {
+                countdown = 10;
                 countdownStarted = false;
+                System.out.println("Not enough players, countdown reset");
             }
-
         }).start();
     }
+
     public double gettimer() {
         return countdown;
     }
-    public String getGeneratedLetter(){
+
+    public String getGeneratedLetter() {
         return letters;
     }
 
     @Override
     public String playerInGameList() {
-        return lobbyPlayers.toString();
+        // Fix: Return appropriate list based on game state
+        if (isGameStarted && !playersInGame.isEmpty()) {
+            return playersInGame.toString();
+        } else {
+            return lobbyPlayers.toString();
+        }
     }
 
     @Override
     public void generateLetters() {
-
+        generateRandomLetters();
     }
-
-
 
     private void startGame() {
         if (lobbyPlayers.size() < 2) {
             System.out.println("Cannot start game. Not enough players.");
-            lobbyPlayers.clear();
             countdown = 10;
+            countdownStarted = false;
             return;
         }
-        System.out.println("Starting game with players: " + lobbyPlayers.toString());
-        //Generate 17 random letters with 5-7 vowels
+
+        // Initialize game state
+        isGameStarted = true;
+        isGameEnded = false;
+        playersInGame.clear();
+        playersInGame.addAll(lobbyPlayers);
+        clientWords.clear();
+        words.clear();
+        currentWinner = "";
+        gameTimer = 30;
+
+        System.out.println("Starting game with players: " + playersInGame.toString());
         generateRandomLetters();
         System.out.println("GAME STARTING WITH: " + letters);
 
+        // Start game timer
+        startGameTimer();
+
+        // Reset lobby
         countdown = 10;
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        countdownStarted = false;
         lobbyPlayers.clear();
     }
 
-    // Play Word method
+    private void startGameTimer() {
+        gameTimerInstance = new Timer();
+        gameTimerInstance.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                gameTimer--;
+                System.out.println("Game Timer: " + gameTimer);
+
+                if (gameTimer <= 0) {
+                    endGame();
+                    gameTimerInstance.cancel();
+                }
+            }
+        }, 1000, 1000);
+    }
+
+    private void endGame() {
+        isGameEnded = true;
+        isGameStarted = false;
+
+        // Determine winner
+        currentWinner = findLongestWord();
+        if (!currentWinner.isEmpty()) {
+            addOrUpdateUser(currentWinner);
+            System.out.println("Game ended! Winner: " + currentWinner);
+        } else {
+            System.out.println("Game ended! No winner (no words submitted)");
+            currentWinner = "No Winner";
+        }
+
+        // Reset for next game
+        playersWaitingForRestart.clear();
+    }
+
     public void playWord(String playerName, String word) throws InvalidWord {
+        // Fix: Check if game is active before allowing word submission
+        if (!isGameStarted || isGameEnded) {
+            throw new InvalidWord("Game is not active");
+        }
 
         if (!canFormWord(word)) {
-            System.out.println("Cant be formed");
-                throw new InvalidWord("Word Cannot Be Formed!");
+            System.out.println("Can't be formed with available letters");
+            throw new InvalidWord("Word Cannot Be Formed!");
         }
         if (!isValidWord(word)) {
-            System.out.println("Not Valid");
-                throw new InvalidWord("Word Not Valid");
+            System.out.println("Not a valid word");
+            throw new InvalidWord("Word Not Valid");
         }
+
         words.add(word);
-        clientWords.put(playerName,word);
-        storeClientWord(playerName,word);
+        clientWords.put(playerName, word);
+        storeClientWord(playerName, word);
         System.out.println("Client " + playerName + " submitted word: " + word);
     }
+
+    // New methods for game state management
+    public boolean isGameActive() {
+        return isGameStarted && !isGameEnded;
+    }
+
+    public boolean getGameEnded() {
+        return isGameEnded;
+    }
+
+    public String getWinnerName() {
+        return currentWinner;
+    }
+
+    public int getGameTimer() {
+        return gameTimer;
+    }
+
+    public String findLongestWord() {
+        String longestWord = "";
+        String winnerName = "";
+
+        for (Map.Entry<String, String> entry : clientWords.entrySet()) {
+            String playerName = entry.getKey();
+            String word = entry.getValue();
+
+            if (word.length() > longestWord.length()) {
+                longestWord = word;
+                winnerName = playerName;
+            }
+        }
+
+        return winnerName;
+    }
+
+    private void generateRandomLetters() {
+        String vowels = "AEIOU";
+        String consonants = "BCDFGHJKLMNPQRSTVWXYZ";
+        StringBuilder result = new StringBuilder();
+        Random random = new Random();
+
+        // Add 5-7 vowels
+        int vowelCount = 5 + random.nextInt(3);
+        for (int i = 0; i < vowelCount; i++) {
+            result.append(vowels.charAt(random.nextInt(vowels.length())));
+        }
+
+        // Add consonants to make 17 total letters
+        int consonantCount = 17 - vowelCount;
+        for (int i = 0; i < consonantCount; i++) {
+            result.append(consonants.charAt(random.nextInt(consonants.length())));
+        }
+
+        // Shuffle the letters
+        List<Character> charList = new ArrayList<>();
+        for (char c : result.toString().toCharArray()) {
+            charList.add(c);
+        }
+        Collections.shuffle(charList);
+
+        StringBuilder shuffled = new StringBuilder();
+        for (char c : charList) {
+            shuffled.append(c);
+        }
+
+        letters = shuffled.toString();
+    }
+
+    private boolean canFormWord(String word) {
+        if (letters == null || letters.isEmpty()) {
+            return false;
+        }
+
+        Map<Character, Integer> letterCount = new HashMap<>();
+        for (char c : letters.toCharArray()) {
+            letterCount.put(c, letterCount.getOrDefault(c, 0) + 1);
+        }
+
+        for (char c : word.toUpperCase().toCharArray()) {
+            if (!letterCount.containsKey(c) || letterCount.get(c) <= 0) {
+                return false;
+            }
+            letterCount.put(c, letterCount.get(c) - 1);
+        }
+
+        return true;
+    }
+
+    private boolean isValidWord(String word) {
+        if (word.length() < 3) {
+            return false;
+        }
+
+        try (BufferedReader reader = new BufferedReader(new FileReader("src/Server_Java/words.txt"))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.trim().equalsIgnoreCase(word)) {
+                    return true;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public static void addOrUpdateUser(String username) {
         String selectSql = "SELECT * FROM wincount WHERE username = ?";
         String insertSql = "INSERT INTO wincount (username, wins) VALUES (?, 1)";
@@ -191,22 +365,18 @@ public class WordyServer extends wordyPOA {
             ResultSet resultSet = selectStatement.executeQuery();
 
             if (resultSet.next()) {
-                // User exists, increment their win count
                 updateStatement.setString(1, username);
                 int rowsAffected = updateStatement.executeUpdate();
                 if (rowsAffected > 0) {
                     System.out.println("Win count incremented for user: " + username);
-                    return;
                 } else {
                     System.out.println("Failed to increment win count for user: " + username);
                 }
             } else {
-                // User doesn't exist, add them to the table
                 insertStatement.setString(1, username);
                 int rowsAffected = insertStatement.executeUpdate();
                 if (rowsAffected > 0) {
                     System.out.println("User added to wincount table: " + username);
-                    return;
                 } else {
                     System.out.println("Failed to add user to wincount table: " + username);
                 }
@@ -216,12 +386,9 @@ public class WordyServer extends wordyPOA {
         }
     }
 
-
     public static void storeClientWord(String username, String word) {
         try {
-            // Retrieve the user ID based on the username
             String userId = getUserIdByUsername(username);
-            // Insert the user ID and word into the wordlist table
             String sql = "INSERT INTO wordlist (user_id, word) VALUES (?, ?)";
             PreparedStatement statement;
             statement = myConnection.getConnection().prepareStatement(sql);
@@ -230,9 +397,9 @@ public class WordyServer extends wordyPOA {
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
-            // Handle any exceptions that occur during the database operation
         }
     }
+
     private static String getUserIdByUsername(String username) throws SQLException {
         String userId = null;
         String sql = "SELECT user_id FROM users WHERE user_username = ?";
@@ -247,6 +414,7 @@ public class WordyServer extends wordyPOA {
         statement.close();
         return userId;
     }
+
     @Override
     public String[] displayWordList() {
         List<String> wordDataList = new ArrayList<>();
@@ -264,7 +432,6 @@ public class WordyServer extends wordyPOA {
                 String word = resultSet.getString("word");
                 String wordData = username + "," + word;
                 wordDataList.add(wordData);
-                System.out.println(username + word);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -272,6 +439,7 @@ public class WordyServer extends wordyPOA {
 
         return wordDataList.toArray(new String[0]);
     }
+
     public String[] displayWinsList() {
         List<String> winsDataList = new ArrayList<>();
 
@@ -285,7 +453,6 @@ public class WordyServer extends wordyPOA {
                 String wins = resultSet.getString("wins");
                 String wordData = username + "," + wins;
                 winsDataList.add(wordData);
-                System.out.println(username + wins);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -294,176 +461,77 @@ public class WordyServer extends wordyPOA {
         return winsDataList.toArray(new String[0]);
     }
 
-
-
-    public String findLongestWord() {
-        String longestWord = "";
-        for (String word : clientWords.values()) {
-            if (word.length() > longestWord.length()) {
-                longestWord = word;
-            }
-        }
-        return longestWord;
-    }
-    private final Map<String, String> clientWords = new HashMap<>();
-
-    public void getWinner() throws getWin, isSameLength, getRoundWin {
-        String longestWord = findLongestWord();
-        int winCount = 0;
-        String winner = "";
-
-        // Check if both clients sent words of the same length
-        boolean sameLengthWords = isSameLengthWords(longestWord);
-
-        if (sameLengthWords) {
-            throw new isSameLength("TIE: Both clients sent words of the same length. Starting another round...");
-        } else if (clientWords.isEmpty()) {
-            throw new isSameLength("TIE: NO WINNER. Starting another round...");
-        } else {
-            for (Map.Entry<String, Integer> entry : clientWinCount.entrySet()) {
-                String playerName = entry.getKey();
-                winCount = entry.getValue();
-                int maxWinCount = 3;
-                if (winCount > maxWinCount) {
-                    winner = playerName;
-                    addOrUpdateUser(winner);
-                    System.out.println(winner + " WON");
-                    throw new getWin(winner + " HAS WON THE GAME!!!");
-                }
-            }
-
-            boolean hasWinner = false;
-            for (Map.Entry<String, String> entry : clientWords.entrySet()) {
-                if (entry.getValue().equals(longestWord)) {
-                    if (hasWinner) {
-                        // We have multiple winners with the same longest word
-                        throw new getRoundWin("TIE: Multiple players won with the same word: " + longestWord);
-                    }
-                    winner = entry.getKey();
-                    clientWinCount.put(winner, clientWinCount.getOrDefault(winner, 0) + 1);
-                    System.out.println(winner + " won the round");
-                    hasWinner = true;
-                }
-            }
-            if (hasWinner) {
-                throw new getRoundWin(winner + " won with a word: " + longestWord);
-            }
-        }
-        clientWords.clear();
-    }
-
-    private boolean isSameLengthWords(String longestWord) {
-        int wordLength = longestWord.length();
-        int count = 0;
-        for (String word : clientWords.values()) {
-            if (word.length() == wordLength) {
-                count++;
-            }
-        }
-        return count == 2; // Return true if there are exactly two words with the same length as the longest word
-    }
-
-
-
-
-
+    // Missing abstract method implementations from wordyOperations interface
     @Override
     public String getValidWordFromClients() {
-        return String.valueOf(clientWords);
+        // Return all valid words submitted by clients
+        StringBuilder validWords = new StringBuilder();
+        for (Map.Entry<String, String> entry : clientWords.entrySet()) {
+            validWords.append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
+        }
+        return validWords.toString();
     }
 
-    private boolean canFormWord(String word){
-        word = word.toLowerCase();
-        letters = letters.toLowerCase();
-        Map<Character, Integer> letterCount = new HashMap<>();
-        for (char c : letters.toCharArray()) {
-            letterCount.put(c, letterCount.getOrDefault(c, 0) + 1);
-        }
-        for (char c : word.toCharArray()) {
-            if (!letterCount.containsKey(c) || letterCount.get(c) == 0) {
-                return false;
-            }
-            letterCount.put(c, letterCount.get(c) - 1);
-        }
-        return true;
-    }
-
-    public void startNewRound() {
-        if (lobbyPlayers.size() < 2) {
-            System.out.println("Cannot start game. Not enough players. SNR");
-            lobbyPlayers.clear();
-            return;
-        }
-        System.out.println("Starting game with players: " + lobbyPlayers.toString());
-        //Generate 17 random letters with 5-7 vowels
-        generateRandomLetters();
-        System.out.println("GAME STARTING WITH: " + letters);
-        lobbyPlayers.clear();
-        clientWords.clear();
-        rounds.add(letters);
-        System.out.println("Starting new round with letters: " + letters);
-    }
-
-    private String generateRandomLetters() {
-        List<Character> letter = new ArrayList<Character>();
-        Random random = new Random();
-        int numVowels = random.nextInt(3) + 5; // 5 to 7 vowels
-        for (int i = 0; i < numVowels; i++) {
-            letter.add(getRandomVowel());
-        }
-        for (int i = numVowels; i < 17; i++) {
-            letter.add(getRandomConsonant());
-        }
-        Collections.shuffle(letter);
-        StringBuilder sb = new StringBuilder();
-        for (char c : letter) {
-            sb.append(c);
-        }
-        return letters = sb.toString();
-    }
-    private char getRandomVowel() {
-        String vowels = "AEIOU";
-        return vowels.charAt(new Random().nextInt(vowels.length()));
-    }
-    private char getRandomConsonant() {
-        String consonants = "BCDFGHJKLMNPQRSTVWXYZ";
-        return consonants.charAt(new Random().nextInt(consonants.length()));
-    }
-    private Set<String> words;
-    // implementation to check if word is valid using .txt file
-    private boolean isValidWord(String word) {
-        try {
-            words = new HashSet<>();
-            BufferedReader reader = new BufferedReader(new FileReader("src/Server_Java/words.txt"));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                words.add(line.trim().toUpperCase());
-            }
-            reader.close();
-        } catch (IOException e) {
-            System.err.println("Failed to load dictionary: " + e.getMessage());
-        }
-        return words.contains(word.toUpperCase());
-    }
-
-    public void leaveGame(String playerName) throws GameException {
-        if (playersInGame.contains(playerName) || lobbyPlayers.contains(playerName)) {
-            playersInGame.remove(playerName);
-            lobbyPlayers.remove(playerName);
-            if (playersInGame.size() == 0 || lobbyPlayers.size() == 0) {
-                isGameStarted = false;
-            }
+    @Override
+    public void getWinner() throws isSameLength, getWin, getRoundWin {
+        // Determine and announce the winner
+        String winner = findLongestWord();
+        if (winner.isEmpty()) {
+            throw new isSameLength("No words submitted or tie game");
         } else {
-            throw new GameException("Player " + playerName + " is not in the game");
-        };
+            System.out.println("Winner: " + winner);
+            throw new getWin("Winner is: " + winner);
+        }
     }
 
+    @Override
+    public void startNewRound() {
+        // Reset game state for a new round
+        isGameStarted = false;
+        isGameEnded = false;
+        clientWords.clear();
+        words.clear();
+        currentWinner = "";
+        gameTimer = 30;
+        countdown = 10;
+        countdownStarted = false;
 
+        // Clear game timer if running
+        if (gameTimerInstance != null) {
+            gameTimerInstance.cancel();
+        }
+
+        System.out.println("New round started - game state reset");
+    }
 
     @Override
     public double lobbyPlayerCount() {
         return lobbyPlayers.size();
     }
 
+    @Override
+    public void leaveGame(String playerName) throws GameException {
+        try {
+            // Remove player from all lists
+            lobbyPlayers.remove(playerName);
+            playersInGame.remove(playerName);
+            playersWaitingForRestart.remove(playerName);
+            clientWords.remove(playerName);
 
+            System.out.println("Player " + playerName + " left the game");
+
+            // Check if we need to stop countdown or end game
+            if (lobbyPlayers.isEmpty()) {
+                countdown = 10;
+                countdownStarted = false;
+            }
+
+            // If game is in progress and no players left, end game
+            if (isGameStarted && playersInGame.isEmpty()) {
+                endGame();
+            }
+        } catch (Exception e) {
+            throw new GameException("Error removing player from game: " + e.getMessage());
+        }
+    }
 }

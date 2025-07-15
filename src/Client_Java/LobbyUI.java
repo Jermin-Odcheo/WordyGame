@@ -1,292 +1,392 @@
 package Client_Java;
 
 import javax.swing.*;
-
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
+import java.awt.*;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
 import static Client_Java.Client.wordyImpl;
 
-public class LobbyUI extends javax.swing.JFrame{
-static String username;
+public class LobbyUI extends javax.swing.JFrame {
+    static String username;
+
+    // Timer for updating lobby status
+    private Timer lobbyUpdateTimer;
+    private Timer countdownTimer;
+
+    // UI Components for enhanced lobby
+    private JLabel countdownLabel;
+    private JTextArea playersListArea;
+    private JLabel playerCountLabel;
+    private JLabel statusLabel;
+
     public LobbyUI(String username) {
         this.username = username;
         initComponents();
         addListeners();
+        startLobbyUpdates();
     }
 
     private void initComponents() {
-
-        jLabel1 = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
-        jLabel3 = new javax.swing.JLabel();
-        jLabel4 = new javax.swing.JLabel();
-        jLabel5 = new javax.swing.JLabel();
-        matchTimerField = new javax.swing.JLabel();
-        playerCountField = new javax.swing.JLabel();
-        jLabel8 = new javax.swing.JLabel();
-        jLabel9 = new javax.swing.JLabel();
-        exitLobbyButton = new javax.swing.JButton();
-        jLayeredPane1 = new javax.swing.JLayeredPane();
-        jLabel7 = new javax.swing.JLabel();
-
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(1270, 750));
+        setTitle("WordyGame - Lobby");
+        setLocationRelativeTo(null);
+        setResizable(false);
+
+        // Set dark background
+        getContentPane().setBackground(new Color(45, 52, 70));
         getContentPane().setLayout(null);
 
-        jLabel1.setForeground(new java.awt.Color(255, 236, 238));
-        jLabel1.setIcon(new javax.swing.ImageIcon("src/Server_Java/WORD.png")); // NOI18N
-        getContentPane().add(jLabel1);
-        jLabel1.setBounds(430, 130, 438, 438);
+        // Main title
+        JLabel titleLabel = new JLabel("WAITING FOR PLAYERS TO JOIN", SwingConstants.CENTER);
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 32));
+        titleLabel.setForeground(Color.WHITE);
+        titleLabel.setBounds(200, 30, 870, 50);
+        getContentPane().add(titleLabel);
 
-        jLabel2.setFont(new java.awt.Font("Arial Rounded MT Bold", 1, 36)); // NOI18N
-        jLabel2.setForeground(new java.awt.Color(255, 236, 238));
-        jLabel2.setText("WAITING FOR PLAYERS TO JOIN");
-        getContentPane().add(jLabel2);
-        jLabel2.setBounds(342, 30, 609, 43);
+        // Lobby info
+        JLabel lobbyLabel = new JLabel("WORDY LOBBY", SwingConstants.CENTER);
+        lobbyLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        lobbyLabel.setForeground(new Color(168, 162, 158));
+        lobbyLabel.setBounds(200, 85, 870, 30);
+        getContentPane().add(lobbyLabel);
 
-        jLabel3.setFont(new java.awt.Font("Arial Rounded MT Bold", 1, 18)); // NOI18N
-        jLabel3.setForeground(new java.awt.Color(255, 236, 238));
-        jLabel3.setText("WORDY LOBBY #2");
-        getContentPane().add(jLabel3);
-        jLabel3.setBounds(520, 90, 215, 21);
+        // Countdown section
+        createCountdownSection();
 
-        jLabel4.setToolTipText("");
-        getContentPane().add(jLabel4);
-        jLabel4.setBounds(199, 283, 0, 0);
+        // Players section
+        createPlayersSection();
 
-        jLabel5.setFont(new java.awt.Font("Arial Rounded MT Bold", 1, 14)); // NOI18N
-        jLabel5.setForeground(new java.awt.Color(255, 236, 238));
-        //jLabel5.setText("PLAYERS IN THE LOBBY :");
-        getContentPane().add(jLabel5);
-        jLabel5.setBounds(530, 120, 184, 17);
+        // Status section
+        createStatusSection();
 
-        matchTimerField.setFont(new java.awt.Font("Arial Rounded MT Bold", 1, 18)); // NOI18N
-        matchTimerField.setForeground(new java.awt.Color(255, 236, 238));
-        getContentPane().add(matchTimerField);
-        matchTimerField.setBounds(740, 90, 30, 20);
+        // Game icon (center)
+        JLabel gameIcon = new JLabel();
+        gameIcon.setIcon(new ImageIcon("src/Server_Java/WORD.png"));
+        gameIcon.setBounds(430, 200, 438, 300);
+        getContentPane().add(gameIcon);
 
-        playerCountField.setFont(new java.awt.Font("Arial Rounded MT Bold", 1, 14)); // NOI18N
-        playerCountField.setForeground(new java.awt.Color(255, 236, 238));
-        getContentPane().add(playerCountField);
-        playerCountField.setBounds(720, 120, 20, 17);
+        // Instructions
+        createInstructionsSection();
 
-        jLabel8.setFont(new java.awt.Font("Arial Rounded MT Bold", 1, 14)); // NOI18N
-        jLabel8.setForeground(new java.awt.Color(255, 236, 238));
-        jLabel8.setText("HOW TO PLAY:");
-        getContentPane().add(jLabel8);
-        jLabel8.setBounds(590, 570, 107, 17);
+        // Exit button
+        createExitButton();
 
-        jLabel9.setFont(new java.awt.Font("Arial Rounded MT Bold", 1, 14)); // NOI18N
-        jLabel9.setForeground(new java.awt.Color(255, 236, 238));
-        jLabel9.setText("Type the Longest word or Type the most words within the given time for you to win the game.");
-        getContentPane().add(jLabel9);
-        jLabel9.setBounds(310, 600, 659, 17);
+        // Background
+        JLabel backgroundLabel = new JLabel();
+        backgroundLabel.setIcon(new ImageIcon("src/Client_Java/17250835.png"));
+        backgroundLabel.setBounds(0, 0, 1270, 750);
+        getContentPane().add(backgroundLabel);
+    }
 
-        exitLobbyButton.setBackground(new java.awt.Color(255, 102, 102));
-        exitLobbyButton.setFont(new java.awt.Font("sansserif", 1, 14)); // NOI18N
-        exitLobbyButton.setForeground(new java.awt.Color(255, 255, 255));
-        exitLobbyButton.setText("EXIT LOBBY");
-        exitLobbyButton.setBorderPainted(false);
-        exitLobbyButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                exitLobbyButtonActionPerformed(evt);
+    private void createCountdownSection() {
+        // Countdown panel
+        JPanel countdownPanel = new JPanel(new BorderLayout());
+        countdownPanel.setBackground(new Color(31, 41, 55));
+        countdownPanel.setBorder(BorderFactory.createCompoundBorder(
+            new LineBorder(new Color(239, 68, 68), 3, true),
+            new EmptyBorder(15, 20, 15, 20)
+        ));
+        countdownPanel.setBounds(50, 130, 300, 120);
+
+        JLabel countdownTitleLabel = new JLabel("⏱️ GAME STARTS IN", SwingConstants.CENTER);
+        countdownTitleLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        countdownTitleLabel.setForeground(Color.WHITE);
+
+        countdownLabel = new JLabel("--", SwingConstants.CENTER);
+        countdownLabel.setFont(new Font("Segoe UI", Font.BOLD, 36));
+        countdownLabel.setForeground(new Color(239, 68, 68));
+
+        countdownPanel.add(countdownTitleLabel, BorderLayout.NORTH);
+        countdownPanel.add(countdownLabel, BorderLayout.CENTER);
+
+        getContentPane().add(countdownPanel);
+    }
+
+    private void createPlayersSection() {
+        // Players panel
+        JPanel playersPanel = new JPanel(new BorderLayout(10, 10));
+        playersPanel.setBackground(new Color(31, 41, 55));
+        playersPanel.setBorder(BorderFactory.createCompoundBorder(
+            new LineBorder(new Color(59, 130, 246), 3, true),
+            new EmptyBorder(15, 15, 15, 15)
+        ));
+        playersPanel.setBounds(920, 130, 300, 350);
+
+        JLabel playersTitle = new JLabel("👥 PLAYERS IN LOBBY", SwingConstants.CENTER);
+        playersTitle.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        playersTitle.setForeground(Color.WHITE);
+
+        playerCountLabel = new JLabel("Players: 0/5", SwingConstants.CENTER);
+        playerCountLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        playerCountLabel.setForeground(new Color(34, 197, 94));
+
+        playersListArea = new JTextArea();
+        playersListArea.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        playersListArea.setBackground(new Color(17, 24, 39));
+        playersListArea.setForeground(new Color(209, 213, 219));
+        playersListArea.setEditable(false);
+        playersListArea.setBorder(new EmptyBorder(10, 10, 10, 10));
+        playersListArea.setText("Loading players...");
+
+        JScrollPane playersScroll = new JScrollPane(playersListArea);
+        playersScroll.setBorder(null);
+        playersScroll.setPreferredSize(new Dimension(0, 250));
+
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setBackground(new Color(31, 41, 55));
+        headerPanel.add(playersTitle, BorderLayout.NORTH);
+        headerPanel.add(playerCountLabel, BorderLayout.SOUTH);
+
+        playersPanel.add(headerPanel, BorderLayout.NORTH);
+        playersPanel.add(playersScroll, BorderLayout.CENTER);
+
+        getContentPane().add(playersPanel);
+    }
+
+    private void createStatusSection() {
+        // Status panel
+        JPanel statusPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        statusPanel.setBackground(new Color(31, 41, 55));
+        statusPanel.setBorder(BorderFactory.createCompoundBorder(
+            new LineBorder(new Color(251, 191, 36), 2, true),
+            new EmptyBorder(10, 20, 10, 20)
+        ));
+        statusPanel.setBounds(50, 270, 300, 80);
+
+        statusLabel = new JLabel("🔍 Searching for players...", SwingConstants.CENTER);
+        statusLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        statusLabel.setForeground(new Color(251, 191, 36));
+
+        statusPanel.add(statusLabel);
+        getContentPane().add(statusPanel);
+    }
+
+    private void createInstructionsSection() {
+        JPanel instructionsPanel = new JPanel(new BorderLayout(10, 10));
+        instructionsPanel.setBackground(new Color(55, 65, 81));
+        instructionsPanel.setBorder(BorderFactory.createCompoundBorder(
+            new LineBorder(new Color(107, 114, 128), 2, true),
+            new EmptyBorder(15, 20, 15, 20)
+        ));
+        instructionsPanel.setBounds(200, 520, 870, 100);
+
+        JLabel howToPlayLabel = new JLabel("🎮 HOW TO PLAY:", SwingConstants.LEFT);
+        howToPlayLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        howToPlayLabel.setForeground(Color.WHITE);
+
+        JLabel instructionsLabel = new JLabel("<html>Create the <b>longest word</b> possible from the given letters within the time limit.<br/>Click letter tiles to build words and compete with other players for the highest score!</html>");
+        instructionsLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        instructionsLabel.setForeground(new Color(209, 213, 219));
+
+        instructionsPanel.add(howToPlayLabel, BorderLayout.NORTH);
+        instructionsPanel.add(instructionsLabel, BorderLayout.CENTER);
+
+        getContentPane().add(instructionsPanel);
+    }
+
+    private void createExitButton() {
+        JButton exitLobbyButton = new JButton("🚪 EXIT LOBBY");
+        exitLobbyButton.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        exitLobbyButton.setForeground(Color.WHITE);
+        exitLobbyButton.setBackground(new Color(239, 68, 68));
+        exitLobbyButton.setBorder(BorderFactory.createCompoundBorder(
+            new LineBorder(new Color(220, 38, 38), 2),
+            new EmptyBorder(12, 25, 12, 25)
+        ));
+        exitLobbyButton.setFocusPainted(false);
+        exitLobbyButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        exitLobbyButton.setBounds(560, 650, 160, 50);
+
+        // Hover effect
+        exitLobbyButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                exitLobbyButton.setBackground(new Color(220, 38, 38));
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                exitLobbyButton.setBackground(new Color(239, 68, 68));
             }
         });
+
+        exitLobbyButton.addActionListener(this::exitLobbyButtonActionPerformed);
         getContentPane().add(exitLobbyButton);
-        exitLobbyButton.setBounds(560, 630, 160, 50);
-        jLayeredPane1.setBackground(new java.awt.Color(204, 153, 255));;
-
-
-        javax.swing.GroupLayout jLayeredPane1Layout = new javax.swing.GroupLayout(jLayeredPane1);
-        jLayeredPane1.setLayout(jLayeredPane1Layout);
-        jLayeredPane1Layout.setHorizontalGroup(
-                jLayeredPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGap(0, 1263, Short.MAX_VALUE)
-                        .addGroup(jLayeredPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addGroup(jLayeredPane1Layout.createSequentialGroup()
-                                        .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 1257, Short.MAX_VALUE)
-                                        .addContainerGap()))
-        );
-        jLayeredPane1Layout.setVerticalGroup(
-                jLayeredPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGap(0, 711, Short.MAX_VALUE)
-                        .addGroup(jLayeredPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 711, Short.MAX_VALUE))
-        );
-
-        getContentPane().add(jLayeredPane1);
-        jLayeredPane1.setBounds(0, 0, 1260, 710);
-
-        pack();
-
     }
-    //dwad
-    private void addListeners()
-    {
-        // Add your listeners here as usual
-        this.addWindowListener(new WindowListener()
-        {
+
+    private void startLobbyUpdates() {
+        // Update lobby status every 1 second
+        lobbyUpdateTimer = new Timer(1000, e -> updateLobbyStatus());
+        lobbyUpdateTimer.start();
+
+        // Initial update
+        updateLobbyStatus();
+    }
+
+    private void updateLobbyStatus() {
+        try {
+            // Get current players in lobby
+            String playersList = wordyImpl.playerInGameList();
+            double playerCount = wordyImpl.lobbyPlayerCount();
+            double countdown = wordyImpl.gettimer();
+
+            // Update players list
+            if (playersList != null && !playersList.isEmpty() && !playersList.equals("[]")) {
+                String formattedList = playersList.replace(",", "\n")
+                    .replace("[", "").replace("]", "").trim();
+                SwingUtilities.invokeLater(() -> {
+                    playersListArea.setText(formattedList);
+                    playerCountLabel.setText("Players: " + (int)playerCount + "/5");
+                });
+            } else {
+                SwingUtilities.invokeLater(() -> {
+                    playersListArea.setText("No players in lobby yet...");
+                    playerCountLabel.setText("Players: 0/5");
+                });
+            }
+
+            // Update countdown
+            if (playerCount >= 2 && countdown > 0) {
+                SwingUtilities.invokeLater(() -> {
+                    countdownLabel.setText(String.valueOf((int)countdown));
+                    statusLabel.setText("🚀 Game starting soon!");
+
+                    // Change color based on countdown
+                    if (countdown <= 3) {
+                        countdownLabel.setForeground(new Color(239, 68, 68)); // Red
+                    } else if (countdown <= 5) {
+                        countdownLabel.setForeground(new Color(251, 191, 36)); // Yellow
+                    } else {
+                        countdownLabel.setForeground(new Color(34, 197, 94)); // Green
+                    }
+                });
+            } else if (playerCount >= 2) {
+                // Game should be starting
+                SwingUtilities.invokeLater(() -> {
+                    statusLabel.setText("🎮 Starting game...");
+                    countdownLabel.setText("GO!");
+                });
+
+                // Start game after short delay
+                Timer startGameTimer = new Timer(2000, startEvent -> {
+                    startGameUI(username);
+                    if (lobbyUpdateTimer != null) {
+                        lobbyUpdateTimer.stop();
+                    }
+                });
+                startGameTimer.setRepeats(false);
+                startGameTimer.start();
+
+            } else {
+                SwingUtilities.invokeLater(() -> {
+                    countdownLabel.setText("--");
+                    statusLabel.setText("🔍 Waiting for more players...");
+                    countdownLabel.setForeground(new Color(168, 162, 158)); // Gray
+                });
+            }
+
+        } catch (Exception ex) {
+            SwingUtilities.invokeLater(() -> {
+                statusLabel.setText("❌ Connection error");
+                playersListArea.setText("Error loading players...");
+            });
+            System.out.println("Error updating lobby: " + ex.getMessage());
+        }
+    }
+
+    public void addListeners() {
+        this.addWindowListener(new WindowListener() {
             @Override
-            public void windowOpened(WindowEvent e)
-            {
-                inLobby();
-                /* ... */
+            public void windowOpened(WindowEvent e) {
+                try {
+                    // Join the lobby when window opens
+                    boolean joined = wordyImpl.joinLobby(username);
+                    if (!joined) {
+                        statusLabel.setText("❌ Failed to join lobby");
+                    }
+                } catch (Exception ex) {
+                    statusLabel.setText("❌ Connection error");
+                    System.out.println("Error joining lobby: " + ex.getMessage());
+                }
             }
 
             @Override
             public void windowClosing(WindowEvent e) {
-
+                // Clean up timers and leave lobby
+                if (lobbyUpdateTimer != null) {
+                    lobbyUpdateTimer.stop();
+                }
+                try {
+                    wordyImpl.leaveGame(username);
+                } catch (Exception ex) {
+                    System.out.println("Error leaving lobby: " + ex.getMessage());
+                }
             }
 
-            @Override
-            public void windowClosed(WindowEvent e) {
-
-            }
-
-            @Override
-            public void windowIconified(WindowEvent e) {
-
-            }
-
-            @Override
-            public void windowDeiconified(WindowEvent e) {
-
-            }
-
-            @Override
-            public void windowActivated(WindowEvent e) {
-
-            }
-
-            @Override
-            public void windowDeactivated(WindowEvent e) {
-
-            }
-
-            /* Other methods of WindowListener ... */
+            @Override public void windowClosed(WindowEvent e) {}
+            @Override public void windowIconified(WindowEvent e) {}
+            @Override public void windowDeiconified(WindowEvent e) {}
+            @Override public void windowActivated(WindowEvent e) {}
+            @Override public void windowDeactivated(WindowEvent e) {}
         });
     }
 
-    /* ... */
-
-
-
-    public void inLobby() {
-        try {
-            double lobbyCount = 0;
-            double time = wordyImpl.gettimer() + 1;
-            if (wordyImpl != null) {
-                boolean joined = wordyImpl.joinLobby(username);
-                if (joined) {
-                    System.out.println(username + " Joined");
-                    while (time > 0) {
-                        time -= 1;
-                        System.out.println(time);
-                        Thread.sleep(1000);
-                        lobbyCount = wordyImpl.lobbyPlayerCount();
-                    }
-                }
-            }
-
-            System.out.println("Players " + lobbyCount);
-            if (time == 0) {
-                if (lobbyCount >= 2) {
-                    System.out.println("Count Down " + time);
-                    jLabel3.setText("Starting Game: " + time);
-                    gameStartNotification();
-                    Thread.sleep(1000);
-                } else {
-                    int result = JOptionPane.showConfirmDialog(null, "Not Enough Players!\nGo back to ClientUI?", "Error", JOptionPane.OK_CANCEL_OPTION);
-                    if (result == JOptionPane.OK_OPTION) {
-                        dispose();
-                        ClientUI.startClientUI(username);
-                        try {
-                            System.out.println("Failed to Join: Not enough players");
-                            wordyImpl.leaveGame(username);
-                        } catch (Exception e) {
-                            System.out.println(e.getMessage());
-                        }
-                    }
-                }
-
-            }
-        } catch (Exception e) {
-            System.err.println("Error joining the lobby: " + e);
-            e.printStackTrace(System.out);
-        }
-    }
-
-
-
-
-    public void startGameUI(String username) {
+    private void startGameUI(String username) {
         SwingUtilities.invokeLater(() -> {
-            // Code to initialize and show the game UI
+            this.dispose();
             GameUI.startGameUI(username);
-            System.out.println("Game UI initialized for player: " + username);
-        });
-        dispose();
-    }
-
-    public void gameStartNotification() {
-        SwingUtilities.invokeLater(() -> {
-            // Update the UI to reflect the game start
-            startGameUI(username);
-
         });
     }
+
     private void exitLobbyButtonActionPerformed(java.awt.event.ActionEvent evt) {
         try {
-            wordyImpl.leaveGame(username);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
+            // Stop timers
+            if (lobbyUpdateTimer != null) {
+                lobbyUpdateTimer.stop();
+            }
 
-        dispose();
-        ClientUI.startClientUI(username);
+            // Leave the game/lobby
+            wordyImpl.leaveGame(username);
+
+            // Close lobby and return to client UI
+            dispose();
+            ClientUI.startClientUI(username);
+
+        } catch (Exception e) {
+            System.out.println("Error leaving lobby: " + e.getMessage());
+            dispose();
+            ClientUI.startClientUI(username);
+        }
     }
 
     public static void startLobby(String username) {
-
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
                     javax.swing.UIManager.setLookAndFeel(info.getClassName());
-
                     break;
                 }
             }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(LobbyUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(LobbyUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(LobbyUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException |
+                 javax.swing.UnsupportedLookAndFeelException ex) {
             java.util.logging.Logger.getLogger(LobbyUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
 
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new LobbyUI(username).setVisible(true);
-
-            }
-        });
-
+        java.awt.EventQueue.invokeLater(() -> new LobbyUI(username).setVisible(true));
     }
 
-    private javax.swing.JButton exitLobbyButton;
+    // Legacy variables for compatibility (if needed)
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
-    private static javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
-    private static javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel7;
-    private javax.swing.JLabel jLabel8;
-    private javax.swing.JLabel jLabel9;
-    private javax.swing.JLayeredPane jLayeredPane1;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel matchTimerField;
     private javax.swing.JLabel playerCountField;
-
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
+    private javax.swing.JButton exitLobbyButton;
+    private javax.swing.JLayeredPane jLayeredPane1;
+    private javax.swing.JLabel jLabel7;
 }

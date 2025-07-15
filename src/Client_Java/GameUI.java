@@ -1,344 +1,808 @@
 package Client_Java;
 
-
 import Client_Java.corbaGame.*;
-
 import javax.swing.*;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
-
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import static Client_Java.Client.wordyImpl;
 
-public class GameUI extends javax.swing.JFrame{
-    static String username;
-    static JLabel timerField;
-    static int countdownSeconds = 30;
+public class GameUI extends javax.swing.JFrame {
+    private static String username;
+    private static JLabel timerField;
+    private static int countdownSeconds = 30;
+    private Timer gameTimer;
+    private Timer gameStateTimer;
+
+    // UI Components
+    private JPanel mainPanel;
+    private JPanel letterTilesPanel;
+    private JPanel wordConstructionPanel;
+    private JPanel controlPanel;
+    private JPanel playerInfoPanel;
+
+    private JLabel scoreLabel;
+    private JTextArea wordHistoryArea;
+    private JTextArea playerListArea;
+    private JTextField wordInputField;
+    private JButton submitWordButton;
+    private JButton clearWordButton;
+    private JButton shuffleLettersButton;
+    private JLabel statusLabel;
+    private JLabel wordValueLabel;
+
+    // Game state
+    private final List<LetterTile> letterTiles;
+    private final List<LetterTile> selectedTiles;
+    private final StringBuilder currentWord;
+    private int currentScore = 0;
+
+    // Letter values (Scrabble-like scoring)
+    private static final Map<Character, Integer> LETTER_VALUES = new HashMap<>();
+    static {
+        LETTER_VALUES.put('A', 1); LETTER_VALUES.put('E', 1); LETTER_VALUES.put('I', 1);
+        LETTER_VALUES.put('O', 1); LETTER_VALUES.put('U', 1); LETTER_VALUES.put('L', 1);
+        LETTER_VALUES.put('N', 1); LETTER_VALUES.put('S', 1); LETTER_VALUES.put('T', 1);
+        LETTER_VALUES.put('R', 1); LETTER_VALUES.put('D', 2); LETTER_VALUES.put('G', 2);
+        LETTER_VALUES.put('B', 3); LETTER_VALUES.put('C', 3); LETTER_VALUES.put('M', 3);
+        LETTER_VALUES.put('P', 3); LETTER_VALUES.put('F', 4); LETTER_VALUES.put('H', 4);
+        LETTER_VALUES.put('V', 4); LETTER_VALUES.put('W', 4); LETTER_VALUES.put('Y', 4);
+        LETTER_VALUES.put('K', 5); LETTER_VALUES.put('J', 8); LETTER_VALUES.put('X', 8);
+        LETTER_VALUES.put('Q', 10); LETTER_VALUES.put('Z', 10);
+    }
+
     public GameUI(String username) {
-        this.username = username;
-        initComponents();
+        GameUI.username = username;
+        this.letterTiles = new ArrayList<>();
+        this.selectedTiles = new ArrayList<>();
+        this.currentWord = new StringBuilder();
+
+        initializeUI();
         addListeners();
         startCountdownTimer();
+        startGameStateMonitoring(); // Add game state monitoring
     }
 
-    public void addListeners()
-    {
-        // Add your listeners here as usual
-        this.addWindowListener(new WindowListener()
-        {
-            @Override
-            public void windowOpened(WindowEvent e)
-            {
-                System.out.println(wordyImpl.playerInGameList());
-                playerListField.append(wordyImpl.playerInGameList().replace(",", "\n").substring(1, wordyImpl.playerInGameList().length() - 1));
-                jTextArea1.append(wordyImpl.getGeneratedLetter());
-                System.out.println(wordyImpl.getGeneratedLetter());
+    private void initializeUI() {
+        setTitle("WordyGame - Modern Interface");
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setSize(1200, 800);
+        setLocationRelativeTo(null);
+        setResizable(false);
 
+        // Main container
+        mainPanel = new JPanel(new BorderLayout(10, 10));
+        mainPanel.setBackground(new Color(45, 52, 70));
+        mainPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+
+        createHeaderPanel();
+        createGamePanel();
+
+        add(mainPanel);
+    }
+
+    private void createHeaderPanel() {
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setBackground(new Color(31, 41, 55));
+        headerPanel.setBorder(new LineBorder(new Color(75, 85, 99), 2, true));
+        headerPanel.setPreferredSize(new Dimension(0, 80));
+
+        // Title and timer
+        JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        titlePanel.setBackground(new Color(31, 41, 55));
+        JLabel titleLabel = new JLabel("WordyGame");
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 28));
+        titleLabel.setForeground(Color.WHITE);
+        titlePanel.add(titleLabel);
+
+        // Timer and score panel
+        JPanel infoPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        infoPanel.setBackground(new Color(31, 41, 55));
+
+        timerField = new JLabel("30");
+        timerField.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        timerField.setForeground(new Color(239, 68, 68));
+        timerField.setBorder(BorderFactory.createCompoundBorder(
+            new LineBorder(new Color(239, 68, 68), 2, true),
+            new EmptyBorder(5, 10, 5, 10)
+        ));
+
+        scoreLabel = new JLabel("Score: 0");
+        scoreLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        scoreLabel.setForeground(new Color(34, 197, 94));
+        scoreLabel.setBorder(new EmptyBorder(0, 20, 0, 20));
+
+        JLabel currentPlayerLabel = new JLabel("Player: " + username);
+        currentPlayerLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        currentPlayerLabel.setForeground(new Color(168, 162, 158));
+
+        infoPanel.add(currentPlayerLabel);
+        infoPanel.add(scoreLabel);
+        infoPanel.add(timerField);
+
+        headerPanel.add(titlePanel, BorderLayout.WEST);
+        headerPanel.add(infoPanel, BorderLayout.EAST);
+
+        mainPanel.add(headerPanel, BorderLayout.NORTH);
+    }
+
+    private void createGamePanel() {
+        JPanel gamePanel = new JPanel(new BorderLayout(15, 15));
+        gamePanel.setBackground(new Color(45, 52, 70));
+
+        // Left side - Game area
+        JPanel leftPanel = new JPanel(new BorderLayout(10, 10));
+        leftPanel.setBackground(new Color(45, 52, 70));
+        leftPanel.setPreferredSize(new Dimension(750, 0));
+
+        // Word construction area
+        createWordConstructionPanel();
+        leftPanel.add(wordConstructionPanel, BorderLayout.NORTH);
+
+        // Letter tiles area
+        createLetterTilesPanel();
+        leftPanel.add(letterTilesPanel, BorderLayout.CENTER);
+
+        // Control buttons
+        createGameControlPanel();
+        leftPanel.add(controlPanel, BorderLayout.SOUTH);
+
+        // Right side - Player info and game history
+        createPlayerInfoPanel();
+
+        gamePanel.add(leftPanel, BorderLayout.CENTER);
+        gamePanel.add(playerInfoPanel, BorderLayout.EAST);
+
+        mainPanel.add(gamePanel, BorderLayout.CENTER);
+    }
+
+    private void createWordConstructionPanel() {
+        wordConstructionPanel = new JPanel(new BorderLayout(10, 10));
+        wordConstructionPanel.setBackground(new Color(55, 65, 81));
+        wordConstructionPanel.setBorder(BorderFactory.createCompoundBorder(
+            new LineBorder(new Color(107, 114, 128), 2, true),
+            new EmptyBorder(15, 15, 15, 15)
+        ));
+        wordConstructionPanel.setPreferredSize(new Dimension(0, 120));
+
+        JLabel wordLabel = new JLabel("Construct Your Word:");
+        wordLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        wordLabel.setForeground(Color.WHITE);
+
+        wordInputField = new JTextField();
+        wordInputField.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        wordInputField.setBackground(new Color(17, 24, 39));
+        wordInputField.setForeground(Color.WHITE);
+        wordInputField.setCaretColor(Color.WHITE);
+        wordInputField.setBorder(BorderFactory.createCompoundBorder(
+            new LineBorder(new Color(59, 130, 246), 2, true),
+            new EmptyBorder(10, 15, 10, 15)
+        ));
+        wordInputField.setEditable(false); // Words built by clicking tiles
+
+        wordValueLabel = new JLabel("Word Value: 0 points");
+        wordValueLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        wordValueLabel.setForeground(new Color(168, 162, 158));
+
+        JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel.setBackground(new Color(55, 65, 81));
+        topPanel.add(wordLabel, BorderLayout.WEST);
+        topPanel.add(wordValueLabel, BorderLayout.EAST);
+
+        wordConstructionPanel.add(topPanel, BorderLayout.NORTH);
+        wordConstructionPanel.add(wordInputField, BorderLayout.CENTER);
+    }
+
+    private void createLetterTilesPanel() {
+        letterTilesPanel = new JPanel();
+        letterTilesPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+        letterTilesPanel.setBackground(new Color(55, 65, 81));
+        letterTilesPanel.setBorder(BorderFactory.createCompoundBorder(
+            new LineBorder(new Color(107, 114, 128), 2, true),
+            new EmptyBorder(20, 20, 20, 20)
+        ));
+        letterTilesPanel.setPreferredSize(new Dimension(0, 200));
+
+        JLabel tilesLabel = new JLabel("Your Letter Tiles:");
+        tilesLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        tilesLabel.setForeground(Color.WHITE);
+
+        // This will be populated when letters are received from server
+    }
+
+    private void createGameControlPanel() {
+        controlPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
+        controlPanel.setBackground(new Color(45, 52, 70));
+        controlPanel.setPreferredSize(new Dimension(0, 80));
+
+        submitWordButton = createStyledButton("Submit Word", new Color(34, 197, 94));
+        clearWordButton = createStyledButton("Clear", new Color(239, 68, 68));
+        shuffleLettersButton = createStyledButton("Shuffle Letters", new Color(59, 130, 246));
+
+        controlPanel.add(submitWordButton);
+        controlPanel.add(clearWordButton);
+        controlPanel.add(shuffleLettersButton);
+
+        // Status label
+        statusLabel = new JLabel(" ");
+        statusLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        statusLabel.setForeground(new Color(251, 191, 36));
+        statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
+        JPanel statusPanel = new JPanel(new BorderLayout());
+        statusPanel.setBackground(new Color(45, 52, 70));
+        statusPanel.add(statusLabel, BorderLayout.CENTER);
+
+        JPanel fullControlPanel = new JPanel(new BorderLayout());
+        fullControlPanel.setBackground(new Color(45, 52, 70));
+        fullControlPanel.add(controlPanel, BorderLayout.CENTER);
+        fullControlPanel.add(statusPanel, BorderLayout.SOUTH);
+
+        controlPanel = fullControlPanel;
+    }
+
+    private JButton createStyledButton(String text, Color color) {
+        JButton button = new JButton(text);
+        button.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        button.setForeground(Color.WHITE);
+        button.setBackground(color);
+        button.setBorder(BorderFactory.createCompoundBorder(
+            new LineBorder(color.darker(), 1),
+            new EmptyBorder(10, 20, 10, 20)
+        ));
+        button.setFocusPainted(false);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        // Hover effect
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                button.setBackground(color.brighter());
             }
-
-            @Override
-            public void windowClosing(WindowEvent e) {
-
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setBackground(color);
             }
-
-            @Override
-            public void windowClosed(WindowEvent e) {
-
-            }
-
-            @Override
-            public void windowIconified(WindowEvent e) {
-
-            }
-
-            @Override
-            public void windowDeiconified(WindowEvent e) {
-
-            }
-
-            @Override
-            public void windowActivated(WindowEvent e) {
-
-            }
-
-            @Override
-            public void windowDeactivated(WindowEvent e) {
-
-            }
-
-            /* Other methods of WindowListener ... */
         });
+
+        return button;
     }
 
-    private void initComponents() {
+    private void createPlayerInfoPanel() {
+        playerInfoPanel = new JPanel(new BorderLayout(10, 10));
+        playerInfoPanel.setBackground(new Color(45, 52, 70));
+        playerInfoPanel.setPreferredSize(new Dimension(300, 0));
 
-        jPanel1 = new javax.swing.JPanel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        playerListField = new javax.swing.JTextArea();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        wordBoxField = new javax.swing.JTextArea();
-        jScrollPane3 = new javax.swing.JScrollPane();
-        jTextArea1 = new javax.swing.JTextArea();
-        jLabel1 = new javax.swing.JLabel();
-        inputField = new javax.swing.JTextField();
-        jLabel2 = new javax.swing.JLabel();
-        sendButton = new javax.swing.JButton();
-        jLabel4 = new javax.swing.JLabel();
-        jLabel5 = new javax.swing.JLabel();
-        jLabel6 = new javax.swing.JLabel();
-        timerField = new javax.swing.JLabel();
-        jLabel3 = new javax.swing.JLabel();
-        jLabel7 = new javax.swing.JLabel();
-        jLabelcheck = new JLabel();
+        // Player list
+        JPanel playersPanel = new JPanel(new BorderLayout(5, 5));
+        playersPanel.setBackground(new Color(55, 65, 81));
+        playersPanel.setBorder(BorderFactory.createCompoundBorder(
+            new LineBorder(new Color(107, 114, 128), 2, true),
+            new EmptyBorder(10, 10, 10, 10)
+        ));
 
-        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        setMinimumSize(new java.awt.Dimension(1125, 800));
-        setPreferredSize(new java.awt.Dimension(1125, 800));
-        getContentPane().setLayout(null);
-        jPanel1.setBackground(new java.awt.Color(204, 153, 255));
-        jPanel1.setMinimumSize(new java.awt.Dimension(1125, 800));
-        jPanel1.setPreferredSize(new java.awt.Dimension(1125, 800));
-        playerListField.setBackground(new java.awt.Color(212, 250, 252));
-        playerListField.setColumns(20);
-        playerListField.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        playerListField.setForeground(new java.awt.Color(0, 102, 204));
-        playerListField.setRows(5);
-        playerListField.setBorder(javax.swing.BorderFactory.createMatteBorder(2, 2, 2, 2, new java.awt.Color(0, 153, 255)));
-        jScrollPane1.setViewportView(playerListField);
+        JLabel playersLabel = new JLabel("Players");
+        playersLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        playersLabel.setForeground(Color.WHITE);
 
-        getContentPane().add(jScrollPane1);
-        jScrollPane1.setBounds(790, 130, 266, 300);
+        playerListArea = new JTextArea();
+        playerListArea.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        playerListArea.setBackground(new Color(17, 24, 39));
+        playerListArea.setForeground(new Color(209, 213, 219));
+        playerListArea.setEditable(false);
+        playerListArea.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        wordBoxField.setBackground(new java.awt.Color(227, 223, 253));
-        wordBoxField.setColumns(20);
-        wordBoxField.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
-        wordBoxField.setForeground(new java.awt.Color(204, 0, 204));
-        wordBoxField.setRows(5);
-        wordBoxField.setBorder(javax.swing.BorderFactory.createMatteBorder(2, 2, 2, 2, new java.awt.Color(255, 102, 255)));
-        jScrollPane2.setViewportView(wordBoxField);
+        JScrollPane playersScroll = new JScrollPane(playerListArea);
+        playersScroll.setPreferredSize(new Dimension(0, 200));
+        playersScroll.setBorder(null);
 
-        getContentPane().add(jScrollPane2);
-        jScrollPane2.setBounds(22, 130, 716, 310);
+        playersPanel.add(playersLabel, BorderLayout.NORTH);
+        playersPanel.add(playersScroll, BorderLayout.CENTER);
 
-        jTextArea1.setBackground(new java.awt.Color(255, 204, 255));
-        jTextArea1.setColumns(20);
-        jTextArea1.setFont(new java.awt.Font("sansserif", 1, 18)); // NOI18N
-        jTextArea1.setForeground(new java.awt.Color(255, 51, 204));
-        jTextArea1.setLineWrap(true);
-        jTextArea1.setRows(5);
-        jTextArea1.setBorder(javax.swing.BorderFactory.createMatteBorder(3, 3, 3, 3, new java.awt.Color(255, 51, 255)));
-        jScrollPane3.setViewportView(jTextArea1);
+        // Word history
+        JPanel historyPanel = new JPanel(new BorderLayout(5, 5));
+        historyPanel.setBackground(new Color(55, 65, 81));
+        historyPanel.setBorder(BorderFactory.createCompoundBorder(
+            new LineBorder(new Color(107, 114, 128), 2, true),
+            new EmptyBorder(10, 10, 10, 10)
+        ));
 
-        getContentPane().add(jScrollPane3);
-        jScrollPane3.setBounds(790, 480, 270, 240);
+        JLabel historyLabel = new JLabel("Word History");
+        historyLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        historyLabel.setForeground(Color.WHITE);
 
-        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 36)); // NOI18N
-        jLabel1.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel1.setText("WordyGame Beta v3.32.12");
-        getContentPane().add(jLabel1);
-        jLabel1.setBounds(22, 15, 490, 48);
+        wordHistoryArea = new JTextArea();
+        wordHistoryArea.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        wordHistoryArea.setBackground(new Color(17, 24, 39));
+        wordHistoryArea.setForeground(new Color(209, 213, 219));
+        wordHistoryArea.setEditable(false);
+        wordHistoryArea.setBorder(new EmptyBorder(10, 10, 10, 10));
+        wordHistoryArea.setLineWrap(true);
+        wordHistoryArea.setWrapStyleWord(true);
 
-        inputField.setBackground(new java.awt.Color(204, 204, 255));
-        inputField.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        inputField.setForeground(new java.awt.Color(204, 51, 255));
-        inputField.setBorder(javax.swing.BorderFactory.createMatteBorder(2, 2, 2, 2, new java.awt.Color(255, 204, 153)));
-        inputField.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                inputFieldActionPerformed(evt);
-            }
-        });
-        getContentPane().add(inputField);
-        inputField.setBounds(30, 510, 530, 50);
+        JScrollPane historyScroll = new JScrollPane(wordHistoryArea);
+        historyScroll.setBorder(null);
 
-        jLabel2.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        jLabel2.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel2.setText("Word Box");
-        getContentPane().add(jLabel2);
-        jLabel2.setBounds(20, 100, 117, 25);
+        historyPanel.add(historyLabel, BorderLayout.NORTH);
+        historyPanel.add(historyScroll, BorderLayout.CENTER);
 
-        sendButton.setBackground(new java.awt.Color(255, 51, 255));
-        sendButton.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        sendButton.setForeground(new java.awt.Color(255, 255, 255));
-        sendButton.setText("Enter");
-        sendButton.setBorderPainted(false);
-        sendButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                sendButtonActionPerformed(evt);
-            }
-        });
-        getContentPane().add(sendButton);
-        sendButton.setBounds(220, 590, 160, 50);
-
-        jLabelcheck.setFont(new java.awt.Font("Segoe UI", Font.BOLD, 18)); // NOI18N
-        jLabelcheck.setForeground(new java.awt.Color(255, 255, 255));
-        jLabelcheck.setText(" ");
-        getContentPane().add(jLabelcheck);
-        jLabelcheck.setBounds(190, 630, 250, 100);
-
-
-        jLabel4.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        jLabel4.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel4.setText("Your Letters");
-        getContentPane().add(jLabel4);
-        jLabel4.setBounds(790, 450, 117, 25);
-
-        jLabel5.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        jLabel5.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel5.setText("Player List");
-        getContentPane().add(jLabel5);
-        jLabel5.setBounds(790, 100, 117, 25);
-
-        jLabel6.setIcon(new javax.swing.ImageIcon("src/Server_Java/WORD.png")); // NOI18N
-        getContentPane().add(jLabel6);
-        jLabel6.setBounds(400, 440, 410, 310);
-
-        timerField.setFont(new java.awt.Font("Segoe UI", 1, 36)); // NOI18N
-        timerField.setForeground(new java.awt.Color(255, 255, 255));
-        timerField.setText("");
-        getContentPane().add(timerField);
-        timerField.setBounds(900, 30, 70, 50);
-
-        jLabel3.setIcon(new javax.swing.ImageIcon("src/Client_Java/WORD (5).png")); // NOI18N
-        getContentPane().add(jLabel3);
-        jLabel3.setBounds(710, -20, 380, 150);
-
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-                jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGap(0, 1125, Short.MAX_VALUE)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addGroup(jPanel1Layout.createSequentialGroup()
-                                        .addGap(0, 0, Short.MAX_VALUE)
-                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                                .addGroup(jPanel1Layout.createSequentialGroup()
-                                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                                                .addGroup(jPanel1Layout.createSequentialGroup()
-                                                                        .addGap(2, 2, 2)
-                                                                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 490, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                                                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                                        .addGap(198, 198, 198)
-                                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                                                .addGroup(jPanel1Layout.createSequentialGroup()
-                                                                        .addGap(290, 290, 290)
-                                                                        .addComponent(timerField, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                                                .addGroup(jPanel1Layout.createSequentialGroup()
-                                                                        .addGap(80, 80, 80)
-                                                                        .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                                                .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 380, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                                .addGroup(jPanel1Layout.createSequentialGroup()
-                                                        .addGap(2, 2, 2)
-                                                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 716, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                        .addGap(52, 52, 52)
-                                                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                                .addGroup(jPanel1Layout.createSequentialGroup()
-                                                        .addGap(10, 10, 10)
-                                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                                                .addGroup(jPanel1Layout.createSequentialGroup()
-                                                                        .addGap(190, 190, 190)
-                                                                        .addComponent(sendButton, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                                        .addGap(20, 20, 20)
-                                                                        .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 410, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                                                .addGroup(jPanel1Layout.createSequentialGroup()
-                                                                        .addGap(760, 760, 760)
-                                                                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 270, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                                                .addGroup(jPanel1Layout.createSequentialGroup()
-                                                                        .addGap(760, 760, 760)
-                                                                        .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                                                .addComponent(inputField, javax.swing.GroupLayout.PREFERRED_SIZE, 530, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                                        .addGap(0, 0, Short.MAX_VALUE)))
-        );
-        jPanel1Layout.setVerticalGroup(
-                jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGap(0, 800, Short.MAX_VALUE)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addGroup(jPanel1Layout.createSequentialGroup()
-                                        .addGap(0, 0, Short.MAX_VALUE)
-                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                                .addGroup(jPanel1Layout.createSequentialGroup()
-                                                        .addGap(35, 35, 35)
-                                                        .addComponent(jLabel1)
-                                                        .addGap(37, 37, 37)
-                                                        .addComponent(jLabel2))
-                                                .addGroup(jPanel1Layout.createSequentialGroup()
-                                                        .addGap(50, 50, 50)
-                                                        .addComponent(timerField, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                        .addGap(20, 20, 20)
-                                                        .addComponent(jLabel5))
-                                                .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 310, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                                .addGroup(jPanel1Layout.createSequentialGroup()
-                                                        .addGap(150, 150, 150)
-                                                        .addComponent(sendButton, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                                .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 310, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                .addGroup(jPanel1Layout.createSequentialGroup()
-                                                        .addGap(40, 40, 40)
-                                                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 240, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                                .addGroup(jPanel1Layout.createSequentialGroup()
-                                                        .addGap(10, 10, 10)
-                                                        .addComponent(jLabel4))
-                                                .addGroup(jPanel1Layout.createSequentialGroup()
-                                                        .addGap(70, 70, 70)
-                                                        .addComponent(inputField, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                        .addGap(0, 0, Short.MAX_VALUE)))
-        );
-
-        getContentPane().add(jPanel1);
-        jPanel1.setBounds(0, 0, 1110, 770);
-        jLabel7.setIcon(new javax.swing.ImageIcon("src/Client_Java/17250835.png")); // NOI18N
-        getContentPane().add(jLabel7);
-        jLabel7.setBounds(0, 0, 1110, 770);
-
-        setBounds(0, 0, 1125, 776);
+        playerInfoPanel.add(playersPanel, BorderLayout.NORTH);
+        playerInfoPanel.add(historyPanel, BorderLayout.CENTER);
     }
 
+    // Letter tile class for interactive tiles
+    private class LetterTile extends JButton {
+        private final char letter;
+        private final int value;
+        private boolean isSelected;
 
-    private void inputFieldActionPerformed(java.awt.event.ActionEvent evt) {
-        // TODO add your handling code here:
-    }
+        public LetterTile(char letter) {
+            this.letter = letter;
+            this.value = LETTER_VALUES.getOrDefault(Character.toUpperCase(letter), 1);
+            this.isSelected = false;
 
-    private void sendButtonActionPerformed(java.awt.event.ActionEvent evt) {
-        try {
-            String word = inputField.getText();
-            if (word.length() < 5) {
-                jLabelcheck.setText("WORD IS TOO SHORT!");
-                Timer timer = new Timer(5000, new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        jLabelcheck.setText(" ");
-                    }
-                });
-                timer.start();
+            setupTile();
+        }
+
+        private void setupTile() {
+            setText("<html><div style='text-align: center;'><b>" +
+                   Character.toUpperCase(letter) + "</b><br><small>" + value + "</small></div></html>");
+            setFont(new Font("Segoe UI", Font.BOLD, 18));
+            setPreferredSize(new Dimension(60, 60));
+            setBackground(new Color(251, 191, 36));
+            setForeground(new Color(92, 77, 192));
+            setBorder(new LineBorder(new Color(217, 119, 6), 2, true));
+            setFocusPainted(false);
+            setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+            addActionListener(e -> toggleSelection());
+        }
+
+        private void toggleSelection() {
+            if (isSelected) {
+                deselect();
+                removeFromWord();
             } else {
-                wordBoxField.append("You Played The Word: " + word + "\n");
-                wordyImpl.playWord(username, word);
+                select();
+                addToWord();
             }
-        } catch (InvalidWord e) {
+        }
+
+        private void select() {
+            isSelected = true;
+            setBackground(new Color(59, 130, 246));
+            setForeground(Color.WHITE);
+            selectedTiles.add(this);
+        }
+
+        private void deselect() {
+            isSelected = false;
+            setBackground(new Color(251, 191, 36));
+            setForeground(new Color(92, 77, 192));
+            selectedTiles.remove(this);
+        }
+
+        private void addToWord() {
+            currentWord.append(Character.toUpperCase(letter));
+            updateWordDisplay();
+        }
+
+        private void removeFromWord() {
+            // Remove last occurrence of this letter
+            String word = currentWord.toString();
+            int lastIndex = word.lastIndexOf(Character.toUpperCase(letter));
+            if (lastIndex >= 0) {
+                currentWord.deleteCharAt(lastIndex);
+                updateWordDisplay();
+            }
+        }
+
+        public int getValue() { return value; }
+        public boolean isSelected() { return isSelected; }
+    }
+
+    private void updateWordDisplay() {
+        wordInputField.setText(currentWord.toString());
+        int wordValue = calculateWordValue();
+        wordValueLabel.setText("Word Value: " + wordValue + " points");
+    }
+
+    private int calculateWordValue() {
+        int total = 0;
+        for (LetterTile tile : selectedTiles) {
+            total += tile.getValue();
+        }
+        return total;
+    }
+
+    private void populateLetterTiles(String letters) {
+        letterTilesPanel.removeAll();
+        letterTiles.clear();
+
+        JLabel tilesLabel = new JLabel("Your Letter Tiles:");
+        tilesLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        tilesLabel.setForeground(Color.WHITE);
+        letterTilesPanel.add(tilesLabel);
+
+        for (char c : letters.toCharArray()) {
+            if (Character.isLetter(c)) {
+                LetterTile tile = new LetterTile(c);
+                letterTiles.add(tile);
+                letterTilesPanel.add(tile);
+            }
+        }
+
+        letterTilesPanel.revalidate();
+        letterTilesPanel.repaint();
+    }
+
+    public void addListeners() {
+        // Window listener for game initialization
+        this.addWindowListener(new WindowListener() {
+            @Override
+            public void windowOpened(WindowEvent e) {
+                try {
+                    String playerList = wordyImpl.playerInGameList();
+                    playerListArea.setText(playerList.replace(",", "\n").substring(1, playerList.length() - 1));
+
+                    String letters = wordyImpl.getGeneratedLetter();
+                    populateLetterTiles(letters);
+
+                    statusLabel.setText("Game started! Create words from your letters.");
+                } catch (Exception ex) {
+                    statusLabel.setText("Error connecting to game server.");
+                }
+            }
+
+            @Override public void windowClosing(WindowEvent e) {}
+            @Override public void windowClosed(WindowEvent e) {}
+            @Override public void windowIconified(WindowEvent e) {}
+            @Override public void windowDeiconified(WindowEvent e) {}
+            @Override public void windowActivated(WindowEvent e) {}
+            @Override public void windowDeactivated(WindowEvent e) {}
+        });
+
+        // Button listeners
+        submitWordButton.addActionListener(this::submitWord);
+        clearWordButton.addActionListener(e -> clearCurrentWord());
+        shuffleLettersButton.addActionListener(e -> shuffleLetters());
+    }
+
+    private void startGameStateMonitoring() {
+        gameStateTimer = new Timer(2000, e -> { // Check every 2 seconds
             try {
-            Document document = wordBoxField.getDocument();
-            int length = document.getLength();
-            int lastNewlineIndex = 0;
-            lastNewlineIndex = wordBoxField.getLineOfOffset(length - 1);
-            int startOffset = wordBoxField.getLineStartOffset(lastNewlineIndex);
-            int endOffset = wordBoxField.getLineEndOffset(lastNewlineIndex);
-            document.remove(startOffset, endOffset - startOffset);
-            jLabelcheck.setText("Invalid Word!");
-            System.out.println("Exception occurred on the server: " + e.getMessage());
-            } catch (BadLocationException ex) {
-                throw new RuntimeException(ex);
+                // Update player list to keep all clients synchronized
+                updatePlayerList();
+
+                // Check if game has ended on server side
+                checkGameEndStatus();
+
+            } catch (Exception ex) {
+                // Silently handle connection errors to avoid spam
             }
+        });
+        gameStateTimer.start();
+    }
+
+    private void updatePlayerList() {
+        try {
+            String playerList = wordyImpl.playerInGameList();
+            if (playerList != null && !playerList.trim().isEmpty() && !playerList.equals("[]")) {
+                String formattedList = playerList.replace(",", "\n")
+                    .replace("[", "").replace("]", "").trim();
+                if (!playerListArea.getText().equals(formattedList)) {
+                    SwingUtilities.invokeLater(() -> playerListArea.setText(formattedList));
+                }
+            }
+        } catch (Exception e) {
+            // Silently handle - server might be temporarily unavailable
         }
     }
 
-    public static void startGameUI(String username) {
+    private void checkGameEndStatus() {
+        try {
+            // Try to call a server method that would fail if game is over
+            // We can use the existing methods to detect game state
+            if (countdownSeconds <= 0 && !gameEndedShown) {
+                handleGameEnd();
+            }
+        } catch (Exception e) {
+            // Handle any server-side errors
+        }
+    }
 
+    private boolean gameEndedShown = false;
+
+    private void handleGameEnd() {
+        if (gameEndedShown) return; // Prevent multiple calls
+
+        gameEndedShown = true;
+
+        // Stop timers
+        if (gameTimer != null) {
+            gameTimer.stop();
+        }
+
+        // Disable game controls
+        submitWordButton.setEnabled(false);
+        clearWordButton.setEnabled(false);
+        shuffleLettersButton.setEnabled(false);
+
+        // Disable letter tiles
+        for (LetterTile tile : letterTiles) {
+            tile.setEnabled(false);
+        }
+
+        // Show game end dialog
+        showGameEndDialog();
+    }
+
+    private void showGameEndDialog() {
+        SwingUtilities.invokeLater(() -> {
+            JDialog gameEndDialog = new JDialog(this, "Game Over!", true);
+            gameEndDialog.setSize(450, 300);
+            gameEndDialog.setLocationRelativeTo(this);
+            gameEndDialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+
+            JPanel dialogPanel = new JPanel(new BorderLayout(15, 15));
+            dialogPanel.setBackground(new Color(45, 52, 70));
+            dialogPanel.setBorder(new EmptyBorder(25, 25, 25, 25));
+
+            // Winner announcement
+            JLabel titleLabel = new JLabel("🎉 Game Over! 🎉", SwingConstants.CENTER);
+            titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 28));
+            titleLabel.setForeground(new Color(251, 191, 36));
+
+            // Try to get winner from server (you'll need to implement getWinnerName() in server)
+            String winnerText = "Time's up! Check the word history to see who had the longest word.";
+            try {
+                // For now, we'll show a generic message
+                // In the future, you can add: String winner = wordyImpl.getWinnerName();
+                winnerText = "Game completed! The winner is determined by the longest word submitted.";
+            } catch (Exception e) {
+                winnerText = "Game completed! Unable to determine winner.";
+            }
+
+            JLabel resultLabel = new JLabel("<html><div style='text-align: center;'>" +
+                winnerText + "</div></html>", SwingConstants.CENTER);
+            resultLabel.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+            resultLabel.setForeground(new Color(209, 213, 219));
+
+            // Score display
+            JLabel scoreDisplayLabel = new JLabel("Your final score: " + currentScore + " points", SwingConstants.CENTER);
+            scoreDisplayLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
+            scoreDisplayLabel.setForeground(new Color(34, 197, 94));
+
+            JPanel messagePanel = new JPanel(new BorderLayout(10, 10));
+            messagePanel.setBackground(new Color(45, 52, 70));
+            messagePanel.add(titleLabel, BorderLayout.NORTH);
+            messagePanel.add(resultLabel, BorderLayout.CENTER);
+            messagePanel.add(scoreDisplayLabel, BorderLayout.SOUTH);
+
+            // Buttons
+            JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 0));
+            buttonPanel.setBackground(new Color(45, 52, 70));
+
+            JButton playAgainButton = createStyledButton("🔄 Play Again", new Color(34, 197, 94));
+            JButton backToLobbyButton = createStyledButton("🏠 Back to Lobby", new Color(59, 130, 246));
+
+            playAgainButton.addActionListener(e -> {
+                gameEndDialog.dispose();
+                requestPlayAgain();
+            });
+
+            backToLobbyButton.addActionListener(e -> {
+                gameEndDialog.dispose();
+                backToLobby();
+            });
+
+            buttonPanel.add(playAgainButton);
+            buttonPanel.add(backToLobbyButton);
+
+            dialogPanel.add(messagePanel, BorderLayout.CENTER);
+            dialogPanel.add(buttonPanel, BorderLayout.SOUTH);
+
+            gameEndDialog.add(dialogPanel);
+            gameEndDialog.setVisible(true);
+        });
+    }
+
+    private void requestPlayAgain() {
+        try {
+            statusLabel.setText("Requesting to play again...");
+            statusLabel.setForeground(new Color(251, 191, 36));
+
+            // Show waiting dialog for other players
+            showWaitingForPlayersDialog();
+
+        } catch (Exception e) {
+            showStatus("Error requesting play again: " + e.getMessage(), Color.RED);
+        }
+    }
+
+    private void showWaitingForPlayersDialog() {
+        JDialog waitingDialog = new JDialog(this, "Waiting for Players", true);
+        waitingDialog.setSize(400, 250);
+        waitingDialog.setLocationRelativeTo(this);
+
+        JPanel dialogPanel = new JPanel(new BorderLayout(15, 15));
+        dialogPanel.setBackground(new Color(45, 52, 70));
+        dialogPanel.setBorder(new EmptyBorder(25, 25, 25, 25));
+
+        JLabel waitingLabel = new JLabel("⏳ Waiting for other players...", SwingConstants.CENTER);
+        waitingLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        waitingLabel.setForeground(Color.WHITE);
+
+        JLabel statusLabel = new JLabel("Players ready: " + username, SwingConstants.CENTER);
+        statusLabel.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        statusLabel.setForeground(new Color(168, 162, 158));
+
+        JLabel instructionLabel = new JLabel("When all players are ready, a new game will start automatically.", SwingConstants.CENTER);
+        instructionLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        instructionLabel.setForeground(new Color(156, 163, 175));
+
+        JPanel messagePanel = new JPanel(new BorderLayout(10, 10));
+        messagePanel.setBackground(new Color(45, 52, 70));
+        messagePanel.add(waitingLabel, BorderLayout.NORTH);
+        messagePanel.add(statusLabel, BorderLayout.CENTER);
+        messagePanel.add(instructionLabel, BorderLayout.SOUTH);
+
+        JButton cancelButton = createStyledButton("❌ Cancel", new Color(239, 68, 68));
+        cancelButton.addActionListener(e -> {
+            waitingDialog.dispose();
+            backToLobby();
+        });
+
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        buttonPanel.setBackground(new Color(45, 52, 70));
+        buttonPanel.add(cancelButton);
+
+        dialogPanel.add(messagePanel, BorderLayout.CENTER);
+        dialogPanel.add(buttonPanel, BorderLayout.SOUTH);
+
+        waitingDialog.add(dialogPanel);
+        waitingDialog.setVisible(true);
+    }
+
+    private void backToLobby() {
+        try {
+            // Clean up timers
+            if (gameTimer != null) {
+                gameTimer.stop();
+            }
+            if (gameStateTimer != null) {
+                gameStateTimer.stop();
+            }
+
+            // Close this window
+            this.dispose();
+
+            // Return to lobby (implement this based on your lobby system)
+            SwingUtilities.invokeLater(() -> {
+                try {
+                    // You can implement lobby return here
+                    // For example: LobbyUI.startLobby(username);
+                    System.out.println("Player " + username + " returned to lobby");
+
+                    // For now, we'll just show a message
+                    JOptionPane.showMessageDialog(null,
+                        "Returning to lobby...\nRestart the client to join a new game.",
+                        "Return to Lobby",
+                        JOptionPane.INFORMATION_MESSAGE);
+
+                } catch (Exception e) {
+                    System.out.println("Error returning to lobby: " + e.getMessage());
+                }
+            });
+
+        } catch (Exception e) {
+            showStatus("Error returning to lobby: " + e.getMessage(), Color.RED);
+        }
+    }
+
+    private void clearCurrentWord() {
+        currentWord.setLength(0);
+        for (LetterTile tile : selectedTiles) {
+            tile.deselect();
+        }
+        selectedTiles.clear();
+        updateWordDisplay();
+    }
+
+    private void shuffleLetters() {
+        // Simple shuffle by removing and re-adding tiles
+        java.util.Collections.shuffle(letterTiles);
+        letterTilesPanel.removeAll();
+
+        JLabel tilesLabel = new JLabel("Your Letter Tiles:");
+        tilesLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        tilesLabel.setForeground(Color.WHITE);
+        letterTilesPanel.add(tilesLabel);
+
+        for (LetterTile tile : letterTiles) {
+            letterTilesPanel.add(tile);
+        }
+
+        letterTilesPanel.revalidate();
+        letterTilesPanel.repaint();
+    }
+
+    private void showStatus(String message, Color color) {
+        statusLabel.setText(message);
+        statusLabel.setForeground(color);
+
+        // Clear status after 3 seconds
+        Timer clearTimer = new Timer(3000, e -> statusLabel.setText(" "));
+        clearTimer.setRepeats(false);
+        clearTimer.start();
+    }
+
+    // Update the submitWord method to handle game end scenarios better
+    private void submitWord(ActionEvent evt) {
+        try {
+            String word = currentWord.toString();
+            if (word.length() < 3) {
+                showStatus("Word must be at least 3 letters long!", Color.RED);
+                return;
+            }
+
+            // Submit to server
+            wordHistoryArea.append("You played: " + word + " (" + calculateWordValue() + " pts)\n");
+            wordyImpl.playWord(username, word);
+
+            currentScore += calculateWordValue();
+            scoreLabel.setText("Score: " + currentScore);
+
+            clearCurrentWord();
+            showStatus("Word submitted successfully!", Color.GREEN);
+
+        } catch (InvalidWord e) {
+            // Check if the error is because game ended
+            String errorMessage = e.getMessage();
+            if (errorMessage != null && errorMessage.contains("Game is not active")) {
+                if (!gameEndedShown) {
+                    handleGameEnd();
+                }
+                return;
+            }
+
+            showStatus("Invalid word: " + currentWord, Color.RED);
+            System.out.println("Invalid word exception: " + errorMessage);
+        } catch (Exception e) {
+            showStatus("Error submitting word", Color.RED);
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    // Update the timer to handle game end better
+    private void startCountdownTimer() {
+        gameTimer = new Timer(1000, e -> {
+            countdownSeconds--;
+            timerField.setText(String.valueOf(countdownSeconds));
+
+            if (countdownSeconds <= 10) {
+                timerField.setForeground(new Color(239, 68, 68)); // Red
+            } else if (countdownSeconds <= 20) {
+                timerField.setForeground(new Color(251, 191, 36)); // Yellow
+            }
+
+            if (countdownSeconds <= 0) {
+                gameTimer.stop();
+                if (!gameEndedShown) {
+                    SwingUtilities.invokeLater(() -> handleGameEnd());
+                }
+            }
+        });
+        gameTimer.start();
+    }
+
+    public static void startGameUI(String username) {
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
@@ -350,91 +814,8 @@ public class GameUI extends javax.swing.JFrame{
                  UnsupportedLookAndFeelException ex) {
             java.util.logging.Logger.getLogger(GameUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
 
-                new GameUI(username).setVisible(true);
-            }
-        });
-    }
-
-    private static javax.swing.JTextField inputField;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabelcheck;
-    private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
-    private javax.swing.JLabel jLabel7;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JScrollPane jScrollPane3;
-    private static javax.swing.JTextArea jTextArea1;
-    private javax.swing.JTextArea playerListField;
-    private javax.swing.JButton sendButton;
-    private javax.swing.JTextArea wordBoxField;
-    private javax.swing.JPanel jPanel1;
-
-
-    private void startCountdownTimer() {
-        Timer timer = new Timer(1000, new ActionListener() {
-            int remainingSeconds = countdownSeconds;
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                timerField.setText(String.valueOf(remainingSeconds));
-                System.out.println(remainingSeconds);
-                if (remainingSeconds == 0) {
-                    // Timer has reached 0, perform any necessary actions here
-                    try {
-                        wordyImpl.joinLobby(username);
-                    } catch (GameException ex) {
-                        throw new RuntimeException(ex);
-                    }
-                    int delay = 3000; // 15 seconds in milliseconds
-                    Timer timer = new Timer(delay, exe -> {
-                        JOptionPane.getRootFrame().dispose(); // Close the dialog
-                    });
-                    timer.setRepeats(false); // Set the timer to execute only once
-                    timer.start();
-                    try {
-                        wordyImpl.getWinner();
-                    } catch (isSameLength ex) {
-                        JOptionPane.showMessageDialog(null, ex.message);
-                        System.out.println(ex.message);
-                    } catch (getWin ex) {
-                        JOptionPane.showMessageDialog(null, ex.message);
-                        System.out.println(ex.message);
-                        wordyImpl.exit(username);
-                        ClientUI.startClientUI(username);
-                        dispose();
-                        return;
-                    } catch (getRoundWin ex) {
-                        JOptionPane.showMessageDialog(null, ex.message);
-                        System.out.println(ex.message);
-                    }
-                    try {
-                        Thread.sleep(3000);
-                    } catch (InterruptedException ex) {
-                        throw new RuntimeException(ex);
-                    }
-
-                    // Stop the timer
-                    ((Timer) e.getSource()).stop();
-
-                    wordyImpl.startNewRound();
-                    jTextArea1.setText(wordyImpl.getGeneratedLetter().toUpperCase());
-                    System.out.println(wordyImpl.getGeneratedLetter());
-                    wordBoxField.setText(" ");
-                    startCountdownTimer();
-                }
-
-                remainingSeconds--;
-            }
-        });
-
-        timer.start();
+        java.awt.EventQueue.invokeLater(() -> new GameUI(username).setVisible(true));
     }
 }
 
