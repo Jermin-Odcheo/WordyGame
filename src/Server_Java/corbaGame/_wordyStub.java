@@ -359,7 +359,22 @@ public class _wordyStub extends org.omg.CORBA.portable.ObjectImpl implements wor
             }
   } // displayWinsList
 
-  // Type-specific CORBA::Object operations
+    @Override
+    public void votePlayAgain(String playerName) {
+
+    }
+
+    @Override
+    public String[] getPlayAgainList() {
+        return new String[0];
+    }
+
+    @Override
+    public String getGameState() {
+        return "";
+    }
+
+    // Type-specific CORBA::Object operations
   private static String[] __ids = {
     "IDL:corbaGame/wordy:1.0"};
 

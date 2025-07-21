@@ -1020,7 +1020,7 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
       <AutoIntrospectionLevel>3</AutoIntrospectionLevel>
       <Current>1</Current>
       <LastIntrospectionLevel>3</LastIntrospectionLevel>
-      <LastIntrospectionLocalTimestamp>2025-07-14.02:42:09</LastIntrospectionLocalTimestamp>
+      <LastIntrospectionLocalTimestamp>2025-07-18.02:14:08</LastIntrospectionLocalTimestamp>
       <CollationName>utf8mb4_0900_ai_ci</CollationName>
     </schema>
     <user id="295" parent="1" name="mysql.infoschema">
@@ -1042,68 +1042,109 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
       <Host>localhost</Host>
       <Plugin>caching_sha2_password</Plugin>
     </user>
-    <table id="299" parent="294" name="users">
+    <table id="299" parent="294" name="user_wins">
       <DetailsLevel>3</DetailsLevel>
       <Engine>MyISAM</Engine>
       <CollationName>utf8mb4_0900_ai_ci</CollationName>
     </table>
-    <table id="300" parent="294" name="wincount">
+    <table id="300" parent="294" name="users">
       <DetailsLevel>3</DetailsLevel>
       <Engine>MyISAM</Engine>
       <CollationName>utf8mb4_0900_ai_ci</CollationName>
     </table>
-    <table id="301" parent="294" name="wordlist">
+    <table id="301" parent="294" name="wincount">
       <DetailsLevel>3</DetailsLevel>
       <Engine>MyISAM</Engine>
       <CollationName>utf8mb4_0900_ai_ci</CollationName>
     </table>
-    <column id="302" parent="299" name="user_id">
+    <table id="302" parent="294" name="wordlist">
+      <DetailsLevel>3</DetailsLevel>
+      <Engine>MyISAM</Engine>
+      <CollationName>utf8mb4_0900_ai_ci</CollationName>
+    </table>
+    <column id="303" parent="299" name="username">
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>varchar(191)|0s</StoredType>
+    </column>
+    <column id="304" parent="299" name="win_count">
+      <DefaultExpression>0</DefaultExpression>
+      <Position>2</Position>
+      <StoredType>int|0s</StoredType>
+    </column>
+    <column id="305" parent="299" name="created_at">
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <Position>3</Position>
+      <StoredType>timestamp|0s</StoredType>
+    </column>
+    <column id="306" parent="299" name="updated_at">
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <OnUpdate>CURRENT_TIMESTAMP</OnUpdate>
+      <Position>4</Position>
+      <StoredType>timestamp|0s</StoredType>
+    </column>
+    <index id="307" parent="299" name="PRIMARY">
+      <ColNames>username</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <key id="308" parent="299" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
+    </key>
+    <column id="309" parent="300" name="user_id">
       <AutoIncrement>4</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>int|0s</StoredType>
     </column>
-    <column id="303" parent="299" name="user_username">
+    <column id="310" parent="300" name="user_username">
       <NotNull>1</NotNull>
       <Position>2</Position>
       <StoredType>varchar(50)|0s</StoredType>
     </column>
-    <column id="304" parent="299" name="user_password">
+    <column id="311" parent="300" name="user_password">
       <NotNull>1</NotNull>
       <Position>3</Position>
       <StoredType>char(64)|0s</StoredType>
     </column>
-    <index id="305" parent="299" name="PRIMARY">
+    <column id="312" parent="300" name="win_count">
+      <DefaultExpression>0</DefaultExpression>
+      <Position>4</Position>
+      <StoredType>int|0s</StoredType>
+    </column>
+    <index id="313" parent="300" name="PRIMARY">
       <ColNames>user_id</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <key id="306" parent="299" name="PRIMARY">
+    <key id="314" parent="300" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <Primary>1</Primary>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
-    <column id="307" parent="300" name="username">
+    <column id="315" parent="301" name="username">
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>varchar(50)|0s</StoredType>
     </column>
-    <column id="308" parent="300" name="wins">
+    <column id="316" parent="301" name="wins">
       <NotNull>1</NotNull>
       <Position>2</Position>
       <StoredType>int|0s</StoredType>
     </column>
-    <column id="309" parent="301" name="user_id">
+    <column id="317" parent="302" name="user_id">
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>int|0s</StoredType>
     </column>
-    <column id="310" parent="301" name="word">
+    <column id="318" parent="302" name="word">
       <NotNull>1</NotNull>
       <Position>2</Position>
       <StoredType>varchar(17)|0s</StoredType>
     </column>
-    <index id="311" parent="301" name="user_id">
+    <index id="319" parent="302" name="user_id">
       <ColNames>user_id</ColNames>
       <Type>btree</Type>
     </index>

@@ -27,4 +27,9 @@ public interface wordyOperations
   void leaveGame (String playerName) throws GameException;
   String[] displayWordList ();
   String[] displayWinsList ();
+  // Play again voting methods
+  void votePlayAgain (String playerName);
+  String[] getPlayAgainList ();
+  // New synchronized timer methods
+  String getGameState ();
 } // interface wordyOperations

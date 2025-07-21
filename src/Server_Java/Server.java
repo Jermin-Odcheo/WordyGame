@@ -56,20 +56,5 @@ public class Server {
             e.printStackTrace(System.out);
         }
     }
-
-
 }
 
-
-/**
- * login;
- * start join game;
- * obtain 17 characters random
- * sendwords; with player (kung sino nag send)
- * endGame;
- * endRound;
- * wonRoundOrNot;
- * gameEnded;
- * longestWord;
- * topPlayers;(ranking)
- */

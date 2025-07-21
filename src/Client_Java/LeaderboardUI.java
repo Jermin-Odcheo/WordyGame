@@ -1,131 +1,109 @@
 package Client_Java;
 
 import javax.swing.*;
+import javax.swing.border.*;
+import java.awt.*;
+import java.awt.event.*;
 
-public class LeaderboardUI extends javax.swing.JFrame {
-    static String username;
-    private javax.swing.JPanel backgroundPanel;
-    private javax.swing.JLabel leaderboardLogo;
-    private javax.swing.JButton longestWordsButton;
-    private javax.swing.JButton topWinsButton;
+public class LeaderboardUI extends JFrame {
+    private static final Color BG_COLOR     = new Color(204, 153, 255);
+    private static final Color BTN_COLOR    = new Color(57,  72, 103);
+    private static final Color BTN_FG       = new Color(241, 246, 249);
+    private static final Color BTN_HOVER    = BTN_COLOR.brighter();
+    private final String username;
+    private JPanel  backgroundPanel;
+    private JLabel  leaderboardLogo;
+    private JButton longestWordsButton;
+    private JButton topWinsButton;
+
     public LeaderboardUI(String username) {
+        super("Leaderboard");
         this.username = username;
+        // Window settings
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        setSize(600, 300);
+        setResizable(false);
+        setLocationRelativeTo(null);
         initComponents();
     }
 
     private void initComponents() {
+        // --- Background panel ---
+        backgroundPanel = new JPanel(new BorderLayout());
+        backgroundPanel.setBackground(BG_COLOR);
+        backgroundPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
 
-        backgroundPanel = new javax.swing.JPanel();
-        leaderboardLogo = new javax.swing.JLabel();
-        longestWordsButton = new javax.swing.JButton();
-        topWinsButton = new javax.swing.JButton();
+        // --- Logo ---
+        leaderboardLogo = new JLabel("LEADERBOARD", SwingConstants.CENTER);
+        leaderboardLogo.setFont(new Font("Arial Rounded MT Bold", Font.BOLD, 28));
+        leaderboardLogo.setForeground(Color.WHITE);
+        backgroundPanel.add(leaderboardLogo, BorderLayout.NORTH);
 
-        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        // --- Buttons ---
+        longestWordsButton = makeStyledButton("LONGEST WORDS");
+        topWinsButton      = makeStyledButton("TOP WINS");
 
-        backgroundPanel.setBackground(new java.awt.Color(204, 153, 255));
+        longestWordsButton.addActionListener(e -> LongestWordsUI.startLongestWordsUI(username));
+        topWinsButton     .addActionListener(e -> TopWinsUI.startTopWinsUI(username));
 
-        leaderboardLogo.setFont(new java.awt.Font("Arial Rounded MT Bold", 1, 24)); // NOI18N
-        leaderboardLogo.setForeground(new java.awt.Color(255, 255, 255));
-        leaderboardLogo.setText("LEADERBOARD");
+        JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 50, 0));
+        buttonsPanel.setOpaque(false);
+        buttonsPanel.add(longestWordsButton);
+        buttonsPanel.add(topWinsButton);
 
-        longestWordsButton.setBackground(new java.awt.Color(57, 72, 103));
-        longestWordsButton.setFont(new java.awt.Font("Arial Rounded MT Bold", 1, 18)); // NOI18N
-        longestWordsButton.setForeground(new java.awt.Color(241, 246, 249));
-        longestWordsButton.setText("LONGEST WORDS");
-        //longestWordsButton.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, java.awt.Color.lightGray, null));
-        longestWordsButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                longestWordsButtonActionPerformed(evt);
-            }
-        });
+        backgroundPanel.add(buttonsPanel, BorderLayout.CENTER);
 
-        topWinsButton.setBackground(new java.awt.Color(57, 72, 103));
-        topWinsButton.setFont(new java.awt.Font("Arial Rounded MT Bold", 1, 18)); // NOI18N
-        topWinsButton.setForeground(new java.awt.Color(241, 246, 249));
-        topWinsButton.setText("TOP WINS");
-        //topWinsButton.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, java.awt.Color.lightGray, null));
-        topWinsButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                topWinsButtonActionPerformed(evt);
-            }
-        });
-
-        javax.swing.GroupLayout backgroundPanelLayout = new javax.swing.GroupLayout(backgroundPanel);
-        backgroundPanel.setLayout(backgroundPanelLayout);
-        backgroundPanelLayout.setHorizontalGroup(
-                backgroundPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(backgroundPanelLayout.createSequentialGroup()
-                                .addGroup(backgroundPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addGroup(backgroundPanelLayout.createSequentialGroup()
-                                                .addGap(97, 97, 97)
-                                                .addComponent(longestWordsButton, javax.swing.GroupLayout.PREFERRED_SIZE, 202, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                .addGap(52, 52, 52)
-                                                .addComponent(topWinsButton, javax.swing.GroupLayout.PREFERRED_SIZE, 202, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                        .addGroup(backgroundPanelLayout.createSequentialGroup()
-                                                .addGap(228, 228, 228)
-                                                .addComponent(leaderboardLogo)))
-                                .addContainerGap(113, Short.MAX_VALUE))
-        );
-        backgroundPanelLayout.setVerticalGroup(
-                backgroundPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(backgroundPanelLayout.createSequentialGroup()
-                                .addGap(37, 37, 37)
-                                .addComponent(leaderboardLogo)
-                                .addGap(38, 38, 38)
-                                .addGroup(backgroundPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                        .addComponent(longestWordsButton, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(topWinsButton, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addContainerGap(56, Short.MAX_VALUE))
-        );
-
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(backgroundPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        );
-        layout.setVerticalGroup(
-                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(layout.createSequentialGroup()
-                                .addComponent(backgroundPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(0, 0, Short.MAX_VALUE))
-        );
-
-        pack();
+        // --- Finalize ---
+        setContentPane(backgroundPanel);
     }
 
-    private void longestWordsButtonActionPerformed(java.awt.event.ActionEvent evt) {
-        LongestWordsUI.startLongestWordsUI(username);
+    private JButton makeStyledButton(String text) {
+        JButton btn = new JButton(text);
+        btn.setFont(new Font("Arial Rounded MT Bold", Font.BOLD, 18));
+        btn.setBackground(BTN_COLOR);
+        btn.setForeground(BTN_FG);
+        btn.setFocusPainted(false);
+        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btn.setPreferredSize(new Dimension(200, 60));
+        // rounded border
+        btn.setBorder(new CompoundBorder(
+                new RoundedBorder(15),
+                new EmptyBorder(5, 15, 5, 15)
+        ));
+        // hover effect
+        btn.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) { btn.setBackground(BTN_HOVER); }
+            public void mouseExited(MouseEvent e)  { btn.setBackground(BTN_COLOR); }
+        });
+        return btn;
     }
 
-    private void topWinsButtonActionPerformed(java.awt.event.ActionEvent evt) {
-        TopWinsUI.startTopWinsUI(username);
+    // simple rounded-corner border
+    private static class RoundedBorder extends AbstractBorder {
+        private final int radius;
+        RoundedBorder(int radius) { this.radius = radius; }
+
+        @Override public void paintBorder(Component c, Graphics g, int x, int y, int w, int h) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setColor(Color.WHITE);
+            g2.setStroke(new BasicStroke(2));
+            g2.drawRoundRect(x, y, w - 1, h - 1, radius, radius);
+            g2.dispose();
+        }
     }
 
     public static void startLeaderboardUI(String username) {
+        // set Nimbus if available
         try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+            for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels())
                 if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    UIManager.setLookAndFeel(info.getClassName());
                     break;
                 }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(LeaderboardUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(LeaderboardUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(LeaderboardUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(LeaderboardUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
+        } catch (Exception ex) { /* ignore */ }
 
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-
-                new LeaderboardUI(username).setVisible(true);
-            }
+        SwingUtilities.invokeLater(() -> {
+            new LeaderboardUI(username).setVisible(true);
         });
     }
-
 }

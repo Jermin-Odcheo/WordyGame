@@ -2,9 +2,6 @@ module corbaGame {
    exception GameException {
         string message;
       };
-
-
-
    exception checkLogin{
         string message;
       };
@@ -17,9 +14,6 @@ module corbaGame {
    exception invalid{
         string message;
       };
-
-
-
    exception notEnoughPlayers{
         string message;
       };
@@ -49,17 +43,29 @@ module corbaGame {
         string getValidWordFromClients();
         void getWinner() raises (isSameLength,getWin,getRoundWin);
         void generateLetters();
-        void startNewRound();
 
-        boolean status(in string playerName);
+        // Play again voting methods
+        void votePlayAgain(in string playerName);
+        sequence<string> getPlayAgainList();
+
+        // New synchronized timer methods
+        string getGameState();
+        long getCurrentGameTime();
+        long getLobbyCountdown();
+        boolean isInLobbyCountdown();
+        long getServerTimestamp();
+        boolean isGameActive();
+        boolean getGameEnded();
+        string getWinnerName();
+        // Enhanced game management
+        void startNewRound();
         double lobbyPlayerCount();
         void leaveGame(in string playerName) raises (GameException);
-
+        // New game results methods
+        string getGameResults();
+        string getAllPlayerWords();
         getTop displayWordList();
         getWins displayWinsList();
     };
-
-
-
 };
 #pragma prefix "Server_Java"

@@ -299,33 +299,45 @@ public class _wordyStub extends org.omg.CORBA.portable.ObjectImpl implements wor
             }
   } // lobbyPlayerCount
 
-  public void leaveGame (String playerName) throws GameException
+    @Override
+    public void leaveGame(String playerName) throws GameException {
+
+    }
+
+    @Override
+    public String[] displayWordList() {
+        return new String[0];
+    }
+
+    @Override
+    public String[] displayWinsList() {
+        return new String[0];
+    }
+
+    public void votePlayAgain (String playerName)
   {
             org.omg.CORBA.portable.InputStream $in = null;
             try {
-                org.omg.CORBA.portable.OutputStream $out = _request ("leaveGame", true);
+                org.omg.CORBA.portable.OutputStream $out = _request ("votePlayAgain", true);
                 $out.write_string (playerName);
                 $in = _invoke ($out);
                 return;
             } catch (org.omg.CORBA.portable.ApplicationException $ex) {
                 $in = $ex.getInputStream ();
                 String _id = $ex.getId ();
-                if (_id.equals ("IDL:corbaGame/GameException:1.0"))
-                    throw GameExceptionHelper.read ($in);
-                else
-                    throw new org.omg.CORBA.MARSHAL (_id);
+                throw new org.omg.CORBA.MARSHAL (_id);
             } catch (org.omg.CORBA.portable.RemarshalException $rm) {
-                leaveGame (playerName        );
+                votePlayAgain (playerName        );
             } finally {
                 _releaseReply ($in);
             }
-  } // leaveGame
+  } // votePlayAgain
 
-  public String[] displayWordList ()
+  public String[] getPlayAgainList ()
   {
             org.omg.CORBA.portable.InputStream $in = null;
             try {
-                org.omg.CORBA.portable.OutputStream $out = _request ("displayWordList", true);
+                org.omg.CORBA.portable.OutputStream $out = _request ("getPlayAgainList", true);
                 $in = _invoke ($out);
                 String $result[] = getTopHelper.read ($in);
                 return $result;
@@ -334,32 +346,18 @@ public class _wordyStub extends org.omg.CORBA.portable.ObjectImpl implements wor
                 String _id = $ex.getId ();
                 throw new org.omg.CORBA.MARSHAL (_id);
             } catch (org.omg.CORBA.portable.RemarshalException $rm) {
-                return displayWordList (        );
+                return getPlayAgainList (        );
             } finally {
                 _releaseReply ($in);
             }
-  } // displayWordList
+  } // getPlayAgainList
 
-  public String[] displayWinsList ()
-  {
-            org.omg.CORBA.portable.InputStream $in = null;
-            try {
-                org.omg.CORBA.portable.OutputStream $out = _request ("displayWinsList", true);
-                $in = _invoke ($out);
-                String $result[] = getWinsHelper.read ($in);
-                return $result;
-            } catch (org.omg.CORBA.portable.ApplicationException $ex) {
-                $in = $ex.getInputStream ();
-                String _id = $ex.getId ();
-                throw new org.omg.CORBA.MARSHAL (_id);
-            } catch (org.omg.CORBA.portable.RemarshalException $rm) {
-                return displayWinsList (        );
-            } finally {
-                _releaseReply ($in);
-            }
-  } // displayWinsList
+    @Override
+    public String getGameState() {
+        return "";
+    }
 
-  // Type-specific CORBA::Object operations
+    // Type-specific CORBA::Object operations
   private static String[] __ids = {
     "IDL:corbaGame/wordy:1.0"};
 

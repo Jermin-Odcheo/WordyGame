@@ -14,7 +14,6 @@ public class LobbyUI extends javax.swing.JFrame {
 
     // Timer for updating lobby status
     private Timer lobbyUpdateTimer;
-    private Timer countdownTimer;
 
     // UI Components for enhanced lobby
     private JLabel countdownLabel;
@@ -23,7 +22,7 @@ public class LobbyUI extends javax.swing.JFrame {
     private JLabel statusLabel;
 
     public LobbyUI(String username) {
-        this.username = username;
+        LobbyUI.username = username;
         initComponents();
         addListeners();
         startLobbyUpdates();
@@ -92,7 +91,7 @@ public class LobbyUI extends javax.swing.JFrame {
         ));
         countdownPanel.setBounds(50, 130, 300, 120);
 
-        JLabel countdownTitleLabel = new JLabel("⏱️ GAME STARTS IN", SwingConstants.CENTER);
+        JLabel countdownTitleLabel = new JLabel("GAME STARTS IN", SwingConstants.CENTER);
         countdownTitleLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
         countdownTitleLabel.setForeground(Color.WHITE);
 
@@ -116,7 +115,7 @@ public class LobbyUI extends javax.swing.JFrame {
         ));
         playersPanel.setBounds(920, 130, 300, 350);
 
-        JLabel playersTitle = new JLabel("👥 PLAYERS IN LOBBY", SwingConstants.CENTER);
+        JLabel playersTitle = new JLabel("PLAYERS IN LOBBY", SwingConstants.CENTER);
         playersTitle.setFont(new Font("Segoe UI", Font.BOLD, 16));
         playersTitle.setForeground(Color.WHITE);
 
@@ -157,7 +156,7 @@ public class LobbyUI extends javax.swing.JFrame {
         ));
         statusPanel.setBounds(50, 270, 300, 80);
 
-        statusLabel = new JLabel("🔍 Searching for players...", SwingConstants.CENTER);
+        statusLabel = new JLabel("Searching for players...", SwingConstants.CENTER);
         statusLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
         statusLabel.setForeground(new Color(251, 191, 36));
 
@@ -189,7 +188,7 @@ public class LobbyUI extends javax.swing.JFrame {
     }
 
     private void createExitButton() {
-        JButton exitLobbyButton = new JButton("🚪 EXIT LOBBY");
+        JButton exitLobbyButton = new JButton("EXIT LOBBY");
         exitLobbyButton.setFont(new Font("Segoe UI", Font.BOLD, 16));
         exitLobbyButton.setForeground(Color.WHITE);
         exitLobbyButton.setBackground(new Color(239, 68, 68));
@@ -229,7 +228,8 @@ public class LobbyUI extends javax.swing.JFrame {
             // Get current players in lobby
             String playersList = wordyImpl.playerInGameList();
             double playerCount = wordyImpl.lobbyPlayerCount();
-            double countdown = wordyImpl.gettimer();
+            double timer = wordyImpl.gettimer();
+            boolean isPlayerInGame = wordyImpl.status(username);
 
             // Update players list
             if (playersList != null && !playersList.isEmpty() && !playersList.equals("[]")) {
@@ -246,11 +246,29 @@ public class LobbyUI extends javax.swing.JFrame {
                 });
             }
 
-            // Update countdown
-            if (playerCount >= 2 && countdown > 0) {
+            // Determine game state based on available information
+            if (isPlayerInGame && timer > 0 && timer <= 30) {
+                // Player is in game and game timer is running - transition to GameUI
                 SwingUtilities.invokeLater(() -> {
-                    countdownLabel.setText(String.valueOf((int)countdown));
-                    statusLabel.setText("🚀 Game starting soon!");
+                    statusLabel.setText("Game Started! Joining...");
+                    countdownLabel.setText("LIVE");
+                    countdownLabel.setForeground(new Color(34, 197, 94)); // Green
+                });
+
+                // Transition to game UI immediately
+                startGameUI(username);
+                if (lobbyUpdateTimer != null) {
+                    lobbyUpdateTimer.stop();
+                }
+                return; // Exit this method
+
+            } else if (playerCount >= 2 && timer > 30) {
+                // Lobby countdown is active (timer > 30 means countdown phase)
+                int countdown = (int)(timer - 30); // Assuming countdown starts from server timer > 30
+
+                SwingUtilities.invokeLater(() -> {
+                    countdownLabel.setText(String.valueOf(countdown));
+                    statusLabel.setText("Game starting soon!");
 
                     // Change color based on countdown
                     if (countdown <= 3) {
@@ -261,34 +279,35 @@ public class LobbyUI extends javax.swing.JFrame {
                         countdownLabel.setForeground(new Color(34, 197, 94)); // Green
                     }
                 });
-            } else if (playerCount >= 2) {
-                // Game should be starting
-                SwingUtilities.invokeLater(() -> {
-                    statusLabel.setText("🎮 Starting game...");
-                    countdownLabel.setText("GO!");
-                });
 
-                // Start game after short delay
-                Timer startGameTimer = new Timer(2000, startEvent -> {
-                    startGameUI(username);
-                    if (lobbyUpdateTimer != null) {
-                        lobbyUpdateTimer.stop();
+            } else if (playerCount >= 2 && timer > 0 && timer <= 10) {
+                // Countdown in final phase
+                SwingUtilities.invokeLater(() -> {
+                    countdownLabel.setText(String.valueOf((int)timer));
+                    statusLabel.setText("Game starting soon!");
+
+                    // Change color based on countdown
+                    if (timer <= 3) {
+                        countdownLabel.setForeground(new Color(239, 68, 68)); // Red
+                    } else if (timer <= 5) {
+                        countdownLabel.setForeground(new Color(251, 191, 36)); // Yellow
+                    } else {
+                        countdownLabel.setForeground(new Color(34, 197, 94)); // Green
                     }
                 });
-                startGameTimer.setRepeats(false);
-                startGameTimer.start();
 
             } else {
+                // Waiting for players
                 SwingUtilities.invokeLater(() -> {
                     countdownLabel.setText("--");
-                    statusLabel.setText("🔍 Waiting for more players...");
+                    statusLabel.setText("Waiting for more players...");
                     countdownLabel.setForeground(new Color(168, 162, 158)); // Gray
                 });
             }
 
         } catch (Exception ex) {
             SwingUtilities.invokeLater(() -> {
-                statusLabel.setText("❌ Connection error");
+                statusLabel.setText("Connection error");
                 playersListArea.setText("Error loading players...");
             });
             System.out.println("Error updating lobby: " + ex.getMessage());
@@ -299,16 +318,32 @@ public class LobbyUI extends javax.swing.JFrame {
         this.addWindowListener(new WindowListener() {
             @Override
             public void windowOpened(WindowEvent e) {
-                try {
-                    // Join the lobby when window opens
-                    boolean joined = wordyImpl.joinLobby(username);
-                    if (!joined) {
-                        statusLabel.setText("❌ Failed to join lobby");
+                // Join the server's lobby when the LobbyUI opens
+                new Thread(() -> {
+                    try {
+                        SwingUtilities.invokeLater(() -> {
+                            statusLabel.setText("Joining lobby...");
+                        });
+
+                        boolean joined = Client.safeJoinLobby(username);
+                        if (joined) {
+                            SwingUtilities.invokeLater(() -> {
+                                statusLabel.setText("Successfully joined lobby!");
+                            });
+                            System.out.println("LobbyUI: Successfully joined server lobby for " + username);
+                        } else {
+                            SwingUtilities.invokeLater(() -> {
+                                statusLabel.setText("Failed to join lobby - server may be full or unavailable");
+                            });
+                            System.out.println("LobbyUI: Failed to join server lobby for " + username);
+                        }
+                    } catch (Exception ex) {
+                        SwingUtilities.invokeLater(() -> {
+                            statusLabel.setText(" Connection error");
+                        });
+                        System.out.println("LobbyUI: Error joining lobby: " + ex.getMessage());
                     }
-                } catch (Exception ex) {
-                    statusLabel.setText("❌ Connection error");
-                    System.out.println("Error joining lobby: " + ex.getMessage());
-                }
+                }).start();
             }
 
             @Override
@@ -318,9 +353,10 @@ public class LobbyUI extends javax.swing.JFrame {
                     lobbyUpdateTimer.stop();
                 }
                 try {
-                    wordyImpl.leaveGame(username);
+                    Client.safeLeaveGame(username);
+                    System.out.println("LobbyUI: Left server lobby for " + username);
                 } catch (Exception ex) {
-                    System.out.println("Error leaving lobby: " + ex.getMessage());
+                    System.out.println("LobbyUI: Error leaving lobby: " + ex.getMessage());
                 }
             }
 
@@ -375,18 +411,4 @@ public class LobbyUI extends javax.swing.JFrame {
 
         java.awt.EventQueue.invokeLater(() -> new LobbyUI(username).setVisible(true));
     }
-
-    // Legacy variables for compatibility (if needed)
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel matchTimerField;
-    private javax.swing.JLabel playerCountField;
-    private javax.swing.JLabel jLabel8;
-    private javax.swing.JLabel jLabel9;
-    private javax.swing.JButton exitLobbyButton;
-    private javax.swing.JLayeredPane jLayeredPane1;
-    private javax.swing.JLabel jLabel7;
 }

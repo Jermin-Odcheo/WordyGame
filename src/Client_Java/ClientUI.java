@@ -20,13 +20,14 @@ public class ClientUI extends javax.swing.JFrame {
     private JButton quickPlayButton;
     private int lastPlayerCount = 0;
 
+    // Add singleton pattern to prevent multiple instances
+    private static ClientUI instance = null;
+    private static boolean isDisposing = false;
+
     // Original UI components
-    private javax.swing.JPanel backgroundPanel;
+    private javax.swing.JPanel mainPanel;
     private javax.swing.JButton startGameButton;
     private javax.swing.JLabel welcomeMessage;
-    private javax.swing.JLabel logo;
-    private javax.swing.JLayeredPane jLayeredPane2;
-    private javax.swing.JLabel backgroundPane;
     private javax.swing.JButton leaderboardButton;
     private javax.swing.JButton exitButton;
 
@@ -47,165 +48,207 @@ public class ClientUI extends javax.swing.JFrame {
     }
 
     private void initComponents() {
-        backgroundPanel = new javax.swing.JPanel();
-        startGameButton = new javax.swing.JButton();
-        welcomeMessage = new javax.swing.JLabel();
-        logo = new javax.swing.JLabel();
-        jLayeredPane2 = new javax.swing.JLayeredPane();
-        backgroundPane = new javax.swing.JLabel();
-        leaderboardButton = new javax.swing.JButton();
-        exitButton = new javax.swing.JButton();
-
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("WordyGame - Main Menu (" + username + ")");
+        setTitle("WordyGame - " + username);
         setResizable(false);
-
-        backgroundPanel.setBackground(new java.awt.Color(204, 153, 255));
-        backgroundPanel.setLayout(null); // Use absolute layout for precise positioning
-
-        // Welcome message with username
-        welcomeMessage.setFont(new java.awt.Font("Segoe UI", 1, 32));
-        welcomeMessage.setForeground(new java.awt.Color(255, 255, 255));
-        welcomeMessage.setText("Welcome " + username + "!");
-        welcomeMessage.setBounds(46, 25, 600, 40);
-        backgroundPanel.add(welcomeMessage);
-
-        // Game title
-        JLabel gameTitle = new JLabel("WORD GAME BETA v 3.32.71");
-        gameTitle.setFont(new java.awt.Font("Segoe UI", 1, 24));
-        gameTitle.setForeground(new java.awt.Color(255, 255, 255));
-        gameTitle.setBounds(46, 70, 400, 30);
-        backgroundPanel.add(gameTitle);
-
-        // Logo
-        logo.setIcon(new javax.swing.ImageIcon("src/Server_Java/WORD.png"));
-        logo.setBounds(35, 120, 400, 300);
-        backgroundPanel.add(logo);
-
-        // Online Players Panel
-        createOnlinePlayersPanel();
-
-        // Game action buttons
-        createGameButtons();
-
-        // Other buttons
-        createOtherButtons();
-
-        // Background
-        backgroundPane.setIcon(new javax.swing.ImageIcon("src/Client_Java/17250835.png"));
-        backgroundPane.setBounds(0, 0, 905, 524);
-        backgroundPanel.add(backgroundPane);
-
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(backgroundPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 905, javax.swing.GroupLayout.PREFERRED_SIZE)
-        );
-        layout.setVerticalGroup(
-                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(backgroundPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 524, Short.MAX_VALUE)
-        );
-
-        pack();
+        setSize(800, 600);
         setLocationRelativeTo(null);
+
+        // Create main panel with proper layout
+        mainPanel = new JPanel();
+        mainPanel.setLayout(new BorderLayout(20, 20));
+        mainPanel.setBackground(new Color(245, 245, 245));
+        mainPanel.setBorder(new EmptyBorder(30, 30, 30, 30));
+
+        createHeaderPanel();
+        createCenterPanel();
+        createFooterPanel();
+
+        add(mainPanel);
     }
 
-    private void createOnlinePlayersPanel() {
-        // Online Players Panel
-        JPanel onlinePanel = new JPanel();
-        onlinePanel.setLayout(new BorderLayout(5, 5));
-        onlinePanel.setBackground(new Color(31, 41, 55));
-        onlinePanel.setBorder(BorderFactory.createCompoundBorder(
-            new LineBorder(new Color(59, 130, 246), 3, true),
-            new EmptyBorder(10, 10, 10, 10)
+    private void createHeaderPanel() {
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setBackground(new Color(245, 245, 245));
+
+        // Welcome message
+        welcomeMessage = new JLabel("Welcome, " + username + "!");
+        welcomeMessage.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        welcomeMessage.setForeground(new Color(51, 51, 51));
+        welcomeMessage.setHorizontalAlignment(SwingConstants.CENTER);
+
+        // Game title
+        JLabel gameTitle = new JLabel("WordyGame");
+        gameTitle.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        gameTitle.setForeground(new Color(102, 102, 102));
+        gameTitle.setHorizontalAlignment(SwingConstants.CENTER);
+
+        JPanel titlePanel = new JPanel(new BorderLayout(0, 5));
+        titlePanel.setBackground(new Color(245, 245, 245));
+        titlePanel.add(welcomeMessage, BorderLayout.CENTER);
+        titlePanel.add(gameTitle, BorderLayout.SOUTH);
+
+        headerPanel.add(titlePanel, BorderLayout.CENTER);
+        mainPanel.add(headerPanel, BorderLayout.NORTH);
+    }
+
+    private void createCenterPanel() {
+        JPanel centerPanel = new JPanel(new GridLayout(1, 2, 30, 0));
+        centerPanel.setBackground(new Color(245, 245, 245));
+
+        // Left side - Game controls
+        createGameControlsPanel(centerPanel);
+
+        // Right side - Online players
+        createOnlinePlayersPanel(centerPanel);
+
+        mainPanel.add(centerPanel, BorderLayout.CENTER);
+    }
+
+    private void createGameControlsPanel(JPanel parent) {
+        JPanel gamePanel = new JPanel();
+        gamePanel.setLayout(new BoxLayout(gamePanel, BoxLayout.Y_AXIS));
+        gamePanel.setBackground(Color.WHITE);
+        gamePanel.setBorder(BorderFactory.createCompoundBorder(
+            new LineBorder(new Color(200, 200, 200), 1),
+            new EmptyBorder(25, 25, 25, 25)
         ));
-        onlinePanel.setBounds(460, 120, 280, 300);
+
+        JLabel gameLabel = new JLabel("Game Options");
+        gameLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        gameLabel.setForeground(new Color(51, 51, 51));
+        gameLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        // Add spacing
+        gamePanel.add(gameLabel);
+        gamePanel.add(Box.createRigidArea(new Dimension(0, 20)));
+
+        // Quick Play button
+        quickPlayButton = createStyledButton("Quick Play", new Color(46, 125, 50));
+        quickPlayButton.addActionListener(e -> quickPlayAction());
+        gamePanel.add(quickPlayButton);
+
+        gamePanel.add(Box.createRigidArea(new Dimension(0, 15)));
+
+        // Create Lobby button
+        startGameButton = createStyledButton("Create Lobby", new Color(25, 118, 210));
+        startGameButton.addActionListener(e -> createLobbyAction());
+        gamePanel.add(startGameButton);
+
+        gamePanel.add(Box.createRigidArea(new Dimension(0, 15)));
+
+        // Leaderboard button
+        leaderboardButton = createStyledButton("Leaderboard", new Color(156, 39, 176));
+        leaderboardButton.addActionListener(e -> leaderboardButtonActionPerformed());
+        gamePanel.add(leaderboardButton);
+
+        parent.add(gamePanel);
+    }
+
+    private void createOnlinePlayersPanel(JPanel parent) {
+        JPanel onlinePanel = new JPanel(new BorderLayout(0, 15));
+        onlinePanel.setBackground(Color.WHITE);
+        onlinePanel.setBorder(BorderFactory.createCompoundBorder(
+            new LineBorder(new Color(200, 200, 200), 1),
+            new EmptyBorder(25, 25, 25, 25)
+        ));
 
         // Header
-        JLabel onlineTitle = new JLabel("🌐 ONLINE PLAYERS", SwingConstants.CENTER);
-        onlineTitle.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        onlineTitle.setForeground(Color.WHITE);
-
-        onlineCountLabel = new JLabel("Players: 0", SwingConstants.CENTER);
-        onlineCountLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        onlineCountLabel.setForeground(new Color(34, 197, 94));
-
         JPanel headerPanel = new JPanel(new BorderLayout());
-        headerPanel.setBackground(new Color(31, 41, 55));
-        headerPanel.add(onlineTitle, BorderLayout.NORTH);
-        headerPanel.add(onlineCountLabel, BorderLayout.SOUTH);
+        headerPanel.setBackground(Color.WHITE);
+
+        JLabel onlineTitle = new JLabel("Online Players");
+        onlineTitle.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        onlineTitle.setForeground(new Color(51, 51, 51));
+
+        onlineCountLabel = new JLabel("Players: 0");
+        onlineCountLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        onlineCountLabel.setForeground(new Color(102, 102, 102));
+
+        headerPanel.add(onlineTitle, BorderLayout.WEST);
+        headerPanel.add(onlineCountLabel, BorderLayout.EAST);
 
         // Players list
         onlinePlayersArea = new JTextArea();
         onlinePlayersArea.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        onlinePlayersArea.setBackground(new Color(17, 24, 39));
-        onlinePlayersArea.setForeground(new Color(209, 213, 219));
+        onlinePlayersArea.setBackground(new Color(250, 250, 250));
+        onlinePlayersArea.setForeground(new Color(51, 51, 51));
         onlinePlayersArea.setEditable(false);
-        onlinePlayersArea.setBorder(new EmptyBorder(5, 5, 5, 5));
+        onlinePlayersArea.setBorder(new EmptyBorder(10, 10, 10, 10));
         onlinePlayersArea.setText("Loading players...");
 
         JScrollPane playersScroll = new JScrollPane(onlinePlayersArea);
-        playersScroll.setBorder(null);
-        playersScroll.setPreferredSize(new Dimension(0, 180));
+        playersScroll.setBorder(new LineBorder(new Color(220, 220, 220), 1));
+        playersScroll.setPreferredSize(new Dimension(0, 200));
 
         // Refresh button
-        refreshButton = new JButton("🔄 Refresh");
-        refreshButton.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        refreshButton.setBackground(new Color(59, 130, 246));
-        refreshButton.setForeground(Color.WHITE);
-        refreshButton.setBorder(null);
-        refreshButton.setFocusPainted(false);
+        refreshButton = createSmallButton("Refresh", new Color(96, 125, 139));
         refreshButton.addActionListener(e -> updateOnlinePlayers());
 
         onlinePanel.add(headerPanel, BorderLayout.NORTH);
         onlinePanel.add(playersScroll, BorderLayout.CENTER);
         onlinePanel.add(refreshButton, BorderLayout.SOUTH);
 
-        backgroundPanel.add(onlinePanel);
+        parent.add(onlinePanel);
     }
 
-    private void createGameButtons() {
-        // Quick Play button - automatically creates lobby and starts game when 2+ players
-        quickPlayButton = new JButton("🚀 QUICK PLAY");
-        quickPlayButton.setFont(new Font("Arial Rounded MT Bold", Font.BOLD, 20));
-        quickPlayButton.setBackground(new Color(34, 197, 94));
-        quickPlayButton.setForeground(Color.WHITE);
-        quickPlayButton.setBorder(BorderFactory.createRaisedBevelBorder());
-        quickPlayButton.setFocusPainted(false);
-        quickPlayButton.setBounds(760, 150, 130, 50);
-        quickPlayButton.addActionListener(e -> quickPlayAction());
-        backgroundPanel.add(quickPlayButton);
+    private void createFooterPanel() {
+        JPanel footerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        footerPanel.setBackground(new Color(245, 245, 245));
 
-        // Original Start Game button (now creates lobby manually)
-        startGameButton.setFont(new java.awt.Font("Arial Rounded MT Bold", 1, 18));
-        startGameButton.setForeground(new java.awt.Color(238, 241, 255));
-        startGameButton.setText("CREATE LOBBY");
-        startGameButton.setBorder(null);
-        startGameButton.setContentAreaFilled(false);
-        startGameButton.setBounds(760, 220, 130, 40);
-        startGameButton.addActionListener(e -> createLobbyAction());
-        backgroundPanel.add(startGameButton);
-    }
-
-    private void createOtherButtons() {
-        leaderboardButton.setFont(new java.awt.Font("Arial Rounded MT Bold", 1, 14));
-        leaderboardButton.setForeground(new java.awt.Color(238, 241, 255));
-        leaderboardButton.setText("LEADERBOARD");
-        leaderboardButton.setBorder(null);
-        leaderboardButton.setContentAreaFilled(false);
-        leaderboardButton.setBounds(760, 280, 130, 30);
-        leaderboardButton.addActionListener(e -> leaderboardButtonActionPerformed());
-        backgroundPanel.add(leaderboardButton);
-
-        exitButton.setFont(new java.awt.Font("Arial Rounded MT Bold", 1, 14));
-        exitButton.setForeground(new java.awt.Color(238, 241, 255));
-        exitButton.setText("EXIT");
-        exitButton.setBorder(null);
-        exitButton.setContentAreaFilled(false);
-        exitButton.setBounds(760, 320, 130, 30);
+        exitButton = createSmallButton("Exit", new Color(244, 67, 54));
         exitButton.addActionListener(e -> exitButtonActionPerformed());
-        backgroundPanel.add(exitButton);
+
+        footerPanel.add(exitButton);
+        mainPanel.add(footerPanel, BorderLayout.SOUTH);
+    }
+
+    private JButton createStyledButton(String text, Color backgroundColor) {
+        JButton button = new JButton(text);
+        button.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        button.setForeground(Color.WHITE);
+        button.setBackground(backgroundColor);
+        button.setBorder(BorderFactory.createEmptyBorder(12, 20, 12, 20));
+        button.setFocusPainted(false);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setAlignmentX(Component.CENTER_ALIGNMENT);
+        button.setMaximumSize(new Dimension(200, 40));
+
+        // Hover effect
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            private Color originalColor = backgroundColor;
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                button.setBackground(backgroundColor.brighter());
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setBackground(originalColor);
+            }
+        });
+
+        return button;
+    }
+
+    private JButton createSmallButton(String text, Color backgroundColor) {
+        JButton button = new JButton(text);
+        button.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        button.setForeground(Color.WHITE);
+        button.setBackground(backgroundColor);
+        button.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
+        button.setFocusPainted(false);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        // Hover effect
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            private Color originalColor = backgroundColor;
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                button.setBackground(backgroundColor.brighter());
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setBackground(originalColor);
+            }
+        });
+
+        return button;
     }
 
     private void startOnlinePlayersUpdate() {
@@ -247,34 +290,54 @@ public class ClientUI extends javax.swing.JFrame {
         worker.execute();
     }
 
+    // Fixed online players display
     private void displayOnlinePlayers(String playerListString) {
-        if (playerListString == null || playerListString.trim().isEmpty()) {
+        System.out.println("Raw player list from server: [" + playerListString + "]"); // Debug output
+
+        if (playerListString == null || playerListString.trim().isEmpty() || playerListString.equals("[]")) {
             onlinePlayersArea.setText("No players online");
             onlineCountLabel.setText("Players: 0");
             lastPlayerCount = 0;
             return;
         }
 
-        // Parse the player list (assuming comma-separated)
-        String[] players = playerListString.split(",");
-        List<String> playerList = Arrays.asList(players);
+        // Clean up the string - remove brackets and split by comma
+        String cleanedList = playerListString.trim();
+        if (cleanedList.startsWith("[")) {
+            cleanedList = cleanedList.substring(1);
+        }
+        if (cleanedList.endsWith("]")) {
+            cleanedList = cleanedList.substring(0, cleanedList.length() - 1);
+        }
 
-        // Filter out empty strings
-        playerList = playerList.stream()
+        // Handle empty list after cleaning
+        if (cleanedList.trim().isEmpty()) {
+            onlinePlayersArea.setText("No players online");
+            onlineCountLabel.setText("Players: 0");
+            lastPlayerCount = 0;
+            return;
+        }
+
+        // Split by comma and clean each name
+        String[] players = cleanedList.split(",");
+        List<String> playerList = Arrays.stream(players)
             .map(String::trim)
             .filter(s -> !s.isEmpty())
             .collect(toList());
 
         int currentPlayerCount = playerList.size();
 
-        // Update UI
+        // Display players with simple formatting
         StringBuilder displayText = new StringBuilder();
         for (int i = 0; i < playerList.size(); i++) {
             String player = playerList.get(i);
-            displayText.append("• ").append(player);
+
             if (player.equals(username)) {
-                displayText.append(" (You)");
+                displayText.append(player).append(" (You)");
+            } else {
+                displayText.append(player);
             }
+
             if (i < playerList.size() - 1) {
                 displayText.append("\n");
             }
@@ -283,24 +346,40 @@ public class ClientUI extends javax.swing.JFrame {
         onlinePlayersArea.setText(displayText.toString());
         onlineCountLabel.setText("Players: " + currentPlayerCount);
 
-        // Check for automatic game start (2+ players including current user)
-        if (currentPlayerCount >= 2 && currentPlayerCount > lastPlayerCount) {
-            // Show notification that there are enough players for a game
-            SwingUtilities.invokeLater(() -> {
-                quickPlayButton.setBackground(new Color(220, 38, 127)); // Highlight the quick play button
-                quickPlayButton.setText("🔥 " + currentPlayerCount + " PLAYERS!");
+        // Show notification for player count changes
+        if (currentPlayerCount != lastPlayerCount) {
+            if (currentPlayerCount > lastPlayerCount) {
+                showPlayerNotification("New player joined! (" + currentPlayerCount + " total)");
+            } else if (currentPlayerCount < lastPlayerCount) {
+                showPlayerNotification("Player left (" + currentPlayerCount + " remaining)");
+            }
 
-                // Reset button after 3 seconds
-                Timer resetTimer = new Timer(3000, e -> {
-                    quickPlayButton.setBackground(new Color(34, 197, 94));
-                    quickPlayButton.setText("🚀 QUICK PLAY");
-                    ((Timer) e.getSource()).stop();
-                });
-                resetTimer.start();
-            });
+            // Enable/disable quick play based on player count
+            if (currentPlayerCount >= 2) {
+                quickPlayButton.setBackground(new Color(76, 175, 80));
+                quickPlayButton.setText("Quick Play (" + currentPlayerCount + " players)");
+            } else {
+                quickPlayButton.setBackground(new Color(46, 125, 50));
+                quickPlayButton.setText("Quick Play");
+            }
         }
 
         lastPlayerCount = currentPlayerCount;
+    }
+
+    // Simple notification system
+    private void showPlayerNotification(String message) {
+        SwingUtilities.invokeLater(() -> {
+            String currentTitle = getTitle();
+            setTitle(message + " - " + currentTitle);
+
+            // Reset title after 3 seconds
+            Timer titleTimer = new Timer(3000, e -> {
+                setTitle("WordyGame - " + username);
+                ((Timer) e.getSource()).stop();
+            });
+            titleTimer.start();
+        });
     }
 
     private void quickPlayAction() {
@@ -311,7 +390,6 @@ public class ClientUI extends javax.swing.JFrame {
             @Override
             protected Boolean doInBackground() throws Exception {
                 try {
-                    // Join lobby - this should automatically start game if 2+ players
                     return wordyImpl.joinLobby(username);
                 } catch (Exception e) {
                     System.err.println("Error joining lobby: " + e.getMessage());
@@ -324,7 +402,6 @@ public class ClientUI extends javax.swing.JFrame {
                 try {
                     boolean success = get();
                     if (success) {
-                        // Successfully joined lobby, go to lobby UI
                         dispose();
                         if (onlinePlayersTimer != null) {
                             onlinePlayersTimer.stop();
@@ -336,7 +413,7 @@ public class ClientUI extends javax.swing.JFrame {
                             "Connection Error",
                             JOptionPane.ERROR_MESSAGE);
                         quickPlayButton.setEnabled(true);
-                        quickPlayButton.setText("🚀 QUICK PLAY");
+                        quickPlayButton.setText("Quick Play");
                     }
                 } catch (Exception e) {
                     JOptionPane.showMessageDialog(ClientUI.this,
@@ -344,7 +421,7 @@ public class ClientUI extends javax.swing.JFrame {
                         "System Error",
                         JOptionPane.ERROR_MESSAGE);
                     quickPlayButton.setEnabled(true);
-                    quickPlayButton.setText("🚀 QUICK PLAY");
+                    quickPlayButton.setText("Quick Play");
                 }
             }
         };
@@ -352,7 +429,6 @@ public class ClientUI extends javax.swing.JFrame {
     }
 
     private void createLobbyAction() {
-        // Create lobby manually (original behavior)
         dispose();
         if (onlinePlayersTimer != null) {
             onlinePlayersTimer.stop();
@@ -373,9 +449,63 @@ public class ClientUI extends javax.swing.JFrame {
     }
 
     public static void startClientUI(String username) {
-        System.out.println("StartClientUI: " + username);
-        java.awt.EventQueue.invokeLater(() -> {
-            new ClientUI(username).setVisible(true);
+        System.out.println("StartClientUI called for: " + username);
+
+        SwingUtilities.invokeLater(() -> {
+            // Check if an instance already exists and is visible
+            if (instance != null && instance.isVisible() && !isDisposing) {
+                System.out.println("ClientUI instance already exists, bringing to front");
+                instance.toFront();
+                instance.requestFocus();
+                return;
+            }
+
+            // If we're disposing, wait a moment then create new instance
+            if (isDisposing) {
+                Timer waitTimer = new Timer(100, e -> {
+                    if (!isDisposing) {
+                        createNewInstance(username);
+                    }
+                    ((Timer) e.getSource()).stop();
+                });
+                waitTimer.start();
+                return;
+            }
+
+            createNewInstance(username);
         });
+    }
+
+    private static void createNewInstance(String username) {
+        // Close existing instance if it exists
+        if (instance != null) {
+            instance.dispose();
+        }
+
+        // Create new instance
+        instance = new ClientUI(username);
+        instance.setVisible(true);
+        System.out.println("New ClientUI instance created for: " + username);
+    }
+
+    @Override
+    public void dispose() {
+        isDisposing = true;
+
+        if (onlinePlayersTimer != null) {
+            onlinePlayersTimer.stop();
+        }
+
+        super.dispose();
+
+        // Clear instance reference after disposal
+        Timer cleanupTimer = new Timer(50, e -> {
+            if (instance == this) {
+                instance = null;
+            }
+            isDisposing = false;
+            ((Timer) e.getSource()).stop();
+        });
+        cleanupTimer.start();
     }
 }

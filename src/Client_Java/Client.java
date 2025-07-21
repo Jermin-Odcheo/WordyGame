@@ -49,13 +49,13 @@ public class Client {
                 if (wordyImpl != null) {
                     // Try a simple operation to verify connection
                     wordyImpl.lobbyPlayerCount(); // This should work if server is running
-                    System.out.println("✅ Successfully connected to server!");
+                    System.out.println("Successfully connected to server!");
                     return true;
                 }
 
             } catch (Exception e) {
                 attempts++;
-                System.out.println("❌ Connection attempt " + attempts + " failed: " + e.getMessage());
+                System.out.println("Connection attempt " + attempts + " failed: " + e.getMessage());
 
                 if (attempts < maxRetries) {
                     try {
@@ -66,7 +66,7 @@ public class Client {
                         break;
                     }
                 } else {
-                    System.out.println("❌ Failed to connect after " + maxRetries + " attempts");
+                    System.out.println("Failed to connect after " + maxRetries + " attempts");
                 }
             }
         }
@@ -100,11 +100,17 @@ public class Client {
         return connectToServer();
     }
 
+    // Functional interface for server operations
+    @FunctionalInterface
+    public interface ServerOperation<T> {
+        T execute(wordy server) throws Exception;
+    }
+
     // Wrapper method for making safe server calls with auto-reconnect
     public static <T> T safeServerCall(ServerOperation<T> operation, T defaultValue) {
         try {
             if (!ensureConnection()) {
-                System.out.println("❌ Cannot establish server connection");
+                System.out.println("Cannot establish server connection");
                 return defaultValue;
             }
 
@@ -124,9 +130,66 @@ public class Client {
         }
     }
 
-    // Functional interface for server operations
-    @FunctionalInterface
-    public interface ServerOperation<T> {
-        T execute(wordy server) throws Exception;
+    // Safe lobby join with retries
+    public static boolean safeJoinLobby(String username) {
+        return safeServerCall(server -> server.joinLobby(username), false);
     }
+
+    // Safe timer retrieval
+    public static double safeGetTimer() {
+        return safeServerCall(server -> server.gettimer(), 0.0);
+    }
+
+    // Safe letter retrieval
+    public static String safeGetLetters() {
+        return safeServerCall(server -> server.getGeneratedLetter(), "");
+    }
+
+    // Safe player list retrieval
+    public static String safeGetPlayerList() {
+        return safeServerCall(server -> server.playerInGameList(), "[]");
+    }
+
+    // Safe lobby count retrieval
+    public static double safeGetLobbyCount() {
+        return safeServerCall(server -> server.lobbyPlayerCount(), 0.0);
+    }
+
+    // Safe word submission
+    public static boolean safePlayWord(String username, String word) {
+        try {
+            return safeServerCall(server -> {
+                server.playWord(username, word);
+                return true;
+            }, false);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    // Safe leave game
+    public static void safeLeaveGame(String username) {
+        safeServerCall(server -> {
+            server.leaveGame(username);
+            return null;
+        }, null);
+    }
+
+    // Alternative game state methods using existing CORBA interface
+    public static boolean safeIsPlayerInGame(String username) {
+        return safeServerCall(server -> server.status(username), false);
+    }
+
+    public static double safeGetTimerValue() {
+        return safeServerCall(server -> server.gettimer(), 0.0);
+    }
+
+    public static String safeGetPlayersList() {
+        return safeServerCall(server -> server.playerInGameList(), "[]");
+    }
+
+    public static double safeGetPlayerCount() {
+        return safeServerCall(server -> server.lobbyPlayerCount(), 0.0);
+    }
+
 }

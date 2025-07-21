@@ -34,6 +34,8 @@ public abstract class wordyPOA extends org.omg.PortableServer.Servant
     _methods.put ("leaveGame", new java.lang.Integer (14));
     _methods.put ("displayWordList", new java.lang.Integer (15));
     _methods.put ("displayWinsList", new java.lang.Integer (16));
+    _methods.put ("votePlayAgain", new java.lang.Integer (17));
+    _methods.put ("getPlayAgainList", new java.lang.Integer (18));
   }
 
   public org.omg.CORBA.portable.OutputStream _invoke (String $method,
@@ -232,6 +234,23 @@ public abstract class wordyPOA extends org.omg.PortableServer.Servant
          break;
        }
 
+       case 17:  // corbaGame/wordy/votePlayAgain
+       {
+         String playerName = in.read_string ();
+         this.votePlayAgain (playerName);
+         out = $rh.createReply();
+         break;
+       }
+
+       case 18:  // corbaGame/wordy/getPlayAgainList
+       {
+         String $result[] = null;
+         $result = this.getPlayAgainList ();
+         out = $rh.createReply();
+         getTopHelper.write (out, $result);
+         break;
+       }
+
        default:
          throw new org.omg.CORBA.BAD_OPERATION (0, org.omg.CORBA.CompletionStatus.COMPLETED_MAYBE);
     }
@@ -261,4 +280,5 @@ public abstract class wordyPOA extends org.omg.PortableServer.Servant
   }
 
 
+    public abstract int getServerTimestamp();
 } // class wordyPOA
