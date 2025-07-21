@@ -1,92 +1,113 @@
-# FinalProjectGrp1_730-900MTh
+
+Project from the FINALS CIS-2 IT222 Integrative Technologies Lab
+---
+
+# Wordy Game
+
+**Longest word wins**
 
 
-
-## Getting started
-
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
-
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
-
-```
-cd existing_repo
-git remote add origin https://gitlab.com/ramecaba/finalprojectgrp1_730-900mth.git
-git branch -M main
-git push -uf origin main
-```
-
-## Integrate with your tools
-
-- [ ] [Set up project integrations](https://gitlab.com/ramecaba/finalprojectgrp1_730-900mth/-/settings/integrations)
-
-## Collaborate with your team
-
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Automatically merge when pipeline succeeds](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
-
-## Test and Deploy
-
-Use the built-in continuous integration in GitLab.
-
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
-
-***
-
-# Editing this README
-
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thank you to [makeareadme.com](https://www.makeareadme.com/) for this template.
-
-## Suggestions for a good README
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
-
-## Name
-Choose a self-explaining name for your project.
-
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
-
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
 
 ## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+### 1. Install Zulu Java 8 JDK
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+1. Go to the official Zulu website:  
+   https://www.azul.com/downloads/zulu-community/  
+2. Select **Java 8** for your OS and download the installer.
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+### 2. Extract the JDK
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+- Run the downloaded installer or unzip the archive to a directory of your choice (e.g., `C:\zulu8` or `~/zulu8`).
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+### 3. Configure your PATH
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+**Windows**  
+1. Open _Control Panel_ → _System_ → _Advanced system settings_ → _Environment Variables_.  
+2. Under **System variables**, select **Path** → **Edit** → **New**.  
+3. Add the path to the JDK’s `bin` folder, e.g.:  
+4. Click **OK** to save.
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+## macOS / Linux Installation
 
-## License
-For open source projects, say how it is licensed.
+1. **Edit Shell Profile**  
+   Open your shell profile in an editor, e.g.:  
+   ```bash
+   nano ~/.bash_profile   # or ~/.bashrc on some distros
+   ```
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+2. **Add Zulu Java 8 to PATH**  
+   Add the following line to your shell profile (adjust path as needed):  
+   ```bash
+   export PATH="$PATH:$HOME/zulu8/bin"
+   ```
+
+3. **Save and Reload**  
+   Save the file and reload the profile:  
+   ```bash
+   source ~/.bash_profile
+   ```
+
+4. **Verify Installation**  
+   Open a new terminal and run:  
+   ```bash
+   java -version
+   ```  
+   Expected output:  
+   ```
+   openjdk version "1.8.0_362"
+   Zulu8
+   ```
+
+5. **Configure in IntelliJ IDEA (Optional)**  
+   - Open IntelliJ IDEA.
+   - Go to `File → Project Structure` (or press `Ctrl+Alt+Shift+S` / `⌘;`).
+   - Under `Platform Settings`, select `SDKs → click + → JDK`.
+   - Navigate to your Zulu Java 8 installation directory and click `OK`.
+   - Name it (e.g., “Zulu Java 8”) and click `Finish`.
+
+## Running the Game
+
+Wordy Game uses CORBA for networking. Follow these steps to start the ORB daemon, server, and client.
+
+### Start the CORBA ORB Daemon
+
+1. Open a terminal (macOS/Linux) or Command Prompt (Windows).
+2. Run:  
+   ```bash
+   start orbd -ORBInitialPort 1050
+   ```
+3. Keep this window open to facilitate CORBA communications.
+
+### Launch the Server
+
+1. In IntelliJ IDEA (or your IDE), locate the `Server` class in the project tree.
+2. Right-click on `Server.java` → `Run ‘Server.main()’`.
+3. The server console will display logs confirming it’s listening on port 1050.
+
+### Launch the Client
+
+1. Obtain your server’s IP address.
+2. Open `Client.java`. On the line initializing the ORB (around line 20), replace:  
+   ```java
+   ORB orb = ORB.init(new String[]{
+       "-ORBInitialHost", "xxx.xxx.xxx.xxx",
+       "-ORBInitialPort", "1050"
+   }, null);
+   ```  
+   with your server’s IP, e.g.:  
+   ```java
+   ORB orb = ORB.init(new String[]{
+       "-ORBInitialHost", "192.168.1.42",
+       "-ORBInitialPort", "1050"
+   }, null);
+   ```
+3. Right-click on `Client.java` → `Run ‘Client.main()’`.
+
+### Team
+---
+The following individuals have contributed to the development of the Wordy Game project:
+1. ANNE MARIE FACTOR
+2. JAN MICHAEL VILLANUEVA
+3. JOSH MARCO RABINO
+4. KENNELY RAY BUCANG
