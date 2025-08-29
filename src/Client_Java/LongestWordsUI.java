@@ -1,92 +1,76 @@
-
 package Client_Java;
 
 
-import Server_Java.corbaGame.wordyPOA;
-
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import java.sql.*;
-import java.util.Arrays;
-import java.util.List;
+import javax.swing.border.*;
+import java.awt.*;
 
 import static Client_Java.Client.wordyImpl;
 
 public class LongestWordsUI extends javax.swing.JFrame {
 
+    static { Client_Java.util.UIUtils.applyModernNimbusTweaks(); }
+
     static String username;
+    private JTable table;
+
     public LongestWordsUI(String username) {
-        this.username= username;
+        LongestWordsUI.username = username;
         initComponents();
         displayWordList();
     }
 
     private void initComponents() {
 
-        jPanel1 = new javax.swing.JPanel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
-        jLabel1 = new javax.swing.JLabel();
-
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        setBackground(new java.awt.Color(255, 51, 255));
+        setTitle("WordyGame - Longest Words");
+        setResizable(true);
+        setSize(640, 420);
+        setLocationRelativeTo(null);
 
-        jPanel1.setBackground(new java.awt.Color(204, 153, 255));
+        JPanel main = new JPanel(new BorderLayout(15, 15));
+        main.setBackground(new Color(45, 52, 70));
+        main.setBorder(new EmptyBorder(20, 20, 20, 20));
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
-                new Object [][] {
-
-                },
-                new String [] {
-                        "User ID", "WORD"
-                }
+        JPanel header = new JPanel(new BorderLayout());
+        header.setBackground(new Color(31, 41, 55));
+        header.setBorder(BorderFactory.createCompoundBorder(
+            new LineBorder(new Color(75, 85, 99), 2, true),
+            new EmptyBorder(14, 18, 14, 18)
         ));
-        jScrollPane1.setViewportView(jTable1);
+        JLabel title = new JLabel("Longest Words", SwingConstants.CENTER);
+        title.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        title.setForeground(Color.WHITE);
+        header.add(title, BorderLayout.CENTER);
+        main.add(header, BorderLayout.NORTH);
 
-        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 36)); // NOI18N
-        jLabel1.setText("Longest Words");
+        // Table
+        String[] cols = {"User ID", "Word"};
+        DefaultTableModel model = new DefaultTableModel(new Object[][]{}, cols) {
+            public boolean isCellEditable(int r, int c) { return false; }
+        };
+        table = new JTable(model);
+        table.setRowHeight(28);
+        table.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        table.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 14));
+        table.getTableHeader().setBackground(new Color(55, 65, 81));
+        table.getTableHeader().setForeground(Color.WHITE);
+        table.setBackground(new Color(17, 24, 39));
+        table.setForeground(new Color(209, 213, 219));
+        table.setGridColor(new Color(75, 85, 99));
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-                jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addContainerGap(94, Short.MAX_VALUE)
-                                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(94, 94, 94))
-                        .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGap(190, 190, 190)
-                                .addComponent(jLabel1)
-                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        jPanel1Layout.setVerticalGroup(
-                jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                                .addContainerGap(38, Short.MAX_VALUE)
-                                .addComponent(jLabel1)
-                                .addGap(18, 18, 18)
-                                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(67, 67, 67))
-        );
+        JScrollPane scroll = new JScrollPane(table);
+        scroll.setBorder(new LineBorder(new Color(107, 114, 128), 1, true));
+        main.add(scroll, BorderLayout.CENTER);
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-        );
-        layout.setVerticalGroup(
-                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-        );
-
-        pack();
+        setContentPane(main);
     }
 
     private void displayWordList() {
         String[] wordDataList = wordyImpl.displayWordList();
 
-        DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+        DefaultTableModel model = (DefaultTableModel) table.getModel();
         model.setRowCount(0); // Clear the table
 
         for (String wordData : wordDataList) {
@@ -94,10 +78,7 @@ public class LongestWordsUI extends javax.swing.JFrame {
             if (data.length >= 2) {
                 String user = data[0];
                 String word = data[1].toUpperCase();
-                // Process username and word as needed
-                System.out.println("Username: " + user + ", Word: " + word);
-
-                model.addRow(new Object[]{user, word}); // Add a new row to the table
+                model.addRow(new Object[]{user, word});
             }
         }
     }
@@ -128,11 +109,5 @@ public class LongestWordsUI extends javax.swing.JFrame {
             }
         });
     }
-
-
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable jTable1;
 
 }

@@ -1,16 +1,18 @@
 package Client_Java;
 
 
-import Client_Java.corbaGame.checkLogin;
-import Client_Java.corbaGame.invalid;
-import Client_Java.corbaGame.notFound;
-import Client_Java.corbaGame.validatedLogin;
+import corbaGame.checkLogin;
+import corbaGame.invalid;
+import corbaGame.notFound;
+import corbaGame.validatedLogin;
 
 import javax.swing.*;
 
 import static Client_Java.Client.wordyImpl;
 
 public class ClientLoginUI extends javax.swing.JFrame {
+
+    static { Client_Java.util.UIUtils.applyModernNimbusTweaks(); }
 
     public ClientLoginUI() {
         initComponents();
@@ -33,169 +35,150 @@ public class ClientLoginUI extends javax.swing.JFrame {
         jLabel9 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        setTitle("WordyGame - Login");
+        setResizable(true);
+        setSize(900, 560);
+        setLocationRelativeTo(null);
 
-        jPanel1.setBackground(new java.awt.Color(10, 77, 104));
-        jPanel1.setForeground(new java.awt.Color(10, 77, 104));
+        // Main container
+        jPanel1 = new JPanel(new java.awt.BorderLayout(20, 20));
+        jPanel1.setBackground(new java.awt.Color(45, 52, 70));
+        jPanel1.setBorder(javax.swing.BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        jPanel2.setBackground(new java.awt.Color(255, 255, 255));
+        // Left branding panel
+        JPanel leftBrand = new JPanel();
+        leftBrand.setBackground(new java.awt.Color(31, 41, 55));
+        leftBrand.setBorder(javax.swing.BorderFactory.createCompoundBorder(
+            new javax.swing.border.LineBorder(new java.awt.Color(75, 85, 99), 2, true),
+            javax.swing.BorderFactory.createEmptyBorder(20, 20, 20, 20)
+        ));
+        leftBrand.setLayout(new BoxLayout(leftBrand, BoxLayout.Y_AXIS));
 
-        userName.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        userName.setBorder(javax.swing.BorderFactory.createMatteBorder(0, 0, 3, 0, new java.awt.Color(5, 191, 219)));
-        userName.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField2ActionPerformed(evt);
-            }
-        });
+        jLabel2 = new JLabel("WordyGame", SwingConstants.CENTER);
+        jLabel2.setFont(new java.awt.Font("Segoe UI", java.awt.Font.BOLD, 28));
+        jLabel2.setForeground(java.awt.Color.WHITE);
+        jLabel2.setAlignmentX(CENTER_ALIGNMENT);
 
-        jLabel3.setForeground(new java.awt.Color(0, 153, 204));
+        jLabel1 = new JLabel("Exercise your mind while having fun!", SwingConstants.CENTER);
+        jLabel1.setFont(new java.awt.Font("Segoe UI", java.awt.Font.PLAIN, 14));
+        jLabel1.setForeground(new java.awt.Color(209, 213, 219));
+        jLabel1.setAlignmentX(CENTER_ALIGNMENT);
+
+        jLabel7 = new JLabel();
+        jLabel7.setAlignmentX(CENTER_ALIGNMENT);
+        jLabel7.setIcon(new javax.swing.ImageIcon("src/Server_Java/WORD.png"));
+
+        jLabel8 = new JLabel("Brought to you by Odcheo LLC.", SwingConstants.CENTER);
+        jLabel8.setFont(new java.awt.Font("Segoe UI", java.awt.Font.PLAIN, 12));
+        jLabel8.setForeground(new java.awt.Color(168, 162, 158));
+        jLabel8.setAlignmentX(CENTER_ALIGNMENT);
+
+        jLabel9 = new JLabel("Client.10.17.22", SwingConstants.CENTER);
+        jLabel9.setFont(new java.awt.Font("Segoe UI", java.awt.Font.PLAIN, 12));
+        jLabel9.setForeground(new java.awt.Color(168, 162, 158));
+        jLabel9.setAlignmentX(CENTER_ALIGNMENT);
+
+        leftBrand.add(Box.createVerticalStrut(10));
+        leftBrand.add(jLabel2);
+        leftBrand.add(Box.createVerticalStrut(10));
+        leftBrand.add(jLabel1);
+        leftBrand.add(Box.createVerticalStrut(20));
+        leftBrand.add(jLabel7);
+        leftBrand.add(Box.createVerticalStrut(20));
+        leftBrand.add(jLabel8);
+        leftBrand.add(Box.createVerticalStrut(10));
+        leftBrand.add(jLabel9);
+
+        // Right login panel
+        jPanel2 = new JPanel();
+        jPanel2.setBackground(new java.awt.Color(55, 65, 81));
+        jPanel2.setBorder(javax.swing.BorderFactory.createCompoundBorder(
+            new javax.swing.border.LineBorder(new java.awt.Color(107, 114, 128), 2, true),
+            javax.swing.BorderFactory.createEmptyBorder(24, 28, 24, 28)
+        ));
+        jPanel2.setLayout(new BoxLayout(jPanel2, BoxLayout.Y_AXIS));
+
+        jLabel5 = new JLabel("Login", SwingConstants.CENTER);
+        jLabel5.setFont(new java.awt.Font("Segoe UI", java.awt.Font.BOLD, 24));
+        jLabel5.setForeground(java.awt.Color.WHITE);
+        jLabel5.setAlignmentX(CENTER_ALIGNMENT);
+
+        jLabel3.setForeground(new java.awt.Color(209, 213, 219));
         jLabel3.setText("Username");
+        jLabel3.setAlignmentX(CENTER_ALIGNMENT);
 
-        jLabel4.setForeground(new java.awt.Color(0, 153, 204));
+        userName.setFont(new java.awt.Font("Segoe UI", java.awt.Font.BOLD, 14));
+        userName.setBackground(new java.awt.Color(17, 24, 39));
+        userName.setForeground(java.awt.Color.WHITE);
+        userName.setCaretColor(java.awt.Color.WHITE);
+        userName.setBorder(javax.swing.BorderFactory.createCompoundBorder(
+            new javax.swing.border.LineBorder(new java.awt.Color(59, 130, 246), 2, true),
+            javax.swing.BorderFactory.createEmptyBorder(8, 12, 8, 12)
+        ));
+        userName.addActionListener(this::jTextField2ActionPerformed);
+        userName.setAlignmentX(CENTER_ALIGNMENT);
+        userName.setColumns(18);
+        userName.setMaximumSize(new java.awt.Dimension(280, 36));
+        userName.setPreferredSize(new java.awt.Dimension(280, 36));
+
+        jLabel4.setForeground(new java.awt.Color(209, 213, 219));
         jLabel4.setText("Password");
+        jLabel4.setAlignmentX(CENTER_ALIGNMENT);
 
-        jLabel5.setBackground(new java.awt.Color(255, 255, 255));
-        jLabel5.setFont(new java.awt.Font("Segoe UI", 1, 36)); // NOI18N
-        jLabel5.setForeground(new java.awt.Color(8, 131, 149));
-        jLabel5.setText("Login");
+        password.setFont(new java.awt.Font("Segoe UI", java.awt.Font.BOLD, 14));
+        password.setBackground(new java.awt.Color(17, 24, 39));
+        password.setForeground(java.awt.Color.WHITE);
+        password.setCaretColor(java.awt.Color.WHITE);
+        password.setBorder(javax.swing.BorderFactory.createCompoundBorder(
+            new javax.swing.border.LineBorder(new java.awt.Color(59, 130, 246), 2, true),
+            javax.swing.BorderFactory.createEmptyBorder(8, 12, 8, 12)
+        ));
+        password.setAlignmentX(CENTER_ALIGNMENT);
+        password.setColumns(18);
+        password.setMaximumSize(new java.awt.Dimension(280, 36));
+        password.setPreferredSize(new java.awt.Dimension(280, 36));
 
-        loginButton.setBackground(new java.awt.Color(8, 131, 149));
-        loginButton.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        loginButton.setForeground(new java.awt.Color(255, 255, 255));
-        loginButton.setText("Login");
-        loginButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                loginButtonActionPerformed(evt);
-            }
-        });
+        loginButton = new JButton("Login");
+        loginButton.setFont(new java.awt.Font("Segoe UI", java.awt.Font.BOLD, 14));
+        loginButton.setForeground(java.awt.Color.WHITE);
+        loginButton.setBackground(new java.awt.Color(34, 197, 94));
+        loginButton.setBorder(javax.swing.BorderFactory.createEmptyBorder(12, 18, 12, 18));
+        loginButton.setFocusPainted(false);
+        loginButton.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        loginButton.setAlignmentX(CENTER_ALIGNMENT);
+        loginButton.setMaximumSize(new java.awt.Dimension(280, 40));
+        loginButton.setPreferredSize(new java.awt.Dimension(280, 40));
+        loginButton.addActionListener(this::loginButtonActionPerformed);
 
-        password.setFont(new java.awt.Font("sansserif", 1, 14)); // NOI18N
-        password.setBorder(javax.swing.BorderFactory.createMatteBorder(0, 0, 3, 0, new java.awt.Color(5, 191, 219)));
+        // assemble right panel with vertical centering
+        jPanel2.add(Box.createVerticalGlue());
+        jPanel2.add(jLabel5);
+        jPanel2.add(Box.createVerticalStrut(18));
+        jPanel2.add(jLabel3);
+        jPanel2.add(Box.createVerticalStrut(6));
+        jPanel2.add(userName);
+        jPanel2.add(Box.createVerticalStrut(14));
+        jPanel2.add(jLabel4);
+        jPanel2.add(Box.createVerticalStrut(6));
+        jPanel2.add(password);
+        jPanel2.add(Box.createVerticalStrut(20));
+        jPanel2.add(loginButton);
+        jPanel2.add(Box.createVerticalGlue());
 
-        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
-        jPanel2.setLayout(jPanel2Layout);
-        jPanel2Layout.setHorizontalGroup(
-                jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addContainerGap(37, Short.MAX_VALUE)
-                                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                                                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                                        .addComponent(jLabel4)
-                                                        .addComponent(jLabel3)
-                                                        .addComponent(userName)
-                                                        .addComponent(password, javax.swing.GroupLayout.DEFAULT_SIZE, 264, Short.MAX_VALUE))
-                                                .addGap(28, 28, 28))
-                                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                                                .addComponent(loginButton, javax.swing.GroupLayout.PREFERRED_SIZE, 153, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                .addGap(87, 87, 87))
-                                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                                                .addComponent(jLabel5)
-                                                .addGap(115, 115, 115))))
-        );
-        jPanel2Layout.setVerticalGroup(
-                jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addGap(17, 17, 17)
-                                .addComponent(jLabel5)
-                                .addGap(36, 36, 36)
-                                .addComponent(jLabel3)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(userName, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(32, 32, 32)
-                                .addComponent(jLabel4)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(password, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(77, 77, 77)
-                                .addComponent(loginButton, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addContainerGap(89, Short.MAX_VALUE))
-        );
+        // Put into main panel
+        JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftBrand, jPanel2);
+        split.setResizeWeight(0.5);
+        split.setBorder(null);
+        split.setOpaque(false);
+        jPanel1.add(split, java.awt.BorderLayout.CENTER);
 
-        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jLabel1.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel1.setText("A good way to exercise your mind while having fun in the process!");
-
-        jLabel2.setFont(new java.awt.Font("Segoe UI", 1, 36)); // NOI18N
-        jLabel2.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel2.setText("WordGames Beta v3.23.1");
-
-        jLabel7.setIcon(new javax.swing.ImageIcon("src/Server_Java/WORD.png")); // NOI18N
-
-        jLabel8.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jLabel8.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel8.setText("Brought to you by Odcheo LLC.");
-
-        jLabel9.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jLabel9.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel9.setText("Client.10.17.22");
-
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-                jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addGroup(jPanel1Layout.createSequentialGroup()
-                                                .addGap(31, 31, 31)
-                                                .addComponent(jLabel1))
-                                        .addGroup(jPanel1Layout.createSequentialGroup()
-                                                .addGap(45, 45, 45)
-                                                .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 410, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                        .addGroup(jPanel1Layout.createSequentialGroup()
-                                                .addGap(128, 128, 128)
-                                                .addComponent(jLabel8)))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 86, Short.MAX_VALUE)
-                                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(59, 59, 59))
-                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                                .addGap(0, 0, Short.MAX_VALUE)
-                                .addComponent(jLabel9)
-                                .addContainerGap())
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addGroup(jPanel1Layout.createSequentialGroup()
-                                        .addGap(32, 32, 32)
-                                        .addComponent(jLabel2)
-                                        .addContainerGap(452, Short.MAX_VALUE)))
-        );
-        jPanel1Layout.setVerticalGroup(
-                jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGap(96, 96, 96)
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addGroup(jPanel1Layout.createSequentialGroup()
-                                                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 51, Short.MAX_VALUE)
-                                                .addComponent(jLabel9))
-                                        .addGroup(jPanel1Layout.createSequentialGroup()
-                                                .addComponent(jLabel1)
-                                                .addGap(39, 39, 39)
-                                                .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 356, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                .addGap(18, 18, 18)
-                                                .addComponent(jLabel8)
-                                                .addGap(0, 0, Short.MAX_VALUE)))
-                                .addContainerGap())
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addGroup(jPanel1Layout.createSequentialGroup()
-                                        .addGap(44, 44, 44)
-                                        .addComponent(jLabel2)
-                                        .addContainerGap(544, Short.MAX_VALUE)))
-        );
-
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        );
-        layout.setVerticalGroup(
-                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        );
-
-        pack();
+        setContentPane(jPanel1);
+        validate();
+        repaint();
     }
 
     private void jTextField2ActionPerformed(java.awt.event.ActionEvent evt) {
-        // TODO add your handling code here:
+        // no-op
     }
 
     private void loginButtonActionPerformed(java.awt.event.ActionEvent evt) {
@@ -312,6 +295,7 @@ public class ClientLoginUI extends javax.swing.JFrame {
     }
 
     public static void startLogin() {
+        Client_Java.util.UIUtils.applyModernNimbusTweaks();
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {

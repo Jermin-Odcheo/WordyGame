@@ -1,4 +1,3 @@
-
 Project from the FINALS CIS-2 IT222 Integrative Technologies Lab
 ---
 
@@ -6,7 +5,44 @@ Project from the FINALS CIS-2 IT222 Integrative Technologies Lab
 
 **Longest word wins**
 
+## Quick start (no orbd, no IP edits)
 
+- The server now writes a CORBA IOR file (`wordy.ior`) that clients can read to connect directly.
+- You don’t need to run `orbd` or change any IP in the client.
+
+### Server
+
+- Optional environment (PowerShell):
+  - `$env:WORDY_SERVER_PORT = "3700"`           # server listen port (optional)
+  - `$env:WORDY_IOR_PATH    = "wordy.ior"`       # where to write IOR file (optional)
+  - `$env:WORDY_DB_URL      = "jdbc:mysql://localhost/wordy_accounts"`
+  - `$env:WORDY_DB_USER     = "root"`
+  - `$env:WORDY_DB_PASS     = ""`
+- Run `Server_Java/Server.main()`. It will print the IOR file path, e.g. `…/wordy.ior`.
+
+### Client
+
+- Make sure `wordy.ior` is accessible to the client (same folder or set path via env):
+  - `$env:WORDY_IOR_PATH = "path\to\wordy.ior"`
+- Run `Client_Java/Client.main()`. The client will read the IOR and connect.
+
+### Notes
+
+- If `WORDY_IOR_PATH` isn’t found, the client falls back to NameService using `WORDY_ORB_HOST` and `WORDY_ORB_PORT`.
+- You can still run the legacy flow with `orbd` if you prefer (see below).
+
+## Legacy (optional) NameService flow
+
+- Start NameService:
+  - Command Prompt:
+    - `start orbd -ORBInitialPort 1050`
+- Server env (optional):
+  - `set WORDY_ORB_HOST=<server-ip>`
+  - `set WORDY_ORB_PORT=1050`
+- Client env (optional):
+  - `set WORDY_ORB_HOST=<server-ip>`
+  - `set WORDY_ORB_PORT=1050`
+- Run server, then client.
 
 ## Installation
 

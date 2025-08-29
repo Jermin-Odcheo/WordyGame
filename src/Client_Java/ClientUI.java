@@ -12,6 +12,7 @@ import java.util.List;
 import static java.util.stream.Collectors.toList;
 
 public class ClientUI extends javax.swing.JFrame {
+    static { Client_Java.util.UIUtils.applyModernNimbusTweaks(); }
     static String username;
     private Timer onlinePlayersTimer;
     private JTextArea onlinePlayersArea;
@@ -50,7 +51,7 @@ public class ClientUI extends javax.swing.JFrame {
     private void initComponents() {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("WordyGame - " + username);
-        setResizable(false);
+        setResizable(true);
         setSize(800, 600);
         setLocationRelativeTo(null);
 

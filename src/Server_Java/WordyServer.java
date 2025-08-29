@@ -1,7 +1,6 @@
 package Server_Java;
 
-import Client_Java.myConnection;
-import Server_Java.corbaGame.*;
+import corbaGame.*;
 
 import java.sql.*;
 import java.util.*;
@@ -9,11 +8,11 @@ import java.util.*;
 public class WordyServer extends wordyPOA {
     private static final List<String> players = new ArrayList<>();
     private static final List<String> lobbyPlayers = new ArrayList<>();
-    private final List<String> rounds = new ArrayList<>();
+    // private final List<String> rounds = new ArrayList<>(); // removed unused
     private final List<String> playersInGame = new ArrayList<>();
     private final List<String> playersWaitingForRestart = new ArrayList<>();
 
-    private final Map<String, Integer> clientWinCount = new HashMap<>();
+    // private final Map<String, Integer> clientWinCount = new HashMap<>(); // removed unused
     private final Map<String, String> clientWords = new HashMap<>();
     private final Map<String, String> lastGameWords = new HashMap<>();
     private String lastGameWinner = "";
@@ -38,7 +37,7 @@ public class WordyServer extends wordyPOA {
             throw new notFound(username + " : Account not found");
         }
         try {
-            PreparedStatement ps = myConnection.getConnection().prepareStatement(
+            PreparedStatement ps = MyConnection.getConnection().prepareStatement(
                     "SELECT * FROM users WHERE user_username = ? AND user_password = ?");
             ps.setString(1, username);
             ps.setString(2, password);
@@ -67,14 +66,14 @@ public class WordyServer extends wordyPOA {
         System.out.println(username + ": Logged Out!");
     }
 
-    @Override
+    // Not exposed via IDL; internal convenience
     public boolean status(String playerName) {
         return playersInGame.contains(playerName);
     }
 
     private boolean verifyUsername(String username) {
         try {
-            PreparedStatement ps = myConnection.getConnection().prepareStatement(
+            PreparedStatement ps = MyConnection.getConnection().prepareStatement(
                     "SELECT user_username FROM users WHERE user_username = ?");
             ps.setString(1, username);
             ResultSet rs = ps.executeQuery();
@@ -252,7 +251,7 @@ public class WordyServer extends wordyPOA {
         lastGameEndTime = System.currentTimeMillis();
 
         determineAndStoreWinner();
-        lastGameWinner = currentWinner;
+        lastGameWinner = extractWinnerName(currentWinner);
 
         System.out.println("Game ended: " + clientWords);
 
@@ -289,6 +288,14 @@ public class WordyServer extends wordyPOA {
         } else {
             currentWinner = "TIE:" + String.join(",", winners) + ":" + maxLen;
         }
+    }
+
+    private String extractWinnerName(String currentWinner) {
+        if (currentWinner == null) return "";
+        if (currentWinner.startsWith("WINNER:")) {
+            return currentWinner.substring(7);
+        }
+        return "";
     }
 
     @Override
@@ -354,32 +361,54 @@ public class WordyServer extends wordyPOA {
 
     @Override
     public String[] displayWordList() {
-        return words.toArray(new String[0]);
+        Map<String, String> source;
+        if (!clientWords.isEmpty()) {
+            source = clientWords;
+        } else if (!lastGameWords.isEmpty()) {
+            source = lastGameWords;
+        } else {
+            return new String[0];
+        }
+        List<String> list = new ArrayList<>();
+        source.forEach((user, word) -> list.add(user + "," + word));
+        return list.toArray(new String[0]);
     }
 
     @Override
     public String[] displayWinsList() {
-        return currentWinner != null && !currentWinner.isEmpty()
-                ? new String[]{currentWinner} : new String[0];
-    }
-
-    @Override
-    public String getValidWordFromClients() {
-        System.out.println("Fetching submitted words...");
-        Map<String,String> source = clientWords.isEmpty() && !lastGameWords.isEmpty()
-                && System.currentTimeMillis()-lastGameEndTime <= 60000
-                ? lastGameWords : clientWords;
-        if (source.isEmpty()) return "";
-        StringBuilder sb = new StringBuilder();
-        source.forEach((p,w) -> sb.append(p).append(": ").append(w).append("\n"));
-        return sb.toString();
+        List<String> results = new ArrayList<>();
+        try (Connection conn = MyConnection.getConnection()) {
+            if (conn == null) return new String[0];
+            // Ensure win_count column exists
+            try (PreparedStatement chk = conn.prepareStatement("SHOW COLUMNS FROM users LIKE 'win_count'")) {
+                ResultSet rs = chk.executeQuery();
+                if (!rs.next()) {
+                    try (PreparedStatement alter = conn.prepareStatement("ALTER TABLE users ADD COLUMN win_count INT DEFAULT 0")) {
+                        alter.executeUpdate();
+                    }
+                }
+            }
+            String sql = "SELECT user_username, COALESCE(win_count,0) AS wins FROM users ORDER BY wins DESC, user_username ASC LIMIT 10";
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ResultSet rs = ps.executeQuery();
+                while (rs.next()) {
+                    String user = rs.getString("user_username");
+                    int wins = rs.getInt("wins");
+                    results.add(user + "," + wins);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("displayWinsList error: " + e.getMessage());
+        }
+        return results.toArray(new String[0]);
     }
 
     @Override
     public void getWinner() throws isSameLength, getWin, getRoundWin {
         if (!isGameEnded) throw new isSameLength("Game still in progress");
         String w = currentWinner.isEmpty() && System.currentTimeMillis()-lastGameEndTime<=60000
-                ? lastGameWinner : currentWinner;
+                ? (lastGameWinner.isEmpty()? currentWinner : "WINNER:"+lastGameWinner)
+                : currentWinner;
         if (w.startsWith("WINNER:")) {
             throw new getWin("Winner is: " + w.substring(7));
         } else if (w.startsWith("TIE:")) {
@@ -404,9 +433,70 @@ public class WordyServer extends wordyPOA {
     }
 
     @Override
+    public int getCurrentGameTime() {
+        return getGameTimerValue();
+    }
+
+    @Override
+    public int getLobbyCountdown() {
+        return getLobbyTimer();
+    }
+
+    @Override
+    public boolean isInLobbyCountdown() {
+        return countdownStarted && countdown > 0;
+    }
+
+    @Override
     public int getServerTimestamp() {
         return (int)System.currentTimeMillis();
     }
+
+    @Override
+    public boolean isGameActive() {
+        return isGameStarted && !isGameEnded;
+    }
+
+    @Override
+    public boolean getGameEnded() {
+        return isGameEnded;
+    }
+
+    @Override
+    public String getWinnerName() {
+        if (isGameEnded) {
+            if (currentWinner.startsWith("WINNER:")) return currentWinner.substring(7);
+            if (!lastGameWinner.isEmpty()) return lastGameWinner;
+        }
+        return "";
+    }
+
+    // ---------------------------------------------------------------------
+    // New: Provide newline-delimited list of "player: word" for client UIs
+    // Prefers current game's submissions; falls back to last game's results.
+    @Override
+    public String getValidWordFromClients() {
+        synchronized (this) {
+            Map<String, String> source = null;
+            if (!clientWords.isEmpty()) {
+                source = clientWords;
+            } else if (!lastGameWords.isEmpty()) {
+                source = lastGameWords;
+            }
+            if (source == null || source.isEmpty()) return "";
+
+            // Sort by player name for deterministic output
+            List<Map.Entry<String, String>> entries = new ArrayList<>(source.entrySet());
+            entries.sort(Comparator.comparing(Map.Entry::getKey, String.CASE_INSENSITIVE_ORDER));
+
+            StringBuilder sb = new StringBuilder();
+            for (Map.Entry<String, String> e : entries) {
+                sb.append(e.getKey()).append(": ").append(e.getValue()).append("\n");
+            }
+            return sb.toString().trim();
+        }
+    }
+    // ---------------------------------------------------------------------
 
     private void generateRandomLetters() {
         Random rand = new Random();
@@ -439,7 +529,7 @@ public class WordyServer extends wordyPOA {
 
     private void addOrUpdateUser(String username) {
         try {
-            Connection conn = myConnection.getConnection();
+            Connection conn = MyConnection.getConnection();
             PreparedStatement chk = conn.prepareStatement("SHOW COLUMNS FROM users LIKE 'win_count'");
             ResultSet col = chk.executeQuery();
             if (!col.next()) {
@@ -452,9 +542,5 @@ public class WordyServer extends wordyPOA {
         } catch (SQLException e) {
             System.err.println("Win update error: " + e.getMessage());
         }
-    }
-
-    public static boolean isWordValid(String word) {
-        return JazzyWordValidator.isWordValid(word);
     }
 }

@@ -1,7 +1,8 @@
 package Client_Java;
 
-import Client_Java.corbaGame.*;
+import corbaGame.*;
 import javax.swing.*;
+import Client_Java.util.UIUtils;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import java.awt.*;
@@ -10,9 +11,11 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.ArrayList;
 import java.util.List;
+
 import static Client_Java.Client.wordyImpl;
 
 public class GameUI extends javax.swing.JFrame {
+    static { Client_Java.util.UIUtils.applyModernNimbusTweaks(); }
     private static String username;
     private JLabel timerField;
     private Timer gameStateTimer;
@@ -20,6 +23,7 @@ public class GameUI extends javax.swing.JFrame {
 
     // UI Components
     private JPanel letterTilesPanel;
+    private JPanel kbRow1, kbRow2, kbRow3; // keyboard rows
     private JLabel scoreLabel;
     private JTextArea wordHistoryArea;
     private JTextArea playerListArea;
@@ -34,6 +38,11 @@ public class GameUI extends javax.swing.JFrame {
     private final List<LetterTile> letterTiles;
     private final List<LetterTile> selectedTiles;
     private final StringBuilder currentWord;
+    private boolean hasBeenInGame = false;
+
+    // ---- keyboard tile sizing (tweak if you want smaller/larger) ----
+    private static final int TILE_SIZE = 56;     // 56px square keys (try 48 for smaller)
+    private static final int TILE_FONT = 20;     // 20px letter inside the key (try 18 for smaller)
 
     public GameUI(String username) {
         GameUI.username = username;
@@ -41,8 +50,42 @@ public class GameUI extends javax.swing.JFrame {
         this.selectedTiles = new ArrayList<>();
         this.currentWord = new StringBuilder();
 
+        // Enable font anti-aliasing for crisper text
+        System.setProperty("awt.useSystemAAFontSettings","on");
+        System.setProperty("swing.aatext","true");
+        // Try Nimbus Look & Feel for a cleaner, modern look (fallback gracefully)
+        try {
+            for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (Exception ignore) {}
+        // Make UI a bit more compact globally
+        shrinkUIDefaultFonts(0.82);
         initializeUI();
         addListeners();
+    }
+
+    /**
+     * Shrink (or expand) all default UI fonts by a given scale.
+     * This updates Nimbus defaults so labels, buttons, text fields, etc. are consistent.
+     */
+    private static void shrinkUIDefaultFonts(double scale) {
+        try {
+            UIDefaults defaults = UIManager.getLookAndFeelDefaults();
+            java.util.Enumeration<?> keys = defaults.keys();
+            while (keys.hasMoreElements()) {
+                Object key = keys.nextElement();
+                Object val = defaults.get(key);
+                if (val instanceof Font) {
+                    Font f = (Font) val;
+                    int newSize = (int)Math.max(11, Math.round(f.getSize2D() * (float)scale));
+                    defaults.put(key, f.deriveFont((float)newSize));
+                }
+            }
+        } catch (Exception ignored) {}
     }
 
     private void initializeUI() {
@@ -50,7 +93,7 @@ public class GameUI extends javax.swing.JFrame {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setSize(1200, 800);
         setLocationRelativeTo(null);
-        setResizable(false);
+        setResizable(true);
 
         // Main container
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
@@ -73,7 +116,7 @@ public class GameUI extends javax.swing.JFrame {
         JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         titlePanel.setBackground(new Color(31, 41, 55));
         JLabel titleLabel = new JLabel("WordyGame");
-        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 28));
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 22));
         titleLabel.setForeground(Color.WHITE);
         titlePanel.add(titleLabel);
 
@@ -82,7 +125,7 @@ public class GameUI extends javax.swing.JFrame {
         infoPanel.setBackground(new Color(31, 41, 55));
 
         timerField = new JLabel("30");
-        timerField.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        timerField.setFont(new Font("Segoe UI", Font.BOLD, 19));
         timerField.setForeground(new Color(239, 68, 68));
         timerField.setBorder(BorderFactory.createCompoundBorder(
                 new LineBorder(new Color(239, 68, 68), 2, true),
@@ -90,12 +133,12 @@ public class GameUI extends javax.swing.JFrame {
         ));
 
         scoreLabel = new JLabel("Total Letters: 0");
-        scoreLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        scoreLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
         scoreLabel.setForeground(new Color(34, 197, 94));
         scoreLabel.setBorder(new EmptyBorder(0, 20, 0, 20));
 
         JLabel currentPlayerLabel = new JLabel("Player: " + username);
-        currentPlayerLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        currentPlayerLabel.setFont(new Font("Segoe UI", Font.BOLD, 13));
         currentPlayerLabel.setForeground(new Color(168, 162, 158));
 
         infoPanel.add(currentPlayerLabel);
@@ -120,7 +163,7 @@ public class GameUI extends javax.swing.JFrame {
         // Word construction area
         createWordConstructionPanel(leftPanel);
 
-        // Letter tiles area
+        // Letter tiles area (keyboard layout)
         createLetterTilesPanel(leftPanel);
 
         // Control buttons
@@ -137,28 +180,28 @@ public class GameUI extends javax.swing.JFrame {
         JPanel wordConstructionPanel = new JPanel(new BorderLayout(10, 10));
         wordConstructionPanel.setBackground(new Color(55, 65, 81));
         wordConstructionPanel.setBorder(BorderFactory.createCompoundBorder(
-                new LineBorder(new Color(107, 114, 128), 2, true),
-                new EmptyBorder(15, 15, 15, 15)
+                new LineBorder(new Color(107,114,128), 2, true),
+                new EmptyBorder(12,12,12,12)
         ));
-        wordConstructionPanel.setPreferredSize(new Dimension(0, 120));
+        wordConstructionPanel.setPreferredSize(new Dimension(0, 100));
 
         JLabel wordLabel = new JLabel("Construct Your Word:");
-        wordLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        wordLabel.setFont(new Font("Segoe UI", Font.BOLD, 13));
         wordLabel.setForeground(Color.WHITE);
 
         wordInputField = new JTextField();
-        wordInputField.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        wordInputField.setFont(new Font("Segoe UI", Font.BOLD, 16));
         wordInputField.setBackground(new Color(17, 24, 39));
         wordInputField.setForeground(Color.WHITE);
         wordInputField.setCaretColor(Color.WHITE);
         wordInputField.setBorder(BorderFactory.createCompoundBorder(
-                new LineBorder(new Color(59, 130, 246), 2, true),
-                new EmptyBorder(10, 15, 10, 15)
+                new LineBorder(new Color(59,130,246),2,true),
+                new EmptyBorder(8,12,8,12)
         ));
         wordInputField.setEditable(false);
 
         wordValueLabel = new JLabel("Word Length: 0 letters");
-        wordValueLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        wordValueLabel.setFont(new Font("Segoe UI", Font.BOLD, 11));
         wordValueLabel.setForeground(new Color(168, 162, 158));
 
         JPanel topPanel = new JPanel(new BorderLayout());
@@ -172,17 +215,38 @@ public class GameUI extends javax.swing.JFrame {
         leftPanel.add(wordConstructionPanel, BorderLayout.NORTH);
     }
 
+    // --- Keyboard-style letter area (3 rows, small fixed-size keys) ---
     private void createLetterTilesPanel(JPanel leftPanel) {
         letterTilesPanel = new JPanel();
-        letterTilesPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+        letterTilesPanel.setLayout(new BoxLayout(letterTilesPanel, BoxLayout.Y_AXIS));
         letterTilesPanel.setBackground(new Color(55, 65, 81));
         letterTilesPanel.setBorder(BorderFactory.createCompoundBorder(
-                new LineBorder(new Color(107, 114, 128), 2, true),
-                new EmptyBorder(20, 20, 20, 20)
+                new LineBorder(new Color(107,114,128), 2, true),
+                new EmptyBorder(12,12,12,12)
         ));
-        letterTilesPanel.setPreferredSize(new Dimension(0, 200));
+
+        kbRow1 = makeKBRow(0);   // top
+        kbRow2 = makeKBRow(20);  // home (indented)
+        kbRow3 = makeKBRow(40);  // bottom (more indented)
+
+        letterTilesPanel.add(Box.createVerticalGlue());
+        letterTilesPanel.add(kbRow1);
+        letterTilesPanel.add(Box.createVerticalStrut(8));
+        letterTilesPanel.add(kbRow2);
+        letterTilesPanel.add(Box.createVerticalStrut(8));
+        letterTilesPanel.add(kbRow3);
+        letterTilesPanel.add(Box.createVerticalGlue());
 
         leftPanel.add(letterTilesPanel, BorderLayout.CENTER);
+    }
+
+    private JPanel makeKBRow(int leftIndentPx) {
+        JPanel row = new JPanel(new FlowLayout(FlowLayout.CENTER, 6, 6));
+        row.setOpaque(false);
+        if (leftIndentPx > 0) {
+            row.setBorder(new EmptyBorder(0, leftIndentPx, 0, 0));
+        }
+        return row;
     }
 
     private void createGameControlPanel(JPanel leftPanel) {
@@ -200,7 +264,7 @@ public class GameUI extends javax.swing.JFrame {
 
         // Status label
         statusLabel = new JLabel(" ");
-        statusLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        statusLabel.setFont(new Font("Segoe UI", Font.BOLD, 11));
         statusLabel.setForeground(new Color(251, 191, 36));
         statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
@@ -218,12 +282,12 @@ public class GameUI extends javax.swing.JFrame {
 
     private JButton createStyledButton(String text, Color color) {
         JButton button = new JButton(text);
-        button.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        button.setFont(new Font("Segoe UI", Font.BOLD, 11));
         button.setForeground(Color.WHITE);
         button.setBackground(color);
         button.setBorder(BorderFactory.createCompoundBorder(
                 new LineBorder(color.darker(), 1),
-                new EmptyBorder(10, 20, 10, 20)
+                new EmptyBorder(8, 16, 8, 16)
         ));
         button.setFocusPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -255,11 +319,11 @@ public class GameUI extends javax.swing.JFrame {
         ));
 
         JLabel playersLabel = new JLabel("Players");
-        playersLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        playersLabel.setFont(new Font("Segoe UI", Font.BOLD, 13));
         playersLabel.setForeground(Color.WHITE);
 
         playerListArea = new JTextArea();
-        playerListArea.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        playerListArea.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         playerListArea.setBackground(new Color(17, 24, 39));
         playerListArea.setForeground(new Color(209, 213, 219));
         playerListArea.setEditable(false);
@@ -281,11 +345,11 @@ public class GameUI extends javax.swing.JFrame {
         ));
 
         JLabel historyLabel = new JLabel("All Players' Words");
-        historyLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        historyLabel.setFont(new Font("Segoe UI", Font.BOLD, 13));
         historyLabel.setForeground(Color.WHITE);
 
         wordHistoryArea = new JTextArea();
-        wordHistoryArea.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        wordHistoryArea.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         wordHistoryArea.setBackground(new Color(17, 24, 39));
         wordHistoryArea.setForeground(new Color(209, 213, 219));
         wordHistoryArea.setEditable(false);
@@ -318,13 +382,17 @@ public class GameUI extends javax.swing.JFrame {
         }
 
         private void setupTile() {
-            setText("<html><div style='text-align: center;'><b>" +
-                    Character.toUpperCase(letter) + "</b></div></html>");
-            setFont(new Font("Segoe UI", Font.BOLD, 20));
-            setPreferredSize(new Dimension(60, 60));
+            setText(String.valueOf(Character.toUpperCase(letter)));
+            setHorizontalAlignment(SwingConstants.CENTER);
+            // fixed, compact size so they never dominate
+            setPreferredSize(new Dimension(TILE_SIZE, TILE_SIZE));
+            setMinimumSize(new Dimension(TILE_SIZE, TILE_SIZE));
+            setMaximumSize(new Dimension(TILE_SIZE, TILE_SIZE));
+            setFont(new Font("Segoe UI", Font.BOLD, TILE_FONT));
             setBackground(new Color(251, 191, 36));
             setForeground(new Color(92, 77, 192));
             setBorder(new LineBorder(new Color(217, 119, 6), 2, true));
+            setMargin(new Insets(0,0,0,0));
             setFocusPainted(false);
             setCursor(new Cursor(Cursor.HAND_CURSOR));
 
@@ -383,17 +451,13 @@ public class GameUI extends javax.swing.JFrame {
     private void populateLetterTiles(String letters) {
         System.out.println("GameUI: populateLetterTiles called with: '" + letters + "'");
 
-        letterTilesPanel.removeAll();
+        // clear previous
+        kbRow1.removeAll();
+        kbRow2.removeAll();
+        kbRow3.removeAll();
         letterTiles.clear();
         selectedTiles.clear();
         currentWord.setLength(0);
-
-        letterTilesPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 8, 8));
-
-        JLabel tilesLabel = new JLabel("Your Letter Tiles:");
-        tilesLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        tilesLabel.setForeground(Color.WHITE);
-        letterTilesPanel.add(tilesLabel);
 
         String lettersToUse;
         boolean isTestMode = false;
@@ -420,16 +484,14 @@ public class GameUI extends javax.swing.JFrame {
             if (Character.isLetter(c)) {
                 LetterTile tile = new LetterTile(c);
                 letterTiles.add(tile);
-                letterTilesPanel.add(tile);
                 tilesCreated++;
             }
         }
 
+        // place tiles into balanced keyboard-like rows
+        layoutTilesBalanced();
+
         if (isTestMode) {
-            JLabel testModeLabel = new JLabel("(Test Mode - Check Server Connection)");
-            testModeLabel.setFont(new Font("Segoe UI", Font.ITALIC, 12));
-            testModeLabel.setForeground(Color.YELLOW);
-            letterTilesPanel.add(testModeLabel);
             showStatus("Using test letters - server may be disconnected", new Color(251, 191, 36));
         } else {
             showStatus("Game ready! " + tilesCreated + " letters loaded.", new Color(34, 197, 94));
@@ -443,32 +505,70 @@ public class GameUI extends javax.swing.JFrame {
         });
     }
 
+    // Distribute tiles across 3 rows in a balanced way (weighted 10-9-7 like a keyboard)
+    private void layoutTilesBalanced() {
+        kbRow1.removeAll();
+        kbRow2.removeAll();
+        kbRow3.removeAll();
+
+        int n = letterTiles.size();
+        int[] counts = distributeAcrossRows(n); // counts[0]=top, [1]=home, [2]=bottom
+
+        int idx = 0;
+        for (int i = 0; i < counts[0] && idx < n; i++) kbRow1.add(letterTiles.get(idx++));
+        for (int i = 0; i < counts[1] && idx < n; i++) kbRow2.add(letterTiles.get(idx++));
+        for (int i = 0; i < counts[2] && idx < n; i++) kbRow3.add(letterTiles.get(idx++));
+    }
+
+    // Keep rows visually even; avoid single-key middle rows whenever possible
+    private int[] distributeAcrossRows(int n) {
+        if (n <= 0) return new int[]{0,0,0};
+        int max1 = 10, max2 = 9, max3 = 7;
+        double totalW = max1 + max2 + max3; // 26
+
+        int r1 = (int)Math.round(n * (max1 / totalW));
+        int r2 = (int)Math.round(n * (max2 / totalW));
+        int r3 = n - r1 - r2;
+
+        // Cap to maximums and push overflow forward
+        if (r1 > max1) { int over = r1 - max1; r1 = max1; r2 += over; }
+        if (r2 > max2) { int over = r2 - max2; r2 = max2; r3 += over; }
+        if (r3 > max3) {
+            int over = r3 - max3; r3 = max3;
+            int add2 = Math.min(over, max2 - r2); r2 += add2; over -= add2;
+            int add1 = Math.min(over, max1 - r1); r1 += add1; over -= add1;
+        }
+
+        // Avoid lonely middle row if we have enough tiles
+        if (r2 == 1 && n >= 4) {
+            if (r1 >= 3) { r1--; r2++; }
+            else if (r3 >= 2) { r3--; r2++; }
+        }
+        // Avoid an empty middle row between two non-empty rows
+        if (r2 == 0 && r1 > 0 && r3 > 0) {
+            if (r1 >= r3 && r1 > 1) { r1--; r2++; }
+            else if (r3 > 1) { r3--; r2++; }
+        }
+        // Prefer at least 2 keys per shown row when possible
+        if (n >= 5) {
+            if (r1 == 1 && r2 > 2) { r2--; r1++; }
+            if (r3 == 1 && r2 > 2) { r2--; r3++; }
+        }
+        return new int[]{r1, r2, r3};
+    }
+
     public void addListeners() {
         this.addWindowListener(new WindowListener() {
             @Override
             public void windowOpened(WindowEvent e) {
-                SwingUtilities.invokeLater(() -> {
-                    statusLabel.setText("Loading game...");
-                    statusLabel.setForeground(new Color(251, 191, 36));
-
-                    letterTilesPanel.removeAll();
-                    JLabel loadingLabel = new JLabel("Loading game data...", SwingConstants.CENTER);
-                    loadingLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
-                    loadingLabel.setForeground(new Color(251, 191, 36));
-                    letterTilesPanel.add(loadingLabel);
-                    letterTilesPanel.revalidate();
-                    letterTilesPanel.repaint();
-                });
+                statusLabel.setText("Loading game...");
+                statusLabel.setForeground(new Color(251, 191, 36));
 
                 new Thread(() -> {
                     try {
                         System.out.println("GameUI: Loading game for user: " + username);
-                        Thread.sleep(1000); // Brief delay to let server prepare
-
-                        // Since we're coming from LobbyUI, we should already be in the lobby
-                        // Just load the game data directly
+                        Thread.sleep(1000); // brief delay to let server prepare
                         SwingUtilities.invokeLater(() -> initializeGameAfterJoin());
-
                     } catch (Exception ex) {
                         System.out.println("GameUI: Error loading game: " + ex.getMessage());
                         SwingUtilities.invokeLater(() -> {
@@ -479,30 +579,12 @@ public class GameUI extends javax.swing.JFrame {
                 }).start();
             }
 
-            @Override
-            public void windowClosing(WindowEvent e) {
-                cleanupResources();
-            }
-
-            @Override
-            public void windowClosed(WindowEvent e) {
-            }
-
-            @Override
-            public void windowIconified(WindowEvent e) {
-            }
-
-            @Override
-            public void windowDeiconified(WindowEvent e) {
-            }
-
-            @Override
-            public void windowActivated(WindowEvent e) {
-            }
-
-            @Override
-            public void windowDeactivated(WindowEvent e) {
-            }
+            @Override public void windowClosing(WindowEvent e) { cleanupResources(); }
+            @Override public void windowClosed(WindowEvent e) {}
+            @Override public void windowIconified(WindowEvent e) {}
+            @Override public void windowDeiconified(WindowEvent e) {}
+            @Override public void windowActivated(WindowEvent e) {}
+            @Override public void windowDeactivated(WindowEvent e) {}
         });
 
         submitWordButton.addActionListener(this::submitWord);
@@ -510,15 +592,19 @@ public class GameUI extends javax.swing.JFrame {
         shuffleLettersButton.addActionListener(e -> shuffleLetters());
     }
 
-
     private void initializeGameAfterJoin() {
-        try {
-            statusLabel.setText("Loading game data...");
-            statusLabel.setForeground(new Color(34, 197, 94));
+        statusLabel.setText("Loading game data...");
+        statusLabel.setForeground(new Color(34, 197, 94));
 
-            Thread.sleep(1000);
-
-            String playerList = wordyImpl.playerInGameList();
+        // Run server calls off the EDT to keep UI responsive
+        UIUtils.runAsync(() -> {
+            try { Thread.sleep(300); } catch (InterruptedException ignored) {}
+            String playerList = Client.safeServerCall(wordy::playerInGameList, "");
+            String letters = Client.safeServerCall(wordy::getGeneratedLetter, "");
+            return new String[]{playerList, letters};
+        }, result -> {
+            String playerList = result[0];
+            String letters = result[1];
 
             if (playerList != null && !playerList.trim().isEmpty() &&
                     !playerList.equals("[]") && !playerList.equals("[[]]")) {
@@ -527,30 +613,18 @@ public class GameUI extends javax.swing.JFrame {
                         .replace("[[", "").replace("]]", "")
                         .replace("[", "").replace("]", "")
                         .replace(",", "\n").trim();
-
-                if (!formattedList.isEmpty()) {
-                    playerListArea.setText(formattedList);
-                    String[] players = formattedList.split("\n");
-                    statusLabel.setText("Game ready! " + players.length + " player(s) in game");
-                } else {
-                    playerListArea.setText("Loading other players...");
-                    statusLabel.setText("Game ready! Waiting for other players...");
-                }
+                playerListArea.setText(formattedList);
+                statusLabel.setText("Game ready! " + formattedList.split("\n").length + " player(s) in.");
+                statusLabel.setForeground(new Color(34, 197, 94));
             } else {
                 playerListArea.setText("Loading other players...");
                 statusLabel.setText("Game ready! Waiting for other players...");
             }
 
-            String letters = wordyImpl.getGeneratedLetter();
             populateLetterTiles(letters);
-
             startGameStateMonitoring();
             startSynchronizedTimer();
-
-        } catch (Exception ex) {
-            statusLabel.setText("Error loading game: " + ex.getMessage());
-            statusLabel.setForeground(new Color(239, 68, 68));
-        }
+        });
     }
 
     private void showStatus(String message, Color color) {
@@ -579,7 +653,7 @@ public class GameUI extends javax.swing.JFrame {
         dialogPanel.setBorder(new EmptyBorder(25, 25, 25, 25));
 
         JLabel titleLabel = new JLabel("Unable to Join Game Lobby", SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
         titleLabel.setForeground(new Color(239, 68, 68));
 
         JLabel messageLabel = new JLabel("<html><div style='text-align: center;'>" +
@@ -589,7 +663,7 @@ public class GameUI extends javax.swing.JFrame {
                 "• The lobby is full<br>" +
                 "• Server authentication problems<br><br>" +
                 "Please check the server status and try again.</div></html>", SwingConstants.CENTER);
-        messageLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        messageLabel.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         messageLabel.setForeground(new Color(209, 213, 219));
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 0));
@@ -623,14 +697,6 @@ public class GameUI extends javax.swing.JFrame {
         try {
             statusLabel.setText("Retrying lobby join...");
             statusLabel.setForeground(new Color(251, 191, 36));
-
-            letterTilesPanel.removeAll();
-            JLabel loadingLabel = new JLabel("Attempting to join lobby...", SwingConstants.CENTER);
-            loadingLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
-            loadingLabel.setForeground(new Color(251, 191, 36));
-            letterTilesPanel.add(loadingLabel);
-            letterTilesPanel.revalidate();
-            letterTilesPanel.repaint();
 
             boolean joinedLobby = wordyImpl.joinLobby(username);
 
@@ -689,74 +755,65 @@ public class GameUI extends javax.swing.JFrame {
 
     private void submitWord(ActionEvent e) {
         String word = currentWord.toString().trim();
+        if (word.isEmpty()) { showStatus("Please create a word first!", Color.RED); return; }
+        if (word.length() < 3) { showStatus("Word must be at least 3 letters long!", Color.RED); return; }
 
-        if (word.isEmpty()) {
-            showStatus("Please create a word first!", Color.RED);
-            return;
-        }
-
-        if (word.length() < 3) {
-            showStatus("Word must be at least 3 letters long!", Color.RED);
-            return;
-        }
-
-        try {
-            wordyImpl.playWord(username, word);
-            int wordLength = currentWord.length();
-
-            showStatus("Word '" + word + "' submitted successfully! (" + wordLength + " letters)", new Color(34, 197, 94));
-            clearCurrentWordSilently(); // Clear without showing "Word cleared" message
-
-            // Update the word history to show all players' words immediately
-            updateWordHistory();
-
-        } catch (InvalidWord ex) {
-            showStatus("Invalid word: " + ex.message, Color.RED);
-        } catch (Exception ex) {
-            showStatus("Error submitting word: " + ex.getMessage(), Color.RED);
-        }
+        // Run playWord off the EDT
+        UIUtils.runAsync(() -> {
+            try {
+                wordyImpl.playWord(username, word);
+                return "OK";
+            } catch (InvalidWord ex) {
+                return "INVALID:" + ex.message;
+            } catch (Exception ex) {
+                return "ERR:" + ex.getMessage();
+            }
+        }, result -> {
+            if ("OK".equals(result)) {
+                int wordLength = currentWord.length();
+                showStatus("Word '" + word + "' submitted successfully! (" + wordLength + " letters)", new Color(34, 197, 94));
+                clearCurrentWordSilently();
+                updateWordHistoryAsync();
+            } else if (result.startsWith("INVALID:")) {
+                showStatus("Invalid word: " + result.substring("INVALID:".length()), Color.RED);
+            } else if (result.startsWith("ERR:")) {
+                showStatus("Error submitting word: " + result.substring("ERR:".length()), Color.RED);
+            }
+        });
     }
 
     // New method to update word history with all players' submitted words
-    private void updateWordHistory() {
-        try {
-            String allWords = wordyImpl.getValidWordFromClients();
+    private void updateWordHistory() { updateWordHistoryAsync(); }
+
+    private void updateWordHistoryAsync() {
+        UIUtils.runAsync(() -> {
+            try {
+                return wordyImpl.getValidWordFromClients();
+            } catch (Exception e) {
+                System.out.println("Error updating word history: " + e.getMessage());
+                return null;
+            }
+        }, allWords -> {
             if (allWords != null && !allWords.trim().isEmpty()) {
                 StringBuilder formattedWords = new StringBuilder();
                 formattedWords.append("Submitted Words:\n\n");
-
                 String[] lines = allWords.split("\n");
                 for (String line : lines) {
                     if (line.trim().isEmpty()) continue;
-
                     String[] parts = line.split(":");
                     if (parts.length >= 2) {
                         String playerName = parts[0].trim();
                         String word = parts[1].trim();
-
-                        // Highlight current player's word
-                        if (playerName.equals(username)) {
-                            formattedWords.append(playerName).append(": ")
-                                    .append(word).append(" (").append(word.length()).append(" letters) [YOU]\n");
-                        } else {
-                            formattedWords.append("• ").append(playerName).append(": ")
-                                    .append(word).append(" (").append(word.length()).append(" letters)\n");
-                        }
+                        formattedWords.append("• ").append(playerName).append(": ").append(word).append("\n");
+                    } else {
+                        formattedWords.append("• ").append(line.trim()).append("\n");
                     }
                 }
-
-                SwingUtilities.invokeLater(() -> {
-                    wordHistoryArea.setText(formattedWords.toString());
-                });
+                wordHistoryArea.setText(formattedWords.toString());
             } else {
-                // Clear the word history when no words are available (new game started)
-                SwingUtilities.invokeLater(() -> {
-                    wordHistoryArea.setText("No words submitted yet.\nBe the first to submit a word!");
-                });
+                wordHistoryArea.setText("No words submitted yet.\nBe the first to submit a word!");
             }
-        } catch (Exception e) {
-            System.out.println("Error updating word history: " + e.getMessage());
-        }
+        });
     }
 
     private void startGameStateMonitoring() {
@@ -776,7 +833,7 @@ public class GameUI extends javax.swing.JFrame {
             String playerList = wordyImpl.playerInGameList();
             if (playerList != null && !playerList.trim().isEmpty() && !playerList.equals("[]")) {
                 String formattedList = playerList.replace(",", "\n")
-                    .replace("[", "").replace("]", "").trim();
+                        .replace("[", "").replace("]", "").trim();
 
                 if (!playerListArea.getText().equals(formattedList)) {
                     SwingUtilities.invokeLater(() -> playerListArea.setText(formattedList));
@@ -801,48 +858,46 @@ public class GameUI extends javax.swing.JFrame {
                 double lobbyCount = Client.safeGetLobbyCount();
                 boolean isPlayerInGame = Client.safeIsPlayerInGame(username);
 
+                if (isPlayerInGame && timer > 0) {
+                    hasBeenInGame = true;
+                }
+
                 SwingUtilities.invokeLater(() -> {
-                    // Determine which timer to display based on game status
-                    if (isPlayerInGame && timer > 0) {
-                        // We're in an active game
-                        timerField.setText("Game: " + (int)timer);
-                        timerField.setForeground(new Color(239, 68, 68)); // Red for game
-
-                        if (timer <= 5) {
-                            showStatus("Time running out!", new Color(239, 68, 68));
-                        }
-                    } else if (lobbyCount > 0 && timer > 0) {
-                        // We're in lobby countdown
-                        timerField.setText("Lobby: " + (int)timer);
-                        timerField.setForeground(new Color(251, 191, 36)); // Yellow for lobby
-
-                        if (timer <= 0) {
-                            showStatus("Starting game...", new Color(34, 197, 94));
-                        }
-                    } else if (isPlayerInGame && timer <= 0) {
-                        // Game has ended - transition to results
+                    // Transition first when timer is up and we were in a game
+                    if (timer <= 0 && hasBeenInGame) {
                         timerField.setText("GAME OVER");
                         timerField.setForeground(new Color(239, 68, 68));
                         showStatus("Game finished! Loading results...", new Color(34, 197, 94));
 
-                        // Stop the timer and transition to results after a brief delay
                         synchronizedTimer.stop();
-                        Timer transitionTimer = new Timer(2000, evt -> {
+                        Timer transitionTimer = new Timer(1200, evt -> {
                             transitionToGameResults();
                             ((Timer) evt.getSource()).stop();
                         });
                         transitionTimer.setRepeats(false);
                         transitionTimer.start();
 
-                        // Disable game controls
                         submitWordButton.setEnabled(false);
                         clearWordButton.setEnabled(false);
                         shuffleLettersButton.setEnabled(false);
+                        return;
+                    }
 
+                    if (isPlayerInGame && timer > 0) {
+                        // Active game
+                        timerField.setText("Game: " + (int)timer);
+                        timerField.setForeground(new Color(239, 68, 68));
+                        if (timer <= 5) {
+                            showStatus("Time running out!", new Color(239, 68, 68));
+                        }
+                    } else if (lobbyCount > 0 && timer > 0) {
+                        // Lobby countdown
+                        timerField.setText("Lobby: " + (int)timer);
+                        timerField.setForeground(new Color(251, 191, 36));
                     } else {
-                        // No active timer or waiting state
+                        // Waiting/idle
                         timerField.setText("Waiting...");
-                        timerField.setForeground(new Color(168, 162, 158)); // Gray
+                        timerField.setForeground(new Color(168, 162, 158));
                     }
                 });
 
@@ -876,7 +931,6 @@ public class GameUI extends javax.swing.JFrame {
         selectedTiles.clear();
         currentWord.setLength(0);
         updateWordDisplay();
-        // No status message shown - this is for clearing after successful submission
     }
 
     private void shuffleLetters() {
@@ -887,18 +941,8 @@ public class GameUI extends javax.swing.JFrame {
 
         clearCurrentWord();
 
-        letterTilesPanel.removeAll();
-
-        JLabel tilesLabel = new JLabel("Your Letter Tiles:");
-        tilesLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        tilesLabel.setForeground(Color.WHITE);
-        letterTilesPanel.add(tilesLabel);
-
         java.util.Collections.shuffle(letterTiles);
-
-        for (LetterTile tile : letterTiles) {
-            letterTilesPanel.add(tile);
-        }
+        layoutTilesBalanced();
 
         letterTilesPanel.revalidate();
         letterTilesPanel.repaint();
@@ -925,9 +969,9 @@ public class GameUI extends javax.swing.JFrame {
                 new GameUI(username).setVisible(true);
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(null,
-                    "Error starting game: " + e.getMessage(),
-                    "Game Error",
-                    JOptionPane.ERROR_MESSAGE);
+                        "Error starting game: " + e.getMessage(),
+                        "Game Error",
+                        JOptionPane.ERROR_MESSAGE);
             }
         });
     }

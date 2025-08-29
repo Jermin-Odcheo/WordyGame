@@ -1,133 +1,88 @@
-
 package Client_Java;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import java.sql.*;
+import javax.swing.border.*;
+import java.awt.*;
 
 import static Client_Java.Client.wordyImpl;
 
 public class TopWinsUI extends javax.swing.JFrame {
 
     private String username;
+    private JTable table;
+
+    static { Client_Java.util.UIUtils.applyModernNimbusTweaks(); }
 
     public TopWinsUI(String username) {
-        initComponents();
         this.username = username;
+        initComponents();
         displayWinCount();
     }
 
     private void initComponents() {
-
-        jPanel1 = new javax.swing.JPanel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
-        jLabel1 = new javax.swing.JLabel();
-
-
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        setBackground(new java.awt.Color(255, 51, 255));
+        setTitle("WordyGame - Top Wins");
+        setResizable(true);
+        setSize(640, 420);
+        setLocationRelativeTo(null);
 
-        jPanel1.setBackground(new java.awt.Color(204, 153, 255));
+        JPanel main = new JPanel(new BorderLayout(15, 15));
+        main.setBackground(new Color(45, 52, 70));
+        main.setBorder(new EmptyBorder(20, 20, 20, 20));
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
-                new Object [][] {
-
-                },
-                new String [] {
-                        "Top","PLAYER", "WINS"
-                }
+        JPanel header = new JPanel(new BorderLayout());
+        header.setBackground(new Color(31, 41, 55));
+        header.setBorder(BorderFactory.createCompoundBorder(
+            new LineBorder(new Color(75, 85, 99), 2, true),
+            new EmptyBorder(14, 18, 14, 18)
         ));
-        jScrollPane1.setViewportView(jTable1);
+        JLabel title = new JLabel("TOP WINS", SwingConstants.CENTER);
+        title.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        title.setForeground(Color.WHITE);
+        header.add(title, BorderLayout.CENTER);
+        main.add(header, BorderLayout.NORTH);
 
-        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 36)); // NOI18N
-        jLabel1.setText("TOP WINS");
+        // Table
+        String[] cols = {"Top", "Player", "Wins"};
+        DefaultTableModel model = new DefaultTableModel(new Object[][]{}, cols) {
+            public boolean isCellEditable(int r, int c) { return false; }
+        };
+        table = new JTable(model);
+        table.setRowHeight(28);
+        table.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        table.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 14));
+        table.getTableHeader().setBackground(new Color(55, 65, 81));
+        table.getTableHeader().setForeground(Color.WHITE);
+        table.setBackground(new Color(17, 24, 39));
+        table.setForeground(new Color(209, 213, 219));
+        table.setGridColor(new Color(75, 85, 99));
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-                jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addContainerGap(94, Short.MAX_VALUE)
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                                                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                .addGap(89, 89, 89))
-                                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                                                .addComponent(jLabel1)
-                                                .addGap(229, 229, 229))))
-        );
-        jPanel1Layout.setVerticalGroup(
-                jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                                .addContainerGap(38, Short.MAX_VALUE)
-                                .addComponent(jLabel1)
-                                .addGap(18, 18, 18)
-                                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(67, 67, 67))
-        );
+        JScrollPane scroll = new JScrollPane(table);
+        scroll.setBorder(new LineBorder(new Color(107, 114, 128), 1, true));
+        main.add(scroll, BorderLayout.CENTER);
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-        );
-        layout.setVerticalGroup(
-                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-        );
-
-        pack();
+        setContentPane(main);
     }
+
     private void displayWinCount() {
         String[] wordDataList = wordyImpl.displayWinsList();
 
-        DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+        DefaultTableModel model = (DefaultTableModel) table.getModel();
         model.setRowCount(0); // Clear the table
 
+        int rank = 1;
         for (String winData : wordDataList) {
             String[] data = winData.split(",");
             if (data.length >= 2) {
                 String user = data[0];
                 String wins = data[1].toUpperCase();
-                // Process username and word as needed
-                System.out.println("Username: " + user + ", Word: " + wins);
-
-                model.addRow(new Object[]{user, wins}); // Add a new row to the table
+                model.addRow(new Object[]{rank++, user, wins});
             }
         }
     }
+
     public static void startTopWinsUI(String username) {
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(TopWinsUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(TopWinsUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(TopWinsUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(TopWinsUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new TopWinsUI(username).setVisible(true);
-            }
-        });
+        SwingUtilities.invokeLater(() -> new TopWinsUI(username).setVisible(true));
     }
-
-
-
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable jTable1;
-
 }

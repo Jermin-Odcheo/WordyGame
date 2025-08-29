@@ -1,13 +1,15 @@
 package Client_Java;
 
-import Client_Java.corbaGame.wordy;
-import Client_Java.corbaGame.wordyHelper;
-import Server_Java.corbaGame.*;
+import corbaGame.wordy;
+import corbaGame.wordyHelper;
 import org.omg.CORBA.ORB;
 import org.omg.CosNaming.NamingContextExt;
 import org.omg.CosNaming.NamingContextExtHelper;
 import org.omg.PortableServer.POA;
 import org.omg.PortableServer.POAHelper;
+
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public class Client {
     static wordy wordyImpl;
@@ -31,8 +33,32 @@ public class Client {
             try {
                 System.out.println("Attempting to connect to server... (Attempt " + (attempts + 1) + "/" + maxRetries + ")");
 
-                // Create and initialize the ORB
-                orb = ORB.init(new String[]{"-ORBInitialHost", "192.168.1.6", "-ORBInitialPort", "1050"}, null);
+                // 1) Try IOR bootstrap (no NameService or IP edits needed)
+                String iorPath = System.getenv().getOrDefault("WORDY_IOR_PATH", "wordy.ior");
+                try {
+                    if (Files.exists(Paths.get(iorPath))) {
+                        System.out.println("Found IOR file at: " + iorPath + ", using direct bootstrap");
+                        orb = ORB.init(new String[]{}, null);
+                        POA rootpoa = POAHelper.narrow(orb.resolve_initial_references("RootPOA"));
+                        rootpoa.the_POAManager().activate();
+                        String ior = new String(Files.readAllBytes(Paths.get(iorPath)));
+                        org.omg.CORBA.Object obj = orb.string_to_object(ior.trim());
+                        wordyImpl = wordyHelper.narrow(obj);
+                        if (wordyImpl != null) {
+                            // Test the connection with a simple call
+                            wordyImpl.lobbyPlayerCount(); // This should work if server is running
+                            System.out.println("Connected via IOR file");
+                            return true;
+                        }
+                    }
+                } catch (Exception ignore) {
+                    System.out.println("IOR bootstrap failed, trying NameService: " + ignore.getMessage());
+                }
+
+                // 2) Fallback: NameService (legacy)
+                String host = System.getenv().getOrDefault("WORDY_ORB_HOST", "127.0.0.1");
+                String port = System.getenv().getOrDefault("WORDY_ORB_PORT", "1050");
+                orb = ORB.init(new String[]{"-ORBInitialHost", host, "-ORBInitialPort", port}, null);
 
                 // Get the root naming context
                 org.omg.CORBA.Object objRef = orb.resolve_initial_references("NameService");
@@ -49,7 +75,7 @@ public class Client {
                 if (wordyImpl != null) {
                     // Try a simple operation to verify connection
                     wordyImpl.lobbyPlayerCount(); // This should work if server is running
-                    System.out.println("Successfully connected to server!");
+                    System.out.println("Connected via NameService at " + host + ":" + port);
                     return true;
                 }
 
@@ -59,7 +85,7 @@ public class Client {
 
                 if (attempts < maxRetries) {
                     try {
-                        System.out.println("⏳ Retrying in 2 seconds...");
+                        System.out.println("⌛ Retrying in 2 seconds...");
                         Thread.sleep(2000); // Wait 2 seconds before retry
                     } catch (InterruptedException ie) {
                         Thread.currentThread().interrupt();
@@ -110,7 +136,6 @@ public class Client {
     public static <T> T safeServerCall(ServerOperation<T> operation, T defaultValue) {
         try {
             if (!ensureConnection()) {
-                System.out.println("Cannot establish server connection");
                 return defaultValue;
             }
 
@@ -137,34 +162,12 @@ public class Client {
 
     // Safe timer retrieval
     public static double safeGetTimer() {
-        return safeServerCall(server -> server.gettimer(), 0.0);
-    }
-
-    // Safe letter retrieval
-    public static String safeGetLetters() {
-        return safeServerCall(server -> server.getGeneratedLetter(), "");
-    }
-
-    // Safe player list retrieval
-    public static String safeGetPlayerList() {
-        return safeServerCall(server -> server.playerInGameList(), "[]");
+        return safeServerCall(wordy::gettimer, 0.0);
     }
 
     // Safe lobby count retrieval
     public static double safeGetLobbyCount() {
-        return safeServerCall(server -> server.lobbyPlayerCount(), 0.0);
-    }
-
-    // Safe word submission
-    public static boolean safePlayWord(String username, String word) {
-        try {
-            return safeServerCall(server -> {
-                server.playWord(username, word);
-                return true;
-            }, false);
-        } catch (Exception e) {
-            return false;
-        }
+        return safeServerCall(wordy::lobbyPlayerCount, 0.0);
     }
 
     // Safe leave game
@@ -177,19 +180,7 @@ public class Client {
 
     // Alternative game state methods using existing CORBA interface
     public static boolean safeIsPlayerInGame(String username) {
-        return safeServerCall(server -> server.status(username), false);
+        // Use server-reported game activity since per-player status isn't exposed in IDL
+        return safeServerCall(wordy::isGameActive, false);
     }
-
-    public static double safeGetTimerValue() {
-        return safeServerCall(server -> server.gettimer(), 0.0);
-    }
-
-    public static String safeGetPlayersList() {
-        return safeServerCall(server -> server.playerInGameList(), "[]");
-    }
-
-    public static double safeGetPlayerCount() {
-        return safeServerCall(server -> server.lobbyPlayerCount(), 0.0);
-    }
-
 }

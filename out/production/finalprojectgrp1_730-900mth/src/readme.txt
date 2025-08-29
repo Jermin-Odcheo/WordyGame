@@ -32,31 +32,42 @@ Select the JDK folder and click "OK".
 Give a name to the JDK (e.g., "Zulu Java 8") and click "Finish".
 Close the "Project Structure" dialog.
 
-RUNNING THE SERVER:
+EASIEST WAY TO RUN (NO ORBD, NO IP EDITS):
 
-Step 1: Click your Start menu. Its default location will be on the bottom left of your screen unless you have moved your taskbar.
-        Click your settings button. This will usually be in the shape of a cog.
-        Click Network & Internet.
-        Click VPN/Virtual Network found in the left menu.
-        Select the VPN/Virtual Network you wish to disable.
-        Click Disconnect.
+1) Start the Server (writes an IOR file)
+   - Optional env (PowerShell):
+     - $env:WORDY_SERVER_PORT = "3700"        # server listen port
+     - $env:WORDY_IOR_PATH    = "wordy.ior"    # where to write IOR file
+     - $env:WORDY_DB_URL/USER/PASS (if using DB)
+     - For multi‑PC use, also set: $env:WORDY_ORB_HOST = "<server-lan-ip>"
+   - Run Server_Java/Server.main() in your IDE.
+   - The console prints the path to the generated IOR file (e.g., wordy.ior).
 
-Step 2: Open Start Menu
-        Search CMD and press Enter
-        Enter the following command to start the ORB daemon with the specified port number:
-        "start orbd -ORBInitialPort 1050"
-        Press Enter to execute the command.
-        The ORB daemon will start, allowing the server and clients to communicate using the specified port.
+2) Start the Client (reads the IOR file)
+   - Place/copy the IOR file where the client can read it.
+   - Optional env (PowerShell): $env:WORDY_IOR_PATH = "path\to\wordy.ior"
+     (defaults to .\wordy.ior if not set)
+   - Run Client_Java/Client.main() in your IDE.
+   - No need to run orbd or change any IP in the code.
 
-Step 3: Start the Server Class in IntelliJ IDEA
-        Locate the Server class in your project's source code.
-        Right-click on the Server class and select "Run" or "Debug" to start the server.
-        IntelliJ IDEA will compile and execute the Server class, starting the server application.
+NOTES:
+- For same‑machine runs, defaults work out of the box.
+- For different machines, ensure the server sets WORDY_ORB_HOST to its LAN IP so the IOR contains a reachable address, and allow the chosen port through firewall.
+- If the client can’t find the IOR file, it will fall back to using the NameService (below).
 
-RUNNING THE CLIENT:
-    Step 1: Obtain the IP address of the server
-    Step 2: Go to Client Class
-    Step 3: On the line number 20:
-    ORB orb = ORB.init(new String[]{"-ORBInitialHost", "xxx.xxx.xxx.xxx", "-ORBInitialPort", "1050"}, null);
-    change the xxx.xxx.xxx.xxx to the IP address of the server that you obtained
-    Step 4: Start the Client by right-clicking on the Client class and Select "Run" or "Debug" to start the Client
+RUNNING WITH NAMESERVICE (OPTIONAL/LEGACY):
+
+Step 1: Start NameService
+        Open Start Menu → search CMD → Enter
+        Enter the command:
+        start orbd -ORBInitialPort 1050
+        Keep this window open.
+
+Step 2: Start the Server Class in IntelliJ IDEA
+        (Optional env) set WORDY_ORB_HOST / WORDY_ORB_PORT
+        Locate Server_Java/Server.java and Run → Server.main()
+
+Step 3: Start the Client
+        (Optional env) set WORDY_ORB_HOST / WORDY_ORB_PORT to the server’s IP and 1050
+        Locate Client_Java/Client.java and Run → Client.main()
+        (You no longer need to edit the IP inside Client.java.)

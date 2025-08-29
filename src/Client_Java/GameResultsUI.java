@@ -1,8 +1,8 @@
 package Client_Java;
 
-import Client_Java.corbaGame.getRoundWin;
-import Client_Java.corbaGame.getWin;
-import Client_Java.corbaGame.isSameLength;
+import corbaGame.getRoundWin;
+import corbaGame.getWin;
+import corbaGame.isSameLength;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
